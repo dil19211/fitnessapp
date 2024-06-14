@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,20 +15,74 @@ class step extends StatefulWidget {
 class _StepCounterState extends State<step> {
   late StreamSubscription<StepCount> _stepCountStreamSubscription;
   int _stepCount = 0;
+  int _dailySteps = 0;
+  int _todaysSteps = 0; // New variable to store steps without resetting
   int _goalSteps = 10000; // Example goal steps
   int _totalMinutesWalked = 0;
   double _caloriesBurned = 0.0;
   double _goalPercentage = 0.0;
   double _lastStepTimestamp = 0; // To track the timestamp of the last step
+  bool _hasDisability = false; // Flag to track user's disability status
+ // Flag to track if it's the first run of the app
 
   @override
   void initState() {
     super.initState();
-    checkPermissions();
+    SharedPreferences.getInstance().then((prefs) {
+      bool hasShownDialog = prefs.getBool('_showDisabilityDialog') ?? false;
+      if (!hasShownDialog) {// Show the dialog only if it has not been shown before
+        Future.delayed(Duration(seconds: 2), () {
+          _showDisabilityDialog(context);
+          prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
+          print("$_showDisabilityDialog");
+        });
+      }
+      else if(!_hasDisability){checkPermissions();}
+    });
+
+  }
+
+
+
+  void _showDisabilityDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Disability Confirmation"),
+          content: Text("Do you have a disability that prevents you from using the step counter feature?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("No"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _hasDisability = false;
+                });
+                _saveStats(); // Save updated _hasDisability and _isFirstRun
+                checkPermissions();
+              },
+            ),
+            TextButton(
+              child: Text("Yes"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _hasDisability = true;
+
+                });
+                _saveStats(); // Save updated _hasDisability and _isFirstRun
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void checkPermissions() async {
     PermissionStatus status = await Permission.activityRecognition.request();
+    print("checkPermissions: status=$status");
     if (status.isGranted) {
       initializePedometer();
     } else if (status.isDenied) {
@@ -48,34 +100,52 @@ class _StepCounterState extends State<step> {
         double timeDifference = currentTimestamp - _lastStepTimestamp;
         if (timeDifference > 2) {
           _stepCount++;
-          _totalMinutesWalked = calculateMinutesWalked(_stepCount);
-          _caloriesBurned = calculateCaloriesBurned(_stepCount);
+          _dailySteps++;
+          _todaysSteps++;
+          _totalMinutesWalked = calculateMinutesWalked(_dailySteps);
+          _caloriesBurned = calculateCaloriesBurned(_dailySteps);
           _lastStepTimestamp = currentTimestamp;
-          _goalPercentage = (_stepCount / _goalSteps) * 100;
+          _goalPercentage = (_dailySteps / _goalSteps) * 100;
           _saveStats(); // Save the stats when they change
         }
       });
     });
   }
 
-  void _loadStats() async {
+  Future<void> _loadStats() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _stepCount = prefs.getInt('stepCount') ?? 0;
+      _dailySteps = prefs.getInt('dailySteps') ?? 0;
+      _todaysSteps = prefs.getInt('todaysSteps') ?? 0;
       _totalMinutesWalked = prefs.getInt('totalMinutesWalked') ?? 0;
       _caloriesBurned = prefs.getDouble('caloriesBurned') ?? 0;
       _lastStepTimestamp = prefs.getDouble('lastStepTimestamp') ?? 0;
       _goalPercentage = prefs.getDouble('goalPercentage') ?? 0;
+      _hasDisability = prefs.getBool('hasDisability') ?? false;
+
+      // Check if the date has changed
+      String lastSavedDate = prefs.getString('lastSavedDate') ?? '';
+      String currentDate = DateTime.now().toIso8601String().split('T')[0];
+
+      if (lastSavedDate != currentDate) {
+        _dailySteps = 0;
+        prefs.setString('lastSavedDate', currentDate);
+      }
     });
   }
 
   void _saveStats() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('stepCount', _stepCount);
+    prefs.setInt('dailySteps', _dailySteps);
+    prefs.setInt('todaysSteps', _todaysSteps);
     prefs.setInt('totalMinutesWalked', _totalMinutesWalked);
     prefs.setDouble('caloriesBurned', _caloriesBurned);
     prefs.setDouble('lastStepTimestamp', _lastStepTimestamp);
     prefs.setDouble('goalPercentage', _goalPercentage);
+    prefs.setBool('hasDisability', _hasDisability);
+
   }
 
   int calculateMinutesWalked(int steps) {
@@ -161,8 +231,8 @@ class _StepCounterState extends State<step> {
                         SizedBox(height: 70),
                         _buildCircleWithText(
                           'assets/images/running-shoes.png',
-                          '$_stepCount',
-                          'steps',
+                          '$_dailySteps',
+                          'Daily steps',
                           Colors.purpleAccent,
                         ),
                         SizedBox(height: 10),
@@ -213,7 +283,7 @@ class _StepCounterState extends State<step> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '$_stepCount',
+                                '$_todaysSteps',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 30,

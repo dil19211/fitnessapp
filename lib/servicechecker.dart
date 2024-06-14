@@ -17,23 +17,26 @@ class _WaterState extends State<Water> {
   List<String> drankWaterLogs = [];
   String message = '';
 
+
   @override
   void initState() {
     super.initState();
-    _initializePreferences();
-    _loadWaterCount();
+    isfirstime();
   }
-  late SharedPreferences _prefs;
+  bool checked=true;
+  Future<void> isfirstime()async {// Load saved stats including disability status
 
-  Future<void> _initializePreferences() async {
-    _prefs = await SharedPreferences.getInstance();
-    bool isFirstTime = _prefs!.getBool('isFirstTime') ?? true;
-    if (isFirstTime) {
-      // If it's the first time, show the guide dialog
-      _showGuideDialog();
+   await _loadWaterCount();
+    print("initState: _isFirstRun=$checked");
+    if (checked) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showGuideDialog(context);
+      });
     }
   }
-  Future<void> _showGuideDialog() async {
+
+
+  Future<void> _showGuideDialog(BuildContext context) async {
     await showDialog(
       context: context,
       builder: (context) {
@@ -56,7 +59,10 @@ class _WaterState extends State<Water> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                _prefs.setBool('isFirstTime', false);
+                setState(() {
+                  checked= false;
+                });
+                _saveWaterCount();
               },
               child: Text('Got it!'),
             ),
@@ -78,11 +84,13 @@ class _WaterState extends State<Water> {
         _waterCount = 0;
         _totalWaterCount = 0;
          dailyGoal = 8; // Reset daily goal to default value
-        prefs.setString('lastStoredDate', currentDate);
+        checked = prefs.getBool('isFirstRun') ?? true;
+         prefs.setString('lastStoredDate', currentDate);
         _saveWaterCount();
       });
     } else {
       setState(() {
+        checked = prefs.getBool('isFirstRun') ?? true;
         _waterCount = prefs.getInt('waterCount') ?? 0;
         _totalWaterCount = prefs.getInt('totalWaterCount') ?? 0;
         drankWaterLogs = prefs.getStringList('drankWaterLogs') ?? [];
@@ -99,6 +107,7 @@ class _WaterState extends State<Water> {
     prefs.setInt('totalWaterCount', _totalWaterCount);
     prefs.setStringList('drankWaterLogs', drankWaterLogs);
     prefs.setInt('dailyGoal', dailyGoal); // Save daily goal to preferences
+    prefs.setBool('isFirstRun',checked);
   }
 
   void _addToTotalCount(int count) {
@@ -162,7 +171,7 @@ class _WaterState extends State<Water> {
 
                     // Show a warning if the goal is set below the minimum
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Daily water goal must be between 8 and 12 glasses according to Doctor recommendation.')),
+                      const SnackBar(content: Text('Daily water goal must be between 8 and 12 glasses according to Doctor recommendation.')),
                     );
                   }
                 });

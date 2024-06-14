@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'package:fitnessapp/database_handler.dart';
 import 'package:fitnessapp/payUserModel.dart';
@@ -15,7 +16,9 @@ class RecipePage extends StatefulWidget {
 }
 
 class _RecipePageState extends State<RecipePage> {
+
   Map<String, dynamic>? paymentIntentData;
+
   Database? _database;
   TextEditingController nameController = TextEditingController();
   TextEditingController phoneController = TextEditingController(text: '+923');
@@ -42,7 +45,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Tomatoes, Cucumbers, Onions, Feta Cheese, Olives',
       'recipe': 'Mix chopped tomatoes, cucumbers, onions, feta cheese, and olives. Dress with olive oil and oregano.',
       'category': 'Salad',
-     'videoUrl': 'https://youtu.be/j7rU-1-s7NM?si=ePR1PAeBRifxePVh'
+      'videoUrl': 'https://youtu.be/j7rU-1-s7NM?si=ePR1PAeBRifxePVh'
     },
     {
       'name': 'Avocado and Black Bean Salad',
@@ -137,8 +140,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/curry.jpg',
       'ingredients': 'Chicken, Onions, Tomatoes, Garlic, Ginger, Spices, Yogurt',
       'recipe': 'Cook onions until golden. Add garlic, ginger, and spices. Add chicken and cook until browned. Add tomatoes and yogurt. Simmer until chicken is cooked through.',
-      'category': 'Meal','videoUrl': ''
-
+      'category': 'Meal', 'videoUrl': ''
     },
     {
       'name': 'Green Smoothie',
@@ -317,26 +319,28 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Flour, Sugar, Butter, Eggs, Vanilla Extract, Baking Powder, Salt, Milk, Frosting',
       'image': 'assets/images/vanilla.jpg',
       'recipe': 'Cream together butter and sugar. Beat in eggs and vanilla extract. Mix in flour, baking powder, and salt. Gradually add milk. Pour batter into cupcake liners. Bake at 350°F for 18-20 minutes. Frost once cooled.',
-      'category': 'Snacks','videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': ''},
     {
       'name': 'Chocolate Cake',
       'ingredients': 'Flour, Sugar, Cocoa Powder, Baking Powder, Baking Soda, Salt, Eggs, Milk, Vegetable Oil, Vanilla Extract, Hot Water, Frosting',
       'image': 'assets/images/cake.jpg',
       'recipe': 'Mix dry ingredients. Add eggs, milk, oil, and vanilla extract. Beat until smooth. Stir in hot water. Pour into greased pans. Bake at 350°F for 30-35 minutes. Frost once cooled.',
-      'category': 'Snacks','videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': ''},
 
     {
       'name': 'Chocolate Truffles',
       'ingredients': 'Chocolate Chips, Heavy Cream, Butter, Cocoa Powder, Nuts or Sprinkles (optional)',
       'image': 'assets/images/trffles.jpg',
       'recipe': 'Heat cream and pour over chocolate chips and butter. Stir until smooth. Chill until firm. Roll into balls and coat in cocoa powder or chopped nuts. Chill until set.',
-      'category': 'Snacks','videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': ''},
 
 
   ];
 
   List<Map<String, String>> filteredRecipes = [];
   List<String> containerTitles = ['All', 'Salad', 'Meal', 'Blends', 'Snacks'];
+
+
 
   @override
   void initState() {
@@ -615,7 +619,6 @@ class _RecipePageState extends State<RecipePage> {
   }
 
   void showUserForm(BuildContext context, Map<String, String> recipe) {
-
     final _formKey = GlobalKey<FormState>();
     AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
 
@@ -644,33 +647,6 @@ class _RecipePageState extends State<RecipePage> {
                         ],
                       ),
                       TextFormField(
-                        controller: nameController,
-                        decoration: InputDecoration(labelText: 'Name'),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) {
-                            return 'Please enter a valid name';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
-                        controller: phoneController,
-                        decoration: InputDecoration(labelText: 'Phone Number'),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your phone number';
-                          }
-                          if (!RegExp(r'^\+923((0[0-9])|([1-4][0-9]))[0-9]{7}$').hasMatch(value)) {
-                            return 'Please enter a valid Pakistani phone number';
-                          }
-                          return null;
-                        },
-                      ),
-                      TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
@@ -681,7 +657,8 @@ class _RecipePageState extends State<RecipePage> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter your email';
                           }
-                          if (!RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$').hasMatch(value)) {
+                          if (!RegExp(r'^[a-zA-Z0-9._%+-]+@gmail\.com$')
+                              .hasMatch(value)) {
                             return 'Please enter a valid Gmail address';
                           }
                           return null;
@@ -719,9 +696,8 @@ class _RecipePageState extends State<RecipePage> {
       },
     );
   }
-
-
-  void showInternetConnectionDialog(BuildContext context, Map<String, String> recipe) {
+//paid user dalog
+  void showInternetConnectionDialog(BuildContext context,   Map<String, String> recipe) {
     showDialog(
       context: context,
       builder: (context) {
@@ -736,29 +712,7 @@ class _RecipePageState extends State<RecipePage> {
                 Navigator.of(context).pop();
                 insert_payusers();
                 getFrompayusers();
-                await makePayment((paymentSuccessful) {
-                  if (paymentSuccessful) {
-
-
-                    launchVideo(recipe['videoUrl']!);
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Payment Failed'),
-                          content: Text('Payment failed. Please try again.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                });
+                launchVideo(recipe['videoUrl']!);
               },
               child: Text('OK'),
             ),
@@ -766,92 +720,7 @@ class _RecipePageState extends State<RecipePage> {
         );
       },
     );
-
   }
-  Future<void> makePayment(Function(bool) onPaymentResult) async {
-    try {
-      paymentIntentData = await createPaymentIntent('20', 'USD');
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: paymentIntentData!['client_secret'],
-          style: ThemeMode.dark,
-          merchantDisplayName: 'Sif',
-        ),
-      );
-      await displayPaymentSheet(onPaymentResult);
-    } catch (e) {
-      print('Error initializing payment sheet: $e');
-      onPaymentResult(false);
-    }
-  }
-  Future<Database?> openDB() async{
-    _database=await DatabaseHandler().openDB();
-
-    return _database;
-  }
-  Future<void> insert_payusers()async {
-    _database = await openDB();
-    UserRepo userRepo = new UserRepo();
-    userRepo.createpayTable(_database);
-
-    payUserModel userModel = new payUserModel(nameController.text.toString(),
-        emailController.text.toString(),
-        int.tryParse(phoneController.text.toString())!);
-    await _database?.insert('PAIDUSER', userModel.toMap());
-
-    await _database?.close();
-  }
-  Future<void> getFrompayusers()async{
-    _database=await openDB();
-    UserRepo userRepo=new UserRepo();
-    await userRepo.getpayusers(_database);
-
-    await _database?.close();
-  }
-
-  Future<void> displayPaymentSheet(Function(bool) onPaymentResult) async {
-    try {
-      await Stripe.instance.presentPaymentSheet();
-      paymentIntentData = null;
-      onPaymentResult(true);
-    } catch (e) {
-      if (e is StripeException) {
-        print('Error presenting payment sheet: ${e.error.localizedMessage}');
-      } else {
-        print('Error presenting payment sheet: $e');
-      }
-      onPaymentResult(false);
-    }
-  }
-
-  createPaymentIntent(String amount, String currency) async {
-    try {
-      Map<String, dynamic> body = {
-        'amount': calculateAmount('20'),
-        'currency': currency,
-        'payment_method_types[]': 'card'
-      };
-
-      var response = await http.post(
-          Uri.parse('https://api.stripe.com/v1/payment_intents'),
-          body: body,
-          headers: {
-            'Authorization':
-            'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          });
-      return jsonDecode(response.body.toString());
-    }
-    catch (e) {
-      print("error $e");
-    }
-  }
-
-  calculateAmount(String amount) {
-    final a = (int.parse(amount)) * 100;
-    return a.toString();
-  }
-
   void launchVideo(String url) async {
     try {
       if (await canLaunch(url)) {
@@ -866,4 +735,35 @@ class _RecipePageState extends State<RecipePage> {
       ));
     }
   }
+
+
+
+  Future<Database?> openDB() async {
+    _database = await DatabaseHandler().openDB();
+
+    return _database;
+  }
+
+  Future<void> insert_payusers() async {
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
+    userRepo.createpayTable(_database);
+
+    payUserModel userModel = new payUserModel(
+      emailController.text.toString(),
+    );
+    await _database?.insert('PAIDUSER', userModel.toMap());
+
+    await _database?.close();
+  }
+
+  Future<void> getFrompayusers() async {
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
+    await userRepo.getpayusers(_database);
+
+    await _database?.close();
+  }
+
+
 }

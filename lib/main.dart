@@ -1,7 +1,9 @@
-import 'package:fitnessapp/recipe%20page.dart';
+
+import 'package:firebase_core/firebase_core.dart';
 import 'package:fitnessapp/splashscreen.dart';
-import 'package:fitnessapp/weightgain.dart';
+import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/workout.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import 'dart:ui';
@@ -14,21 +16,19 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:flutter_gemini/flutter_gemini.dart';
-import 'chatboat.dart';
 import 'consst.dart';
-import 'gainmeal.dart';
-
-
-
-
 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Gemini.init(apiKey: GEMINI_API_KEY,);
+  Gemini.init(
+    apiKey: GEMINI_API_KEY,
+  );
   Stripe.publishableKey = 'pk_test_51PJ8UO2Llx6JzMA097s9w7TMcx9twOXtugzhcsIPlfagU8Y5D1GvavzMJ72322b4oRhvjNc38Z0cnd0TQ1lqgoLW00e5vXNMgg';
-
+  Platform.isAndroid?
+      await Firebase.initializeApp(options: const FirebaseOptions(apiKey: "AIzaSyCkJnZAee2hzxEy7mvdZPj9ZHe9ZxV-XAI", appId: "1:996311167987:android:1d96a17080801f097b9886", messagingSenderId: "996311167987", projectId:
+        "fitnessapp-a46d2"
+          ,)):await Firebase.initializeApp();
   await Stripe.instance.applySettings();
   await initializeService();
   await requestNotificationPermission();
@@ -130,7 +130,7 @@ void callbackDispatcher() {
         break;
       case "lunch time Reminder":
         print('Background task executed for 2:15 pM');
-       lunchnotificationreminder();
+        lunchnotificationreminder();
         break;
       case "snack time":
         print('Background task executed for 3:0pm');
@@ -395,6 +395,8 @@ class MyApp extends StatelessWidget {
       home: SplashScreen(), // Use the HomePage widget as the home page
     );
   }
+
+
 
 
 // This widget is the home page of your application. It is stateful, meaning

@@ -1,6 +1,12 @@
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart'hide EmailAuthProvider;
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'adminpanel.dart';
 import 'const.dart';
 
@@ -12,6 +18,9 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+
+
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -20,6 +29,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _showEmailError = false;
   bool _showPasswordError = false;
   bool _buttonEnabled = true; // Initialize to true
+  final ValueNotifier<bool> _obscureText = ValueNotifier(true);
+
 
   @override
   void initState() {
@@ -34,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
     _passwordController.removeListener(_validatePassword);
     _emailFocus.dispose();
     _passwordFocus.dispose();
+    _obscureText.dispose();
     super.dispose();
   }
 
@@ -89,6 +101,7 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   children: [
+
                     SizedBox(height: 25),
                     Image.asset(image1),
                     Text(
@@ -116,7 +129,7 @@ class _LoginPageState extends State<LoginPage> {
                       keyboardType: TextInputType.emailAddress,
                       style: const TextStyle(color: kInputColor),
                       decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20.0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 25.0),
                         filled: true,
                         hintText: "Email",
                         prefixIcon: IconButton(
@@ -126,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
                         fillColor: kWhiteColor,
                         border: OutlineInputBorder(
                           borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(9),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         errorText: _showEmailError || (_emailController.text.isEmpty && hasErrors)
                             ? _emailController.text.isEmpty ? 'Email is required' : 'Enter a valid email'
@@ -138,32 +151,45 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ),
                     SizedBox(height: 15),
-                    TextFormField(
-                      controller: _passwordController,
-                      focusNode: _passwordFocus,
-                      obscureText: true,
-                      style: const TextStyle(color: kInputColor),
-                      decoration: InputDecoration(
-                        contentPadding: const EdgeInsets.symmetric(vertical: 20.0),
-                        filled: true,
-                        hintText: "Password",
-                        prefixIcon: IconButton(
-                          onPressed: () {},
-                          icon: SvgPicture.asset(keyIcon),
-                        ),
-                        fillColor: kWhiteColor,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.circular(9),
-                        ),
-                        errorText: _showPasswordError || (_passwordController.text.isEmpty && hasErrors)
-                            ? _passwordController.text.isEmpty ? 'Password is required' : 'Password must be at least 7 characters long'
-                            : null,
-                        errorStyle: TextStyle(fontWeight: FontWeight.bold),
-
-                      ),
-                      onChanged: (_) {
-                        _validatePassword();
+                    ValueListenableBuilder<bool>(
+                      valueListenable: _obscureText,
+                      builder: (context, obscureText, child) {
+                        return TextFormField(
+                          controller: _passwordController,
+                          focusNode: _passwordFocus,
+                          obscureText: obscureText,
+                          style: const TextStyle(color: kInputColor),
+                          decoration: InputDecoration(
+                            contentPadding: const EdgeInsets.symmetric(vertical: 25.0),
+                            filled: true,
+                            hintText: "Password",
+                            prefixIcon: IconButton(
+                              onPressed: () {},
+                              icon: SvgPicture.asset(keyIcon),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscureText ? Icons.visibility : Icons.visibility_off,
+                                color: kInputColor,
+                              ),
+                              onPressed: () {
+                                _obscureText.value = !obscureText;
+                              },
+                            ),
+                            fillColor: kWhiteColor,
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide.none,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            errorText: _showPasswordError || (_passwordController.text.isEmpty && hasErrors)
+                                ? _passwordController.text.isEmpty ? 'Password is required' : 'Password must be at least 7 characters long'
+                                : null,
+                            errorStyle: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onChanged: (_) {
+                            _validatePassword();
+                          },
+                        );
                       },
                     ),
                     SizedBox(height: 15),
@@ -185,18 +211,102 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      onPressed: () {
+                      onPressed: () async {
+                        sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
+
+
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (BuildContext context) => admin(),
+                        ));
+
                         // Validate fields
                         _validateFieldsAndSubmit();
                         if (!_showEmailError && !_showPasswordError) {
-                          Navigator.of(context).push(MaterialPageRoute(
-                            builder: (BuildContext context) =>  admin(),
-                          ));
-                          // All validations pass, perform login or submit data
+                          Future<User?> loginUsingEmailPassword(
+                              { required String email,
+                                required String password,
+                                required BuildContext context}) async {
+                            FirebaseAuth auth = FirebaseAuth.instance;
+                            User? user;
+                            try {
+                              UserCredential userCredential = await auth.signInWithEmailAndPassword(
+                                  email: email, password: password);
+                              user = userCredential.user;
+                              // sendMail(recipientEmail: _emailController.text.toString(),mailMessage: 'u are using gritfit!!!');
+
+                            } on FirebaseAuthException catch (e) {
+
+
+                              if (e.code == "user-not-found") {
+                                Fluttertoast.showToast(msg: "No user found for that email");
+
+
+                              }
+                              else if(e.code == "wrong password"){
+                                Fluttertoast.showToast(msg: "Invalid email or password");
+                              }else{
+                                Fluttertoast.showToast(msg: "Error! Invalid email or password ",
+                                    toastLength: Toast.LENGTH_LONG,
+                                    gravity: ToastGravity.TOP,
+                                    timeInSecForIosWeb: 2,
+                                    backgroundColor: Colors.redAccent,
+                                    textColor: Colors.white,
+                                    fontSize: 15
+                                );
+                              }
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    LoginPage(), ));
+                              return user;
+                            }
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  admin(),
+                            ));
+                            return user;
+                          }
+                          User? user=await loginUsingEmailPassword(
+                              email: _emailController.text, password: _passwordController.text, context: context);
+                          print(user);
                           // Access email and password using _emailController.text and _passwordController.text
                         }
                       },
+                    ), SizedBox(height: 15),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_emailController.text.isEmpty) {
+                          Fluttertoast.showToast(
+                            msg: "Please enter your email first",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.TOP,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.redAccent,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                        } else {
+                          // Handle forgot password action
+                          print("Forgot Password button pressed");
+                          sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Your  psssword is [ agritfit123 ]');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: kWhiteColor, backgroundColor: Colors.transparent,
+                        shadowColor: Colors.transparent,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        side: BorderSide(color: kWhiteColor, width: 2),
+                      ),
+                      child: const Text(
+                        "Forgot Password",
+                        style: TextStyle(
+                          color: kWhiteColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
+
                   ],
                 ),
               ),
@@ -206,6 +316,12 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+
+
+
+
+                          // All validations pass, perform login or submit data
+                          // Access email and password using _emailController.text and _passwordController.text
   void _validateFieldsAndSubmit() {
     // Validate email and password
     _validateEmail();
@@ -219,5 +335,38 @@ class _LoginPageState extends State<LoginPage> {
       print('Password: ${_passwordController.text}');
     }
   }
+  void sendMail({
+    required String recipientEmail,
+    required String mailMessage,
+  }) async {
+    // change your email here
+    String username = _emailController.text.toString();
+    // change your password here
+    String password = 'pzkzsdlrwxuisqye';
+    final smtpServer = gmail(username, password);
+    final message = Message()
+      ..from = Address(username, 'Mail Service')
+      ..recipients.add(recipientEmail)
+      ..subject = 'Mail '
+      ..text = 'Message: $mailMessage';
 
+    try {
+      await send(message, smtpServer);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('E-mail is sent on your account.'),
+        ),
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print(e.toString());
+        print('error in sending email');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong ,cant send email'),
+          ),
+        );
+      }
+    }
+  }
 }

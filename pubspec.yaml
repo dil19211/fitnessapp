@@ -42,6 +42,7 @@ dependencies:
   sqflite: ^2.3.3+1
   url_launcher: ^6.2.6
   http: ^1.2.1
+  firebase_core: ^2.25.4
 
 
 dev_dependencies:
@@ -70,6 +71,10 @@ dev_dependencies:
   mailer: ^6.1.0
   awesome_notifications: ^0.8.2
   flutter_stripe: ^10.1.1
+  cloud_firestore: ^4.15.8
+  firebase_database: ^10.4.5
+  fluttertoast: ^8.2.4
+  firebase_auth: ^4.17.8
 
 
 
