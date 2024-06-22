@@ -63,8 +63,8 @@ class _StepCounterState extends State<step> {
     String gender = await getGenderFromEmail(email);
     String activityLevel = await getActivityLevelFromEmail(email);
 
-    _dailyexpectedsteps = await dailystep(cweight, gweight, height, age, gender, activityLevel);
-    _goalSteps = await totalstep(cweight, gweight, height, age, gender, activityLevel);
+    _dailyexpectedsteps = await dailystep(activityLevel);
+    _goalSteps = await totalstep(activityLevel);
 
     setState(() {
       _goalPercentage = (_dailySteps / _goalSteps) * 100;
@@ -175,14 +175,14 @@ class _StepCounterState extends State<step> {
     return age ?? 0;
   }
 
-  Future<int> totalstep(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> totalstep(String activityLevel) async {
     WeightGainCalculator wg_totalstep = WeightGainCalculator();
-    return await wg_totalstep.calculateTotalStepsInPeriod(cweight, gweight, height, age, gender, activityLevel);
+    return await wg_totalstep.calculateTotalStepsInPeriod(activityLevel);
   }
 
-  Future<int> dailystep(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> dailystep(String activityLevel) async {
     WeightGainCalculator wg_dailystep = WeightGainCalculator();
-    return await wg_dailystep.calculateDailyStepsNeeded(cweight, gweight, height, age, gender, activityLevel);
+    return await wg_dailystep.calculateTotalStepsInPerioddaily(activityLevel);
   }
 
   void _showDisabilityDialog(BuildContext context) {
