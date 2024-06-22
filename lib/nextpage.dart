@@ -18,8 +18,7 @@ class page extends StatelessWidget {
           textAlign: TextAlign.right,
           style: TextStyle(
             color: Colors.white,
-            fontStyle: FontStyle.italic,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w900,
             fontSize: 24,
           ),
         ),

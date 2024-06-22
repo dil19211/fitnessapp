@@ -44,6 +44,7 @@ class _MealState extends State<pmeal> {
         Future.delayed(Duration(seconds: 2), () {
           _showDiseaseDialog(context);
           prefs.setBool('hasShownDiseaseDialog', true); // Set flag to indicate the dialog has been shown
+          print("called");
         });
       }
     });

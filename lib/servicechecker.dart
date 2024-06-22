@@ -1,7 +1,10 @@
+import 'package:fitnessapp/waterchecked.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'firstrun.dart';
 
 class Water extends StatefulWidget {
   @override
@@ -24,7 +27,7 @@ class _WaterState extends State<Water> {
     isfirstime();
   }
   bool checked=true;
-  Future<void> isfirstime()async {// Load saved stats including disability status
+  Future<void> isfirstime()async {// Load saved
 
    await _loadWaterCount();
     print("initState: _isFirstRun=$checked");
@@ -34,6 +37,7 @@ class _WaterState extends State<Water> {
       });
     }
   }
+
 
 
   Future<void> _showGuideDialog(BuildContext context) async {
@@ -57,7 +61,7 @@ class _WaterState extends State<Water> {
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.of(context).pop();
                 setState(() {
                   checked= false;

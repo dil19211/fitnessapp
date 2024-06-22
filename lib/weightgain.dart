@@ -58,8 +58,11 @@ class _WeightGainState extends State<WeightGain> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('GritFit'),
-        centerTitle: true,
+        title: Text('GritFit' ,style: TextStyle(
+          color: Colors.white,fontWeight: FontWeight.w900,
+          fontSize: 24,
+        ), ),
+        centerTitle: false,
         backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(

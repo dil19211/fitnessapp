@@ -76,6 +76,7 @@ dev_dependencies:
   fluttertoast: ^8.2.4
   firebase_auth: ^4.17.8
   carousel_slider: ^4.2.1
+  is_first_run: ^1.0.0
 
 
 

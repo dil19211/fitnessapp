@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:fitnessapp/firstrun.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:is_first_run/is_first_run.dart';
 
 
 class Workout extends StatefulWidget {
@@ -11,26 +13,28 @@ class Workout extends StatefulWidget {
 }
 class _WorkoutState extends State<Workout> {
   String? selectedExercise;
-  Future<void>? _initialization;
+  Future<void>? _initi;
   List<Map<String, String>> weeklyPlan = [];
   Map<String, String>? currentDayPlan;
+   bool? _isFirst;
 
   @override
-  void initState() {
+  void initState()  {
     super.initState();
-    _initialization = initialize();
-  }
-  Future<void> initialize() async {
-    final prefs = await SharedPreferences.getInstance();
-    bool hasShownDialog = prefs.getBool('_showDisabilityDialog') ?? false;
-    if (!hasShownDialog) {
-      await Future.delayed(Duration(seconds: 2));
-      showUserForminfo(context);
-      prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
-    } else{fetchUserDataAndGeneratePlan();}
-    }
+    _checkFirstRun();
 
-  Future<void> showUserForminfo(BuildContext context) async {
+  }
+
+  void _checkFirstRun() async {
+    bool Run = await FirstRunHelper.isFirstRun();
+    if (Run) {
+      showUserForminfo();
+    } else {
+      fetchUserDataAndGeneratePlan();
+    }
+  }
+
+  void showUserForminfo() {
     final _formKey = GlobalKey<FormState>();
     AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
 
@@ -100,8 +104,7 @@ class _WorkoutState extends State<Workout> {
                           Text('Female'),
                         ],
                       ),
-                      if (_autoValidateMode == AutovalidateMode.always &&
-                          gender.isEmpty)
+                      if (_autoValidateMode == AutovalidateMode.always && gender.isEmpty)
                         Text(
                           'Please select a gender',
                           style: TextStyle(color: Colors.red),
@@ -113,7 +116,6 @@ class _WorkoutState extends State<Workout> {
                             value: disability != null,
                             onChanged: (value) async {
                               if (value!) {
-                                // Show disability selection dialog
                                 String? selectedDisability = await showDialog(
                                   context: context,
                                   builder: (context) {
@@ -124,21 +126,15 @@ class _WorkoutState extends State<Workout> {
                                         children: [
                                           ListTile(
                                             title: Text('Back'),
-                                            onTap: () =>
-                                                Navigator.of(context).pop(
-                                                    'Back'),
+                                            onTap: () => Navigator.of(context).pop('Back'),
                                           ),
                                           ListTile(
                                             title: Text('Hand'),
-                                            onTap: () =>
-                                                Navigator.of(context).pop(
-                                                    'Hand'),
+                                            onTap: () => Navigator.of(context).pop('Hand'),
                                           ),
                                           ListTile(
                                             title: Text('Feet'),
-                                            onTap: () =>
-                                                Navigator.of(context).pop(
-                                                    'Feet'),
+                                            onTap: () => Navigator.of(context).pop('Feet'),
                                           ),
                                         ],
                                       ),
@@ -162,28 +158,21 @@ class _WorkoutState extends State<Workout> {
                       SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () async {
-                          // Set autovalidate mode to always when submitting the form
                           setState(() {
                             _autoValidateMode = AutovalidateMode.always;
                           });
 
-                          if (_formKey.currentState!.validate() &&
-                              gender.isNotEmpty) {
-                            // Save form state to trigger onSaved callbacks
+                          if (_formKey.currentState!.validate() && gender.isNotEmpty) {
                             _formKey.currentState!.save();
 
-                            // Save form data to shared preferences
                             final prefs = await SharedPreferences.getInstance();
                             await prefs.setInt('age', age);
-                            print('age: $age'); // Debugging print statement
                             await prefs.setString('gender', gender);
-                            await prefs.setString(
-                                'disability', disability ?? '');
+                            await prefs.setString('disability', disability ?? '');
 
+                            await FirstRunHelper.markFirstRunComplete();
 
-                            // Dismiss the dialog
                             Navigator.of(context).pop();
-                            // Generate the weekly plan after form submission
                             fetchUserDataAndGeneratePlan();
                           }
                         },
@@ -207,6 +196,7 @@ class _WorkoutState extends State<Workout> {
     );
   }
 
+
   Future<void> fetchUserDataAndGeneratePlan() async {
     final prefs = await SharedPreferences.getInstance();
     int age = prefs.getInt('age') ?? 0;
@@ -215,9 +205,7 @@ class _WorkoutState extends State<Workout> {
     generateWeeklyPlan(age, gender, disability);
     setState(() {
       // Update the current day's plan
-      currentDayPlan = weeklyPlan[DateTime
-          .now()
-          .weekday - 1];
+      currentDayPlan = weeklyPlan[DateTime.now().weekday - 1];
     });
   }
 

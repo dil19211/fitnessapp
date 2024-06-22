@@ -32,7 +32,7 @@ class _StepCounterState extends State<step> {
   @override
   void initState() {
     super.initState();
-    _initialization = initialize();
+    _initialization= initialize();
   }
 
   Future<void> initialize() async {
@@ -43,10 +43,12 @@ class _StepCounterState extends State<step> {
       _showDisabilityDialog(context);
       prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
     } else if (!_hasDisability) {
-       checkPermissions();
+     // _showDisabilityDialog(context);
+      checkPermissions();
     }
 
     _database = await openDB();
+    //loadUserData();
     await fetchStepData();
   }
 
@@ -56,13 +58,9 @@ class _StepCounterState extends State<step> {
   }
 
   Future<void> fetchStepData() async {
-    int cweight = await getCWeightFromEmail(email);
-    int gweight = await getGWeightFromEmail(email);
-    int height = await getHeightFromEmail(email);
-    int age = await getAgeFromEmail(email);
-    String gender = await getGenderFromEmail(email);
-    String activityLevel = await getActivityLevelFromEmail(email);
-
+    var  data= await loadUserData();
+    var activityLevel = await getActivityLevelFromEmail(email) ?? data['activityLevel'];
+    print('Activity Level in fetch data: $activityLevel' );
     _dailyexpectedsteps = await dailystep(activityLevel);
     _goalSteps = await totalstep(activityLevel);
 
@@ -73,76 +71,12 @@ class _StepCounterState extends State<step> {
 
 
 
-  Future<int> getHeightFromEmail(String email) async {
-    var height;
-    if (_database != null) {
-      List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
-        columns: ['height'],
-        where: 'email = ?',
-        whereArgs: [email],
-      );
 
-      if (result.isNotEmpty) {
-        height = result[0]['height'];
-      }
-    }
-    return height ?? 0;
-  }
 
-  Future<int> getCWeightFromEmail(String email) async {
-    var cweight;
-    if (_database != null) {
-      List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
-        columns: ['cweight'],
-        where: 'email = ?',
-        whereArgs: [email],
-      );
 
-      if (result.isNotEmpty) {
-        cweight = result[0]['cweight'];
-      }
-    }
-    return cweight ?? 0;
-  }
 
-  Future<int> getGWeightFromEmail(String email) async {
-    var gweight;
-    if (_database != null) {
-      List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
-        columns: ['gweight'],
-        where: 'email = ?',
-        whereArgs: [email],
-      );
-
-      if (result.isNotEmpty) {
-        gweight = result[0]['gweight'];
-      }
-    }
-    return gweight ?? 0;
-  }
-
-  Future<String> getGenderFromEmail(String email) async {
-    String gender = 'Male';
-    if (_database != null) {
-      List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
-        columns: ['gender'],
-        where: 'email = ?',
-        whereArgs: [email],
-      );
-
-      if (result.isNotEmpty) {
-        gender = result[0]['gender'];
-      }
-    }
-    return gender;
-  }
-
-  Future<String> getActivityLevelFromEmail(String email) async {
-    String activityLevel = 'Sedentary';
+  Future<String?> getActivityLevelFromEmail(String email) async {
+    String? activityLevel;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
         'WEIGHTGAINUSER',
@@ -153,10 +87,25 @@ class _StepCounterState extends State<step> {
 
       if (result.isNotEmpty) {
         activityLevel = result[0]['activity_level'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('activity_level', activityLevel!);
+        print("$activityLevel in set ");
       }
     }
     return activityLevel;
   }
+
+
+  Future<Map<String, dynamic>> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final activityLevel = prefs.getString('activity_level') ?? 'Sedentary';
+    print("$activityLevel  in load user data");
+    return {
+      'activityLevel': activityLevel,
+    };
+
+  }
+
 
   Future<int> getAgeFromEmail(String email) async {
     int? age;
@@ -176,11 +125,15 @@ class _StepCounterState extends State<step> {
   }
 
   Future<int> totalstep(String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+    String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_totalstep = WeightGainCalculator();
     return await wg_totalstep.calculateTotalStepsInPeriod(activityLevel);
   }
 
   Future<int> dailystep(String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+    String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_dailystep = WeightGainCalculator();
     return await wg_dailystep.calculateTotalStepsInPerioddaily(activityLevel);
   }
@@ -294,7 +247,7 @@ class _StepCounterState extends State<step> {
   }
 
   double calculateCaloriesBurned(int steps) {
-    // Assuming 0.05 calories burned per step
+    // Assuing 0.05 calories burned per step
     return steps * 0.05;
   }
 
@@ -343,7 +296,7 @@ class _StepCounterState extends State<step> {
     email = ModalRoute.of(context)?.settings.arguments as String;
 
     return FutureBuilder<void>(
-      future: _initialization,
+      future:_initialization,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
@@ -555,7 +508,7 @@ class _StepCounterState extends State<step> {
 
   Widget _buildLottieAnimation() {
     return Container(
-      width: 130,
+      width: 100,
       height: 100,
       child: Lottie.asset(
         'assets/images/health.json',
