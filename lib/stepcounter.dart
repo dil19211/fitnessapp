@@ -294,7 +294,7 @@ class _StepCounterState extends State<step> {
   }
 
   double calculateCaloriesBurned(int steps) {
-    // Assuming 0.05 calories burned per step
+    // Assuing 0.05 calories burned per step
     return steps * 0.05;
   }
 
