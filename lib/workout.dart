@@ -11,27 +11,24 @@ class Workout extends StatefulWidget {
 }
 class _WorkoutState extends State<Workout> {
   String? selectedExercise;
+  Future<void>? _initialization;
   List<Map<String, String>> weeklyPlan = [];
   Map<String, String>? currentDayPlan;
-
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      bool hasShownDialog = prefs.getBool('showUserForminfo') ?? false;
-      print("not shown before");
-      if (!hasShownDialog) {// Show the dialog only if it has not been shown before
-        Future.delayed(Duration(seconds: 2), () {
-          showUserForminfo(context);
-          prefs.setBool('showUserForminfo', true); // Set flag to indicate the dialog has been shown
-        });
-
-      }
-      else{fetchUserDataAndGeneratePlan();}
-    });
+    _initialization = initialize();
   }
-void first(){}
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool hasShownDialog = prefs.getBool('_showDisabilityDialog') ?? false;
+    if (!hasShownDialog) {
+      await Future.delayed(Duration(seconds: 2));
+      showUserForminfo(context);
+      prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
+    } else{fetchUserDataAndGeneratePlan();}
+    }
 
   Future<void> showUserForminfo(BuildContext context) async {
     final _formKey = GlobalKey<FormState>();
@@ -44,7 +41,7 @@ void first(){}
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
@@ -694,41 +691,41 @@ void first(){}
     'Leg Curl': 'assets/images/legcurl.jpg',
     'chair yoga': 'assets/images/chair.jpg',
     'Pelvic Tilts': 'assets/images/pelvit.jpg',
-    'Push-ups':'',
-    'Walking':'',
+    'Push-ups':'assets/images/pushup.png',
+    'Walking':'assets/images/walked.png',
 
     // Add image paths for other exercises as needed
   };
   final Map<String, String> exerciseVideos = {
-    'Running': 'https://youtu.be/c1mBu4tK90k?si=0En-zMi4h_CXt_dQ',
-    'Cycling': 'https://youtu.be/iX9gVVXQ0Ao?si=zCtiDaDiLvEmJ_xk',
-    'Jumping Jacks': '',
-    'High Knees': '',
-    'Burpees': '',
-    'Pilates Exercise 1': '',
-    'Single Leg Stretch': '',
-    'Double Leg Stretch': '',
-    'Criss-cross': '',
-    'Squats': '',
-    'Deadlifts': '',
-    'Bench Press': '',
-    'Pull-ups': '',
-    'Lunges': '',
-    'Yoga Pose 1': '',
-    'Yoga Pose 2': '',
-    'tree pose': '',
-    'Child\'s Pose': '',
-    'Cat-Cow Stretch': '',
-    'Seated Upper Body Strength':'',
-    'Walking':'',
-    'chair yoga':'',
-    'Seated Side Bends':'',
-    'Chair Stretching':'',
-    ' Seated Resistance Band ': '',
-    'Leg Curl': '',
-    'Pelvic Tilts': 'assets/images/pelvit.jpg',
-    'Push-ups':'',
-    'Leg Raises': '',
+    'Running': 'https://youtu.be/c1mBu4tK90k?si=xW_5EZHv4Q2BeVvc',
+    'Cycling': 'https://youtu.be/4Hl1WAGKjMc?si=5PTuRFq8e1hGxmeu',
+    'Jumping Jacks': 'https://youtu.be/aWVoLpRFaTY?si=2XyF-enwwb4s0KYj',
+    'High Knees': 'https://youtu.be/8Mzm52VdXkM?si=buHbl_VscBBRk4ge',
+    'Burpees': 'https://youtu.be/xQdyIrSSFnE?si=HjpyDVJ4TcSuaw1r',
+    'Pilates Exercise 1': 'https://youtu.be/44HquH6QyXc?si=TCape8Md810ZqmuS',
+    'Single Leg Stretch': 'https://youtu.be/Ad4lgW4ieAM?si=b_oFhAkkTEgBwjQ8',
+    'Double Leg Stretch': 'https://youtu.be/N-jZas9tMSU?si=o3xzqfdbBoQfQkdx',
+    'Criss-cross': 'https://youtu.be/gzaCxDVQL90?si=HsnVu48Sr-mUZMQe',
+    'Squats': 'https://youtu.be/4KmY44Xsg2w?si=qARDmfm4kUUD_lNV',
+    'Deadlifts': 'https://youtu.be/1ZXobu7JvvE?si=4ui12nAySGyY6qMj',
+    'Bench Press': 'https://youtu.be/KjYak5vZO9s?si=Ej8jbrrbQhpOFPOl',
+    'Pull-ups': 'https://youtu.be/19xCfAZmMWg?si=yRuNqf3CzS3fUUS5',
+    'Lunges': 'https://youtu.be/uVwNVEQS_uo?si=C11vzCiInpoUUmoq',
+    'Yoga Pose 1': 'https://youtu.be/rt1bsoOukjI?si=yythdPetioqihhM9',
+    'Yoga Pose 2': 'https://youtu.be/Mn6RSIRCV3w?si=DtiY2jL4bWRY6OyX',
+    'tree pose': 'https://youtu.be/wdln9qWYloU?si=c_KS6EUqRm7HlS34',
+    'Child\'s Pose': 'https://youtu.be/qYvYsFrTI0U?si=uZj41eyBX_1uBSKt',
+    'Cat-Cow Stretch': 'https://youtu.be/tT00XNqJ3uA?si=I2ZYQw09lW-7UDbr',
+    'Seated Upper Body Strength':'https://youtu.be/xjhO9JpJJd4?si=nZoLJ99uwahL2b3V',
+    'Walking':'https://youtu.be/enYITYwvPAQ?si=ye7362la88OLsYaH',
+    'chair yoga':'https://youtu.be/U_jdXFfegKE?si=ErGpPFmLrPv1HMeh',
+    'Seated Side Bends':'https://youtu.be/WWdwDfQCvJ4?si=LLP-HZ3I_eNuIeKD',
+    'Chair Stretching':'https://youtu.be/LdW4i3KXXIk?si=aB8xLA6YoerZC5fR',
+    ' Seated Resistance Band ': 'https://youtu.be/1xSj2KOwHs8?si=T6WX6gMuCslpiiG0',
+    'Leg Curl': 'https://youtu.be/oWu8RxtWdGE?si=auNbiDWM3awO1jxq',
+    'Pelvic Tilts': 'https://youtu.be/NKl8ImI3OVE?si=PbI3qhHPMWTBPim2',
+    'Push-ups':'https://youtu.be/tWjBnQX3if0?si=HSdRKQPiGhGG7Jxl',
+    'Leg Raises': 'https://youtu.be/gz-VmPNR2VQ?si=P5scufvEWCQOdckC',
 
 
   };
@@ -1243,67 +1240,67 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
   Timer? _timer;
 
   final Map<String, double> exerciseCalories = {
-    'Running': 67,
-    'Cycling': 7,
-    'Jumping Jacks': 6,
-    'High Knees':7 ,
-    'Burpees':7 ,
-    'Pilates Exercise 1': 8,
-    'Single Leg Stretch': 8,
-    'Double Leg Stretch': 0,
-    'Criss-cross':4,
-    'Squats': 9,
-    'Deadlifts': 0,
-    'Bench Press': 3,
-    'Pull-ups': 9,
-    'Lunges': 8,
-    'Yoga Pose 1': 6,
-    'Yoga Pose 2': 6,
-    'tree pose': 5,
-    'Child\'s Pose': 7,
-    'Cat-Cow Stretch': 8,
-    'Seated Upper Body Strength':9,
-    'Walking':2,
-    'chair yoga':7,
-    'Seated Side Bends':9,
-    'Chair Stretching':8,
-    ' Seated Resistance Band ': 9,
-    'Leg Curl': 6,
-    'Pelvic Tilts': 8,
-    'Push-ups':8,
-    'Leg Raises': 6,
+    'Running': 7.0,
+    'Cycling':5.0 ,
+    'Jumping Jacks': 5.0,
+    'High Knees':5.0,
+    'Burpees':6.0,
+    'Pilates Exercise 1': 3.0,
+    'Single Leg Stretch': 3.0,
+    'Double Leg Stretch': 3.0,
+    'Criss-cross':3.0,
+    'Squats': 4.0,
+    'Deadlifts': 5.0,
+    'Bench Press':4.0,
+    'Pull-ups': 4.0,
+    'Lunges': 4.0,
+    'Yoga Pose 1': 3.0,
+    'Yoga Pose 2': 3.0,
+    'tree pose': 3.0,
+    'Child\'s Pose':2.0,
+    'Cat-Cow Stretch': 2.0,
+    'Seated Upper Body Strength':3.0,
+    'Walking':3.0,
+    'chair yoga':2.0,
+    'Seated Side Bends':2.0,
+    'Chair Stretching':3.0,
+    ' Seated Resistance Band ': 4.0,
+    'Leg Curl': 2.0,
+    'Pelvic Tilts': 3.0,
+    'Push-ups':5.0,
+    'Leg Raises': 8.0,
   };
 
   final Map<String, List<int>> exerciseTimeRange = {
-    'Running': [],
-    'Cycling': [],
-    'Jumping Jacks': [],
-    'High Knees': [],
-    'Burpees': [],
-    'Pilates Exercise 1': [],
-    'Single Leg Stretch': [],
-    'Double Leg Stretch': [],
-    'Criss-cross': [],
-    'Squats': [],
-    'Deadlifts': [],
-    'Bench Press': [],
-    'Pull-ups': [],
-    'Lunges': [],
-    'Yoga Pose 1': [],
-    'Yoga Pose 2': [],
-    'tree pose': [],
-    'Child\'s Pose': [],
-    'Cat-Cow Stretch': [],
-    'Seated Upper Body Strength':[],
-    'Walking':[],
-    'chair yoga':[],
-    'Seated Side Bends':[],
-    'Chair Stretching':[],
-    ' Seated Resistance Band ': [],
-    'Leg Curl': [],
-    'Pelvic Tilts': [],
-    'Push-ups':[],
-    'Leg Raises': [],
+    'Running': [5,25],
+    'Cycling': [5,30],
+    'Jumping Jacks': [5,15],
+    'High Knees': [5,20],
+    'Burpees': [5,30],
+    'Pilates Exercise 1': [5,15],
+    'Single Leg Stretch': [5,25],
+    'Double Leg Stretch': [5,25],
+    'Criss-cross': [5,35],
+    'Squats': [5,20],
+    'Deadlifts': [5,15],
+    'Bench Press': [5,20],
+    'Pull-ups': [5,15],
+    'Lunges':[5,20],
+    'Yoga Pose 1': [5,25],
+    'Yoga Pose 2': [5,25],
+    'tree pose': [5,20],
+    'Child\'s Pose': [5,15],
+    'Cat-Cow Stretch': [5,15],
+    'Seated Upper Body Strength':[5,15],
+    'Walking':[5,30],
+    'chair yoga':[5,25],
+    'Seated Side Bends':[5,25],
+    'Chair Stretching':[5,20],
+    ' Seated Resistance Band ': [5,25],
+    'Leg Curl': [5,15],
+    'Pelvic Tilts': [5,20],
+    'Push-ups':[5,20],
+    'Leg Raises': [5,15],
   };
 
   double _caloriesBurned = 0.0;

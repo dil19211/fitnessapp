@@ -2,9 +2,11 @@ import 'package:fitnessapp/weightgaintable.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'approved table.dart';
+
+import 'login.dart';
 import 'losstable.dart';
 import 'nextpage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 class admin extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -22,8 +24,16 @@ class admin extends StatelessWidget {
           ),
         ),
         centerTitle: false,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.exit_to_app,color: Colors.white,),
+            onPressed: () {
+              showLogoutDialog(context);
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView( // Wrap the Column with SingleChildScrollView
+      body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -49,9 +59,8 @@ class admin extends StatelessWidget {
             // Lottie Animation
             Lottie.asset(
               'assets/images/admin.json',
-              // Replace with the actual path to your Lottie animation file
               width: 280,
-              height: 250, // Adjust the height as needed
+              height: 250,
               repeat: true,
               reverse: true,
             ),
@@ -62,17 +71,15 @@ class admin extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    // Background color for Weight Gain TextField
                     child: TextField(
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.blue[50], // Fill color same as container color
+                        fillColor: Colors.blue[50],
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(20.0),
                             bottomRight: Radius.circular(20.0),
                           ),
-                          // borderSide: BorderSide(color: Colors.blue, width: 7),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
@@ -108,18 +115,15 @@ class admin extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Container(
-                    // Background color for Weight Loss TextField
                     child: TextField(
                       decoration: InputDecoration(
                         filled: true,
                         fillColor: Colors.deepPurple.shade400.withOpacity(0.2),
-                        // Fill color same as container color
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(20.0),
                             bottomRight: Radius.circular(20.0),
                           ),
-                          // borderSide: BorderSide(color: Colors.deepPurple, width: 3),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
@@ -155,17 +159,15 @@ class admin extends StatelessWidget {
                   ),
                   SizedBox(height: 20),
                   Container(
-                    // Background color for Payment TextField
                     child: TextField(
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.green.shade400.withOpacity(0.2), // Fill color same as container color
+                        fillColor: Colors.green.shade400.withOpacity(0.2),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
                             bottomLeft: Radius.circular(20.0),
                             bottomRight: Radius.circular(20.0),
                           ),
-                          // borderSide: BorderSide(color: Colors.green, width: 3),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.only(
@@ -199,55 +201,6 @@ class admin extends StatelessWidget {
                       },
                     ),
                   ),
-                  SizedBox(height: 25),
-                  Container(
-                    // Background color for Dietitian TextField
-                    child: TextField(
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.pink.shade400.withOpacity(0.2),
-                        // Fill color same as container color
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20.0),
-                            bottomRight: Radius.circular(20.0),
-                          ),
-                          // borderSide: BorderSide(color: Colors.pink, width: 3),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.only(
-                            bottomLeft: Radius.circular(20.0),
-                            bottomRight: Radius.circular(20.0),
-                          ),
-                          borderSide: BorderSide(color: Colors.pink, width: 2),
-                        ),
-                      ),
-                      readOnly: true,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            color: Colors.pink,
-                            blurRadius: 1,
-                            offset: Offset(1, 1),
-                          ),
-                        ],
-                      ),
-                      textAlign: TextAlign.center,
-                      controller: TextEditingController(
-                        text: 'Dietitian',
-                      ),
-                      onTap: () {
-                        // Implement navigation or other functionality here
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => page()),
-                        );
-                      },
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -256,4 +209,53 @@ class admin extends StatelessWidget {
       ),
     );
   }
-}
+  void navigateToNextPage(BuildContext context) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => LoginPage()),
+    );
+  }
+  void showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: ( context) {
+        return AlertDialog(
+          title: Text('Exit'),
+          content: Text('Are you sure you want to exit?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Dismiss the dialog
+              },
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // Clear shared preferences data
+                clearSharedPreferences();
+                // Navigate to the next page
+                navigateToNextPage(context);
+              },
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void clearSharedPreferences() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Clear all data stored in SharedPreferences
+  }
+
+    }
+
+
+
+
+
+
+
+

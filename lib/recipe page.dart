@@ -35,7 +35,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Quinoa, Chickpeas, Cucumber, Tomatoes, Red Onion, Parsley',
       'recipe': 'Cook quinoa and let it cool. Mix with chickpeas, chopped cucumber, tomatoes, red onion, and parsley. Dress with olive oil, lemon juice, salt, and pepper.',
       'category': 'Salad',
-      'videoUrl': 'https://youtu.be/nLbomgHVyGU?si=1I8RyPWcQ4skBKNL'
+      'videoUrl': 'https://youtu.be/GnugYR9xS24?si=bw2JdAkpaGqnxHUc'
       // Add your video URL here
 
     },
@@ -45,7 +45,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Tomatoes, Cucumbers, Onions, Feta Cheese, Olives',
       'recipe': 'Mix chopped tomatoes, cucumbers, onions, feta cheese, and olives. Dress with olive oil and oregano.',
       'category': 'Salad',
-      'videoUrl': 'https://youtu.be/j7rU-1-s7NM?si=ePR1PAeBRifxePVh'
+      'videoUrl': 'https://youtu.be/j7rU-1-s7NM?si=NIYbCVpkySjEyN6M'
     },
     {
       'name': 'Avocado and Black Bean Salad',
@@ -53,7 +53,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Avocado, Black Beans, Corn, Red Bell Pepper, Lime Juice, Cilantro',
       'recipe': 'Mix diced avocado, black beans, corn, diced red bell pepper, lime juice, and chopped cilantro.',
       'category': 'Salad',
-      'videoUrl': 'https://youtu.be/i8Cne9rkazI?si=WHjeum4p7ojP49fV'
+      'videoUrl': 'https://youtu.be/i8Cne9rkazI?si=pSoFV_lgxVrSre0d'
     },
     {
       'name': 'Spinach and Strawberry Salad',
@@ -61,7 +61,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Spinach, Strawberries, Almonds, Goat Cheese, Balsamic Vinaigrette',
       'recipe': 'Toss spinach, sliced strawberries, almonds, and crumbled goat cheese. Dress with balsamic vinaigrette.',
       'category': 'Salad',
-      'videoUrl': 'https://youtu.be/IuaZNSru84Q?si=scB-uIe4l18mL0ro'
+      'videoUrl': 'https://youtu.be/IuaZNSru84Q?si=xhoCYBahouUM73Bw'
     },
     {
       'name': 'Asian Chicken Salad',
@@ -69,7 +69,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Chicken Breast, Mixed Greens, Red Cabbage, Carrot, Red Bell Pepper, Green Onions, Cilantro, Almonds, Sesame Seeds',
       'recipe': 'Mix shredded chicken, mixed greens, shredded red cabbage, julienned carrot, sliced red bell pepper, green onions, chopped cilantro, toasted almonds, and sesame seeds. Dress with a mixture of soy sauce, rice vinegar, sesame oil, honey, lime juice, garlic, and ginger.',
       'category': 'Salad',
-      'videoUrl': 'https://youtu.be/d9W2jg92ZYc?si=zctWGrHNyZj-A3yv'
+      'videoUrl': 'https://youtu.be/d9W2jg92ZYc?si=7oFp7U6AQvJF5UtE'
     },
     {
       'name': 'Mediterranean Farro Salad',
@@ -77,7 +77,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Farro, Cucumber, Cherry Tomatoes, Red Onion, Kalamata Olives, Feta Cheese, Parsley, Mint',
       'recipe': 'Mix cooked farro, diced cucumber, halved cherry tomatoes, chopped red onion, pitted and halved Kalamata olives, crumbled feta cheese, chopped parsley, and mint. Dress with olive oil, lemon juice, red wine vinegar, garlic, oregano, salt, and pepper.',
       'category': 'Salad',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/92WHv-rgrZQ?si=wR01wu98O8XQ96iF'
     },
     {
       'name': 'Sushi',
@@ -85,7 +85,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Rice, Nori, Fish, Avocado, Cucumber',
       'recipe': 'Roll cooked rice, fish, avocado, and cucumber in nori sheets. Serve with soy sauce, wasabi, and pickled ginger.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/OWVjync6peU?si=sRZJUMmD_24SQL0N'
     },
     {
       'name': 'Chow Mein',
@@ -93,7 +93,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Noodles, Chicken, Cabbage, Carrot, Soy Sauce, Garlic, Ginger',
       'recipe': 'Stir-fry chicken with garlic and ginger. Add vegetables and cooked noodles. Toss with soy sauce.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/4wC-_4xqnlk?si=279xMRZHVjWa51tP'
     },
     {
       'name': 'Noodles',
@@ -101,7 +101,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Noodles, Vegetables, Soy Sauce, Garlic, Ginger, Sesame Oil',
       'recipe': 'Stir-fry vegetables with garlic and ginger. Add cooked noodles and toss with soy sauce and sesame oil.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/EquybCEvZLM?si=DmjVGdX1FH9X46-D'
     },
     {
       'name': 'Macaroni',
@@ -109,7 +109,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Macaroni, Cheese, Milk, Butter',
       'recipe': 'Cook macaroni. Make cheese sauce with cheese, milk, and butter. Mix macaroni with cheese sauce.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/CRFTkpfs1Wc?si=RZIRf4cVQX4NdJv9'
     },
     {
       'name': 'Chicken Biryani',
@@ -117,7 +117,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Chicken, Basmati Rice, Yogurt, Spices, Onions, Tomatoes',
       'recipe': 'Cook chicken with spices, onions, and tomatoes. Layer with cooked rice and bake.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/40VJanswaAQ?si=-dPNouRpF7uJS33d'
     },
     {
       'name': 'Qorma',
@@ -125,7 +125,7 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Meat, Yogurt, Cumin, Coriander, Turmeric, Garam Masala, Red Chili Powder, Cinnamon, Cardamom, Cloves, Bay Leaves, Onions, Tomatoes',
       'recipe': 'Cook meat with yogurt, spices (cumin, coriander, turmeric, garam masala, red chili powder, cinnamon, cardamom, cloves, bay leaves), onions, and tomatoes until tender.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/9jOH3TEB-NI?si=V0idh2QobLCXWwbQ'
     },
     {
       'name': 'Zarda',
@@ -133,14 +133,14 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Basmati Rice, Sugar, Food Coloring, Nuts, Raisins, Cardamom',
       'recipe': 'Cook rice with sugar, food coloring, nuts, raisins, and cardamom.',
       'category': 'Meal',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/gUrWTVTtPH8?si=w567ZU3Vx3x3xi0Z'
     },
     {
       'name': 'Chicken Curry',
       'image': 'assets/images/curry.jpg',
       'ingredients': 'Chicken, Onions, Tomatoes, Garlic, Ginger, Spices, Yogurt',
       'recipe': 'Cook onions until golden. Add garlic, ginger, and spices. Add chicken and cook until browned. Add tomatoes and yogurt. Simmer until chicken is cooked through.',
-      'category': 'Meal', 'videoUrl': ''
+      'category': 'Meal', 'videoUrl': 'https://youtu.be/WRYOVVexMhU?si=DGavK7F8ghlLuAva'
     },
     {
       'name': 'Green Smoothie',
@@ -148,7 +148,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/green smothie.jpg',
       'recipe': 'Blend spinach, banana, pineapple, and almond milk until smooth.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/YGmQR8yCT_0?si=aExLKbL2T80A9RYm'
     },
     {
       'name': 'Mango Lassi',
@@ -156,7 +156,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/mango lassi.jpg',
       'recipe': 'Blend mango, yogurt, honey, and a pinch of cardamom until creamy.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/xqir4h6rYJw?si=KT-U29EAFD8uXRd0'
     },
     {
       'name': 'Tropical Fruit Smoothie',
@@ -164,7 +164,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/tropical.jpg',
       'recipe': 'Blend pineapple, mango, papaya, and coconut water until smooth.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/-CDrJx-8l94?si=iBgVi99P3-DpKSUA'
     },
     {
       'name': 'Berry Blast Smoothie',
@@ -172,7 +172,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/berry blast.jpg',
       'recipe': 'Blend mixed berries, Greek yogurt, orange juice, and honey until well combined.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/SHaWNkVn8-8?si=_SNAZ6ZUsLoVOwKY'
     },
     {
       'name': 'Banana Berry Smoothie',
@@ -180,7 +180,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/banan berry.jpg',
       'recipe': 'Blend banana, mixed berries, spinach, and almond milk until creamy.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/Ns0TVWVvkyU?si=Sy-OUsqzgB9sGCkU'
     },
     {
       'name': 'Pineapple Coconut Smoothie',
@@ -188,7 +188,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/pineapple.jpg',
       'recipe': 'Blend pineapple, coconut milk, banana, and honey until smooth.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/cQC8IOVn6Pg?si=DdKy3O5e7j2TMYeb'
     },
     {
       'name': 'Chocolate Peanut Butter Smoothie',
@@ -196,14 +196,15 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/chocolate.jpg',
       'recipe': 'Blend banana, peanut butter, cocoa powder, almond milk, and honey until creamy.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/QrIpXPNadvI?si=vgLpGIyJutLIhGW-'
     },
     {
       'name': 'Apple Pie Smoothie',
       'ingredients': 'Apple, Rolled Oats, Yogurt, Cinnamon, Honey, Almond Milk',
       'image': 'assets/images/apple pie.jpg',
       'recipe': 'Blend apple, rolled oats, yogurt, cinnamon, honey, and almond milk until smooth.',
-      'category': 'Blends'
+      'category': 'Blends',
+       'videoUrl': 'https://youtu.be/6dtnxgZCK5M?si=Gw3J5Gk8pyJJBrHn'
     },
     {
       'name': 'Detox Green Smoothie',
@@ -211,7 +212,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/detox.jpg',
       'recipe': 'Blend kale, cucumber, green apple, lemon, ginger, and coconut water until smooth.',
       'category': 'Blends',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/SEBXR5jcYps?si=Xugfnaozn1TROPQE'
     },
 
     {
@@ -220,7 +221,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/Parfait.jpg',
       'recipe': 'Layer Greek yogurt, granola, and mixed berries in a glass. Drizzle with honey.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/5zm9OyyCz7I?si=UVs4UVjiR_LGqn_C'
     },
     {
       'name': 'Trail Mix',
@@ -228,7 +229,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/trail.jpg',
       'recipe': 'Mix mixed nuts, dried fruits, dark chocolate chips, and coconut flakes in a bowl. Serve in portioned bags.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/rGYg8wciFOA?si=rwxl4F3QntVIcES1'
     },
 
     {
@@ -237,7 +238,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/vedggie.jpeg',
       'recipe': 'Slice sweet potatoes, beets, and parsnips thinly. Toss with olive oil and salt. Bake until crispy.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/zJE-xClYq1I?si=WVFMZCX7LEAgYAoC'
     },
     // Additional snack recipes
     {
@@ -246,7 +247,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/fruit.jpg',
       'recipe': 'Thread strawberries, pineapple chunks, grapes, and melon balls onto wooden skewers. Serve chilled.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/SwC2q8qo6GQ?si=x0rKh4o-6o6QQC20'
     },
     {
       'name': 'Cheese and Crackers',
@@ -254,7 +255,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/chiess.jpg',
       'recipe': 'Arrange assorted cheese and crackers on a platter. Serve with grapes on the side.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/maF1MX0-kKQ?si=vxaRUDf5rSnfuk7X'
     },
     {
       'name': 'Popcorn',
@@ -262,7 +263,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/popcorn.jpg',
       'recipe': 'Pop popcorn kernels in olive oil. Season with salt to taste.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/5FTbhoYunxI?si=kRRLPp1BehfNVVrn'
     },
     {
       'name': 'Energy Balls',
@@ -270,7 +271,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/energy.jpg',
       'recipe': 'Blend dates, almonds, rolled oats, cocoa powder, and honey in a food processor. Roll into balls and refrigerate.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/1noPmYc_DxI?si=3HPOWeW0uK-EtuSk'
     },
     {
       'name': 'Chocolate Chip Cookies',
@@ -278,7 +279,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/chocolatechip.jpg',
       'recipe': 'Cream together butter, sugar, and brown sugar. Add eggs and vanilla extract. Mix in flour, baking soda, and salt. Fold in chocolate chips. Bake at 350°F for 10-12 minutes.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/YEZPxhMneOc?si=iGA3mI6wG2CDbXdf'
     },
     {
       'name': 'Classic Brownies',
@@ -286,7 +287,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/brownie.jpg',
       'recipe': 'Melt butter and mix with sugar, eggs, and vanilla extract. Stir in flour, cocoa powder, and salt. Fold in chocolate chips. Bake at 350°F for 20-25 minutes.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/PM8mETfXNeU?si=AH93qXUHRv9RFGTs'
     },
 
     {
@@ -295,7 +296,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/apple piee.jpg',
       'recipe': 'Peel and slice apples. Mix with sugar, flour, cinnamon, and nutmeg. Line a pie dish with pie crust. Fill with apple mixture. Dot with butter. Cover with another pie crust. Bake at 375°F for 45-50 minutes.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/KbyahTnzbKA?si=bvzCgvbWFiybVJ0L'
     },
     {
       'name': 'Banana Bread',
@@ -303,7 +304,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/bread.jpg',
       'recipe': 'Mash bananas and mix with melted butter, sugar, eggs, and vanilla extract. Stir in flour, baking soda, and salt. Bake in a loaf pan at 350°F for 60-65 minutes.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/2eTFhB5SNuY?si=mKDlZk7DK7DRKBgn'
     },
     {
       'name': 'Strawberry Shortcake',
@@ -311,7 +312,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/shortcake.jpg',
       'recipe': 'Mix sliced strawberries with sugar and let sit. Mix flour, baking powder, and salt. Cut in butter. Stir in milk. Drop spoonfuls onto a baking sheet. Bake at 425°F for 12-15 minutes. Serve with strawberries and whipped cream.',
       'category': 'Snacks',
-      'videoUrl': ''
+      'videoUrl': 'https://youtu.be/dRdinLuopTo?si=0p4KR1Oh6kyTAK5i'
     },
     // Additional sweet recipes
     {
@@ -319,20 +320,20 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Flour, Sugar, Butter, Eggs, Vanilla Extract, Baking Powder, Salt, Milk, Frosting',
       'image': 'assets/images/vanilla.jpg',
       'recipe': 'Cream together butter and sugar. Beat in eggs and vanilla extract. Mix in flour, baking powder, and salt. Gradually add milk. Pour batter into cupcake liners. Bake at 350°F for 18-20 minutes. Frost once cooled.',
-      'category': 'Snacks', 'videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': 'https://youtu.be/uU7eOlSL6Hk?si=bJ8BTXeMQcbylTpY'},
     {
       'name': 'Chocolate Cake',
       'ingredients': 'Flour, Sugar, Cocoa Powder, Baking Powder, Baking Soda, Salt, Eggs, Milk, Vegetable Oil, Vanilla Extract, Hot Water, Frosting',
       'image': 'assets/images/cake.jpg',
       'recipe': 'Mix dry ingredients. Add eggs, milk, oil, and vanilla extract. Beat until smooth. Stir in hot water. Pour into greased pans. Bake at 350°F for 30-35 minutes. Frost once cooled.',
-      'category': 'Snacks', 'videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': 'https://youtu.be/RfhNAs597nM?si=3T0uKwx9yfSbLCUz'},
 
     {
       'name': 'Chocolate Truffles',
       'ingredients': 'Chocolate Chips, Heavy Cream, Butter, Cocoa Powder, Nuts or Sprinkles (optional)',
       'image': 'assets/images/trffles.jpg',
       'recipe': 'Heat cream and pour over chocolate chips and butter. Stir until smooth. Chill until firm. Roll into balls and coat in cocoa powder or chopped nuts. Chill until set.',
-      'category': 'Snacks', 'videoUrl': ''},
+      'category': 'Snacks', 'videoUrl': 'https://youtu.be/ckmDgIYsb8Q?si=VUaj7gKhvHXLuBGC'},
 
 
   ];

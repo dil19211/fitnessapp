@@ -1,48 +1,200 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:pedometer/pedometer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:pedometer/pedometer.dart';
+import 'package:lottie/lottie.dart';
+import 'package:sqflite/sqflite.dart';
+
+import 'database_handler.dart';
+import 'gainmealcaculation.dart';
 
 class step extends StatefulWidget {
-  const step({Key? key}) : super(key: key);
-
   @override
   _StepCounterState createState() => _StepCounterState();
 }
-
 class _StepCounterState extends State<step> {
   late StreamSubscription<StepCount> _stepCountStreamSubscription;
+  int _dailyexpectedsteps = 500;
   int _stepCount = 0;
   int _dailySteps = 0;
   int _todaysSteps = 0; // New variable to store steps without resetting
-  int _goalSteps = 10000; // Example goal steps
+  int _goalSteps = 0; // Example goal steps
   int _totalMinutesWalked = 0;
   double _caloriesBurned = 0.0;
   double _goalPercentage = 0.0;
   double _lastStepTimestamp = 0; // To track the timestamp of the last step
   bool _hasDisability = false; // Flag to track user's disability status
- // Flag to track if it's the first run of the app
+  Database? _database;
+  late String email;
+  Future<void>? _initialization;
 
   @override
   void initState() {
     super.initState();
-    SharedPreferences.getInstance().then((prefs) {
-      bool hasShownDialog = prefs.getBool('_showDisabilityDialog') ?? false;
-      if (!hasShownDialog) {// Show the dialog only if it has not been shown before
-        Future.delayed(Duration(seconds: 2), () {
-          _showDisabilityDialog(context);
-          prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
-          print("$_showDisabilityDialog");
-        });
-      }
-      else if(!_hasDisability){checkPermissions();}
-    });
+    _initialization = initialize();
+  }
 
+  Future<void> initialize() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool hasShownDialog = prefs.getBool('_showDisabilityDialog') ?? false;
+    if (!hasShownDialog) {
+      await Future.delayed(Duration(seconds: 2));
+      _showDisabilityDialog(context);
+      prefs.setBool('_showDisabilityDialog', true); // Set flag to indicate the dialog has been shown
+    } else if (!_hasDisability) {
+       checkPermissions();
+    }
+
+    _database = await openDB();
+    await fetchStepData();
+  }
+  void checkPermissions() async {
+    PermissionStatus status = await Permission.activityRecognition.request();
+    print("checkPermissions: status=$status");
+    if (status.isGranted) {
+      initializePedometer();
+    } else if (status.isDenied) {
+      showPermissionDialog();
+    } else {
+      // Handle if permission is denied
+    }
+  }
+  Future<Database> openDB() async {
+    Database _database = await DatabaseHandler().openDB();
+    return _database;
+  }
+
+  Future<void> fetchStepData() async {
+    int cweight = await getCWeightFromEmail(email);
+    int gweight = await getGWeightFromEmail(email);
+    int height = await getHeightFromEmail(email);
+    int age = await getAgeFromEmail(email);
+    String gender = await getGenderFromEmail(email);
+    String activityLevel = await getActivityLevelFromEmail(email);
+
+    _dailySteps = await dailystep(cweight, gweight, height, age, gender, activityLevel);
+    _goalSteps = await totalstep(cweight, gweight, height, age, gender, activityLevel);
+
+    setState(() {
+      _goalPercentage = (_dailySteps / _goalSteps) * 100;
+    });
   }
 
 
+
+  Future<int> getHeightFromEmail(String email) async {
+    var height;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['height'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        height = result[0]['height'];
+      }
+    }
+    return height ?? 0;
+  }
+
+  Future<int> getCWeightFromEmail(String email) async {
+    var cweight;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['cweight'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        cweight = result[0]['cweight'];
+      }
+    }
+    return cweight ?? 0;
+  }
+
+  Future<int> getGWeightFromEmail(String email) async {
+    var gweight;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['gweight'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        gweight = result[0]['gweight'];
+      }
+    }
+    return gweight ?? 0;
+  }
+
+  Future<String> getGenderFromEmail(String email) async {
+    String gender = 'Male';
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['gender'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        gender = result[0]['gender'];
+      }
+    }
+    return gender;
+  }
+
+  Future<String> getActivityLevelFromEmail(String email) async {
+    String activityLevel = 'Sedentary';
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['activity_level'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        activityLevel = result[0]['activity_level'];
+      }
+    }
+    return activityLevel;
+  }
+
+  Future<int> getAgeFromEmail(String email) async {
+    int? age;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['age'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        age = result[0]['age'];
+      }
+    }
+    return age ?? 0;
+  }
+
+  Future<int> totalstep(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    WeightGainCalculator wg_totalstep = WeightGainCalculator();
+    return await wg_totalstep.calculateTotalStepsInPeriod(cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> dailystep(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    WeightGainCalculator wg_dailystep = WeightGainCalculator();
+    return await wg_dailystep.calculateDailyStepsNeeded(cweight, gweight, height, age, gender, activityLevel);
+  }
 
   void _showDisabilityDialog(BuildContext context) {
     showDialog(
@@ -69,7 +221,6 @@ class _StepCounterState extends State<step> {
                 Navigator.of(context).pop();
                 setState(() {
                   _hasDisability = true;
-
                 });
                 _saveStats(); // Save updated _hasDisability and _isFirstRun
               },
@@ -80,17 +231,7 @@ class _StepCounterState extends State<step> {
     );
   }
 
-  void checkPermissions() async {
-    PermissionStatus status = await Permission.activityRecognition.request();
-    print("checkPermissions: status=$status");
-    if (status.isGranted) {
-      initializePedometer();
-    } else if (status.isDenied) {
-      showPermissionDialog();
-    } else {
-      // Handle if permission is denied
-    }
-  }
+
 
   void initializePedometer() {
     _loadStats();
@@ -101,7 +242,7 @@ class _StepCounterState extends State<step> {
         if (timeDifference > 2) {
           _stepCount++;
           _dailySteps++;
-          _todaysSteps++;
+          _todaysSteps++; // Accumulate today's steps
           _totalMinutesWalked = calculateMinutesWalked(_dailySteps);
           _caloriesBurned = calculateCaloriesBurned(_dailySteps);
           _lastStepTimestamp = currentTimestamp;
@@ -117,7 +258,7 @@ class _StepCounterState extends State<step> {
     setState(() {
       _stepCount = prefs.getInt('stepCount') ?? 0;
       _dailySteps = prefs.getInt('dailySteps') ?? 0;
-      _todaysSteps = prefs.getInt('todaysSteps') ?? 0;
+      _todaysSteps = prefs.getInt('todaysSteps') ?? _todaysSteps;
       _totalMinutesWalked = prefs.getInt('totalMinutesWalked') ?? 0;
       _caloriesBurned = prefs.getDouble('caloriesBurned') ?? 0;
       _lastStepTimestamp = prefs.getDouble('lastStepTimestamp') ?? 0;
@@ -129,7 +270,8 @@ class _StepCounterState extends State<step> {
       String currentDate = DateTime.now().toIso8601String().split('T')[0];
 
       if (lastSavedDate != currentDate) {
-        _dailySteps = 0;
+        _todaysSteps += _dailySteps; // Accumulate daily steps to today's steps
+        _dailySteps = 0; // Reset daily steps
         prefs.setString('lastSavedDate', currentDate);
       }
     });
@@ -139,13 +281,12 @@ class _StepCounterState extends State<step> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('stepCount', _stepCount);
     prefs.setInt('dailySteps', _dailySteps);
-    prefs.setInt('todaysSteps', _todaysSteps);
+    prefs.setInt('todaysSteps', _todaysSteps); // Save the accumulated today's steps
     prefs.setInt('totalMinutesWalked', _totalMinutesWalked);
     prefs.setDouble('caloriesBurned', _caloriesBurned);
     prefs.setDouble('lastStepTimestamp', _lastStepTimestamp);
     prefs.setDouble('goalPercentage', _goalPercentage);
     prefs.setBool('hasDisability', _hasDisability);
-
   }
 
   int calculateMinutesWalked(int steps) {
@@ -197,157 +338,176 @@ class _StepCounterState extends State<step> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
-    Color appBarColor = getAppBarColor(_goalPercentage);
+    email = ModalRoute.of(context)?.settings.arguments as String;
 
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: appBarColor,
-        title: Text(
-          'GritFit Health',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20,
-            fontStyle: FontStyle.normal,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<void>(
+      future: _initialization,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Loading...")),
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (snapshot.hasError) {
+          return Scaffold(
+            appBar: AppBar(title: Text("Error")),
+            body: Center(child: Text("An error occurred: ${snapshot.error}")),
+          );
+        } else {
+          Color appBarColor = getAppBarColor(_goalPercentage);
+
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: appBarColor,
+              title: Text(
+                'GritFit Health',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20,
+                  fontStyle: FontStyle.normal,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+            body: Center(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: Column(
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 70),
-                        _buildCircleWithText(
-                          'assets/images/running-shoes.png',
-                          '$_dailySteps',
-                          'Daily steps',
-                          Colors.purpleAccent,
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(height: 70),
+                              _buildCircleWithText(
+                                'assets/images/running-shoes.png',
+                                '$_dailySteps/$_dailyexpectedsteps',
+                                'steps',
+                                Colors.purpleAccent,
+                              ),
+                              SizedBox(height: 10),
+                              _buildCircleWithText(
+                                Icons.timer,
+                                '$_totalMinutesWalked',
+                                'mins',
+                                Colors.lightBlueAccent,
+                              ),
+                              SizedBox(height: 10),
+                              _buildCircleWithText(
+                                Icons.whatshot,
+                                _caloriesBurned.toStringAsFixed(2),
+                                'kcal',
+                                Colors.pinkAccent,
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: 10),
-                        _buildCircleWithText(
-                          Icons.timer,
-                          '$_totalMinutesWalked',
-                          'mins',
-                          Colors.lightBlueAccent,
-                        ),
-                        SizedBox(height: 10),
-                        _buildCircleWithText(
-                          Icons.whatshot,
-                          _caloriesBurned.toStringAsFixed(2),
-                          'kcal',
-                          Colors.pinkAccent,
+                        SizedBox(width: 20),
+                        Padding(
+                          padding: EdgeInsets.only(top: 70, right: 1),
+                          child: _buildLottieAnimation(),
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
-                  Padding(
-                    padding: EdgeInsets.only(top: 70, right: 1),
-                    child: _buildLottieAnimation(),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              right: 10,
-              top: 250,
-              child: Container(
-                height: 140,
-                width: 340,
-                decoration: BoxDecoration(
-                  color: Colors.purple,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '$_todaysSteps',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '/$_goalSteps steps',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: 150,
-                            height: 30,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                  Positioned(
+                    right: 10,
+                    top: 250,
+                    child: Container(
+                      height: 140,
+                      width: 340,
+                      decoration: BoxDecoration(
+                        color: Colors.purple,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  '${_goalPercentage.toStringAsFixed(2)}%',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                ),
-                                SizedBox(height: 5),
-                                Container(
-                                  height: 5,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: appBarColor,
-                                  ),
-                                  child: FractionallySizedBox(
-                                    alignment: Alignment.centerLeft,
-                                    widthFactor: _goalPercentage / 100,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
-                                        color: Colors.grey,
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '$_dailySteps',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    Text(
+                                      '/$_goalSteps',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: 150,
+                                  height: 30,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        '${_goalPercentage.toStringAsFixed(2)}%',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                      SizedBox(height: 5),
+                                      Container(
+                                        height: 5,
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(10),
+                                          color: appBarColor,
+                                        ),
+                                        child: FractionallySizedBox(
+                                          alignment: Alignment.centerLeft,
+                                          widthFactor: _goalPercentage / 100,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10),
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
+      },
     );
   }
-
   Widget _buildCircleWithText(dynamic image, String value, String label, Color color) {
     return Row(
       children: [

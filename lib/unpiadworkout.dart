@@ -2,16 +2,17 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
-
-class Workout extends StatefulWidget {
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+class uWorkout extends StatefulWidget {
   @override
   _WorkoutState createState() => _WorkoutState();
 }
 
-class _WorkoutState extends State<Workout> {
+class _WorkoutState extends State<uWorkout> {
   String? selectedExercise;
 
   final Map<String, String> exerciseImages = {
@@ -40,25 +41,25 @@ class _WorkoutState extends State<Workout> {
   };
 
   final Map<String, String> exerciseVideos = {
-    'Running': '',
-    'Cycling': '',
-    'Jumping Jacks': '',
-    'High Knees':  '',
-    'Burpees': '',
-    'Pilates Exercise 1': '',
-    'Single Leg Stretch': '',
-    'Double Leg Stretch': '',
-    'Criss-Cross': '',
-    'Squats': '',
-    'Deadlifts' :'',
-    'Bench Press':'',
-    'Pull-ups':'',
-    'Lunges':'',
-    'Yoga Pose 1':'',
-    'Yoga Pose 2':'',
-    'Tree Pose':'',
-    'Child\'s Pose':'',
-    'Cat-Cow Stretch':'',
+    'Running': 'https://youtu.be/c1mBu4tK90k?si=xW_5EZHv4Q2BeVvc',
+    'Cycling': 'https://youtu.be/4Hl1WAGKjMc?si=5PTuRFq8e1hGxmeu',
+    'Jumping Jacks': 'https://youtu.be/aWVoLpRFaTY?si=2XyF-enwwb4s0KYj',
+    'High Knees':  'https://youtu.be/8Mzm52VdXkM?si=buHbl_VscBBRk4ge',
+    'Burpees': 'https://youtu.be/xQdyIrSSFnE?si=HjpyDVJ4TcSuaw1r',
+    'Pilates Exercise 1': 'https://youtu.be/44HquH6QyXc?si=TCape8Md810ZqmuS',
+    'Single Leg Stretch': 'https://youtu.be/Ad4lgW4ieAM?si=b_oFhAkkTEgBwjQ8',
+    'Double Leg Stretch': 'https://youtu.be/N-jZas9tMSU?si=o3xzqfdbBoQfQkdx',
+    'Criss-Cross': 'https://youtu.be/gzaCxDVQL90?si=HsnVu48Sr-mUZMQe',
+    'Squats': 'https://youtu.be/4KmY44Xsg2w?si=qARDmfm4kUUD_lNV',
+    'Deadlifts' :'https://youtu.be/1ZXobu7JvvE?si=4ui12nAySGyY6qMj',
+    'Bench Press':'https://youtu.be/KjYak5vZO9s?si=Ej8jbrrbQhpOFPOl',
+    'Pull-ups':'https://youtu.be/19xCfAZmMWg?si=yRuNqf3CzS3fUUS5',
+    'Lunges':'https://youtu.be/uVwNVEQS_uo?si=C11vzCiInpoUUmoq',
+    'Yoga Pose 1':'https://youtu.be/rt1bsoOukjI?si=yythdPetioqihhM9',
+    'Yoga Pose 2':'https://youtu.be/Mn6RSIRCV3w?si=DtiY2jL4bWRY6OyX',
+    'Tree Pose':'https://youtu.be/wdln9qWYloU?si=c_KS6EUqRm7HlS34',
+    'Child\'s Pose':'https://youtu.be/qYvYsFrTI0U?si=uZj41eyBX_1uBSKt',
+    'Cat-Cow Stretch':'https://youtu.be/tT00XNqJ3uA?si=I2ZYQw09lW-7UDbr',
   };
 
 
@@ -429,17 +430,33 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
   Timer? _timer;
 
   final Map<String, double> exerciseCalories = {
-    'Running': 10.0,
-    'Cycling': 8.0,
-    'Jumping Jacks': 12.0,
+    'Running': 7.0,
+    'Cycling':5.0 ,
+    'Jumping Jacks': 5.0,
+    'High Knees':5.0,
+    'Burpees':6.0,
+    'Pilates Exercise 1': 3.0,
+    'Single Leg Stretch': 3.0,
+    'Double Leg Stretch': 3.0,
+    'Criss-cross':3.0,
+    'Squats': 4.0,
+    'Deadlifts': 5.0,
+    'Bench Press':4.0,
+    'Pull-ups': 4.0,
+    'Lunges': 4.0,
+    'Yoga Pose 1': 3.0,
+    'Yoga Pose 2': 3.0,
+    'tree pose': 3.0,
+    'Child\'s Pose':2.0,
+    'Cat-Cow Stretch': 2.0,
   };
   final Map<String, List<int>> exerciseTimeRange = {
-    'Running': [5, 60],
-    'Cycling': [10, 90],
+    'Running': [5, 30],
+    'Cycling': [10, 30],
     'Jumping Jacks': [1, 20],
     'High Knees': [1, 20],
     'Burpees': [1, 30],
-    'Pilates Exercise 1': [10, 50],
+    'Pilates Exercise 1': [10, 30],
     'Single Leg Stretch': [5, 30],
     'Double Leg Stretch': [5, 30],
     'Criss-Cross': [5, 30],
@@ -448,11 +465,11 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
     'Bench Press': [5, 60],
     'Pull-ups': [5, 60],
     'Lunges': [5, 60],
-    'Yoga Pose 1': [5, 60],
-    'Yoga Pose 2': [5, 60],
-    'Tree Pose': [5, 60],
-    'Child\'s Pose': [5, 60],
-    'Cat-Cow Stretch': [5, 60],
+    'Yoga Pose 1': [5, 30],
+    'Yoga Pose 2': [5, 30],
+    'Tree Pose': [5, 30],
+    'Child\'s Pose': [5, 20],
+    'Cat-Cow Stretch': [5, 20],
   };
 
   double _caloriesBurned = 0.0;
@@ -773,7 +790,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
     );
   }
 
-///unpiad workut dilog
+  ///unpiad workut dilog
   void showInternetConnectionDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -791,6 +808,11 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                 await makePayment((paymentSuccessful) {
                   if (paymentSuccessful) {
                     //  launchVideo(recipe['videoUrl']!);
+                    sendEmail(
+                      emailController.text,
+                      'Payment Successful',
+                      'Welcome! you have subscribed the premium package of GritFit.',
+                    );
                     launchVideo(widget.videoUrl);
                   } else {
                     showDialog(
@@ -822,8 +844,8 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
       paymentIntentData = await createPaymentIntent('20', 'USD');
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
+      await stripe.Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: stripe.SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentData!['client_secret'],
           style: ThemeMode.dark,
           merchantDisplayName: 'Sif',
@@ -838,11 +860,11 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
 
   Future<void> displayPaymentSheet(Function(bool) onPaymentResult) async {
     try {
-      await Stripe.instance.presentPaymentSheet();
+      await stripe.Stripe.instance.presentPaymentSheet();
       paymentIntentData = null;
       onPaymentResult(true);
     } catch (e) {
-      if (e is StripeException) {
+      if (e is stripe.StripeException) {
         print('Error presenting payment sheet: ${e.error.localizedMessage}');
       } else {
         print('Error presenting payment sheet: $e');
@@ -893,7 +915,41 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
       ));
     }
   }
+  Future<void> sendEmail(String recipient, String subject, String message) async {
+    // Replace with your email and password
+    String username = 'agritfit@gmail.com';
+    String password = 'dmehtpvtnacfuhpm';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'GritFit')
+      ..recipients.add(recipient)
+      ..subject = subject
+      ..text = message;
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Payment Succesfull E-mail is sent on your account.'),
+        ),
+      );
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Something went wrong ,cant send email'),
+          ),
+        );
+      }
+    }
+  }
 }
+
 
 
 

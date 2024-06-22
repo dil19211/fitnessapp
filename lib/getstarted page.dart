@@ -1,4 +1,4 @@
-import 'package:fitnessapp/main.dart';
+
 import 'package:fitnessapp/nextpage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,16 +7,23 @@ import 'package:lottie/lottie.dart';
 class welcome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Lottie.asset('assets/images/getstarted.json'), // Replace with your animation file path
-            SizedBox(height: 250),
+            SizedBox(height: 100), // Adjust the height as needed// Adjust the height as needed
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add padding for better text alignment
+              child: Text(
+                'Welcome to GritFit! Get ready to transform your fitness journey with our tailored workouts, nutrition plans, and progress tracking.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.black54,fontStyle: FontStyle.italic), // Adjust text style as needed
+              ),
+            ),
+            SizedBox(height: 40),
             ElevatedButton(
-
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
@@ -37,5 +44,4 @@ class welcome extends StatelessWidget {
       ),
     );
   }
-
 }

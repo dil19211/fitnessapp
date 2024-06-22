@@ -33,7 +33,7 @@ class page extends StatelessWidget {
             onPressed: () {
               // Navigate to user account page
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (BuildContext context) => admin(),
+                builder: (BuildContext context) => LoginPage(),
               ));
             },
           ),
@@ -109,7 +109,7 @@ class page extends StatelessWidget {
                         text: 'Weight Loss',
                       ),
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(
                           builder: (BuildContext context) => weightloss(),
                         ));
                       },
@@ -118,19 +118,6 @@ class page extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          Positioned(
-            bottom: 16.0,
-            right: 16.0,
-            child: IconButton(
-              icon: Icon(
-                Icons.person,
-                color: Colors.purple,
-              ),
-              onPressed: () {
-                // Navigate to dietitian page or perform other actions here
-              },
-            ),
           ),
         ],
       ),

@@ -3,11 +3,14 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
-
 import 'color.dart';
 import 'database_handler.dart';
 import 'gainmealcaculation.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:workmanager/workmanager.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+
+import 'notification.dart';
 
 class pmeal extends StatefulWidget {
   @override
@@ -26,7 +29,8 @@ class _MealState extends State<pmeal> {
   int _takenLunchCalories = 0;
   int _takenSnackCalories = 0;
   int _takenDinnerCalories = 0;
-
+  late Future<Database> _databaseFuture;
+  Database? _database;
 
   @override
   void initState() {
@@ -43,6 +47,89 @@ class _MealState extends State<pmeal> {
         });
       }
     });
+    _databaseFuture = openDB();
+    loadUserData();
+    AwesomeNotifications().initialize(
+      null,
+      [
+        NotificationChannel(
+          channelKey: 'basic_channel',
+          channelName: 'GritFit notifications',
+          channelDescription: 'Notification channel for basic notifications',
+          defaultColor: Color(0xFF9D50DD),
+          ledColor: Colors.blueAccent,
+          importance: NotificationImportance.High,
+          playSound: true,
+          onlyAlertOnce: true,
+        ),
+      ],
+      //debug: true
+    );
+    // Register a periodic task to run at 7 PM daily
+    Workmanager().registerPeriodicTask(
+      "1",
+      "show_notification_task",
+      frequency: Duration(days: 1), // Repeat daily
+      initialDelay: NotificationUtils.calculateInitialDelay(7,5),
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "2",
+      "show_notification_830_am_task",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(8, 30), // 8:30 AM
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "3",
+      "lunch time",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(12, 35), // 12:0 pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "4",
+      "lunch time Reminder",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(14,15 ), // 2:15 pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "5",
+      "snack time",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(15,10), // 3:10pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "6",
+      "snack time Reminder",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(17,20), // 5:20 pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "7",
+      "dinner time",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(18,15), // 6:12 pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "8",
+      "dinner time Reminder",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(20,30), // 8:15 pm
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "9",
+      "step reminder",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(15, 30), // 8:30 AM
+      inputData: {},
+    );
+
   }
   void _showDiseaseDialog(BuildContext context) {
     showDialog(
@@ -52,38 +139,42 @@ class _MealState extends State<pmeal> {
         List<String> selectedDiseases = []; // To store selected diseases
         final List<String> allDiseases = ['Diabetes', 'Hypertension', 'Heart Disease'];
 
-        return AlertDialog(
-          title: Text('Select Your Diseases if you have any'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: allDiseases.map((disease) {
-              return CheckboxListTile(
-                title: Text(disease),
-                value: selectedDiseases.contains(disease),
-                activeColor: Colors.green, // Set active color to green
-                onChanged: (bool? value) {
-                  setState(() {
-                    if (value == true) {
-                      selectedDiseases.add(disease);
-                    } else {
-                      selectedDiseases.remove(disease);
-                    }
-                  });
-                },
-              );
-            }).toList(),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                // Save selected diseases to SharedPreferences
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setStringList('diseases', selectedDiseases);
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text('Save'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Select Your Diseases if you have any'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: allDiseases.map((disease) {
+                  return CheckboxListTile(
+                    title: Text(disease),
+                    value: selectedDiseases.contains(disease),
+                    activeColor: Colors.green, // Set active color to green
+                    onChanged: (bool? value) {
+                      setState(() {
+                        if (value == true) {
+                          selectedDiseases.add(disease);
+                        } else {
+                          selectedDiseases.remove(disease);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () async {
+                    // Save selected diseases to SharedPreferences
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    prefs.setStringList('diseases', selectedDiseases);
+                    Navigator.of(context).pop(); // Close the dialog
+                  },
+                  child: Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -151,225 +242,240 @@ class _MealState extends State<pmeal> {
     prefs.setInt('taken_dinner_calories', _takenDinnerCalories);
     prefs.setInt('displayed_consumed_calories', _displayedConsumedCalories);
   }
+  // Helper function to open the database
+  Future<Map<String, dynamic>> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final height = prefs.getInt('height') ?? 0;
+    final cWeight = prefs.getInt('cweight') ?? 0;
+    final gWeight = prefs.getInt('gweight') ?? 0;
+    final gender = prefs.getString('gender') ?? 'Male';
+    final activityLevel = prefs.getString('activity_level') ?? 'Sedentary';
+    final age = prefs.getInt('age') ?? 0;
+
+    return {
+      'height': height,
+      'cweight': cWeight,
+      'gweight': gWeight,
+      'gender': gender,
+      'activityLevel': activityLevel,
+      'age': age,
+    };
+  }
+
+  Future<Database> openDB() async {
+    Database _database = await DatabaseHandler().openDB();
+    return _database;
+  }
+
+  Future<int?> getHeightFromEmail(String email) async {
+    int? height;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['height'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        height = result[0]['height'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('height', height!);
+      }
+    }
+    return height;
+  }
+
+  Future<int?> getCWeightFromEmail(String email) async {
+    int? cweight;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['cweight'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        cweight = result[0]['cweight'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('cweight', cweight!);
+      }
+    }
+    return cweight;
+  }
+
+  Future<int?> getGWeightFromEmail(String email) async {
+    int? gweight;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['gweight'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        gweight = result[0]['gweight'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('gweight', gweight!);
+      }
+    }
+    return gweight;
+  }
+
+  Future<String?> getGenderFromEmail(String email) async {
+    String? gender;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['gender'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        gender = result[0]['gender'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('gender', gender!);
+      }
+    }
+    return gender;
+  }
+
+  Future<String?> getActivityLevelFromEmail(String email) async {
+    String? activityLevel;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['activity_level'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        activityLevel = result[0]['activity_level'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('activity_level', activityLevel!);
+      }
+    }
+    return activityLevel;
+  }
+
+  Future<int?> getAgeFromEmail(String email) async {
+    int? age;
+    if (_database != null) {
+      List<Map<String, dynamic>> result = await _database!.query(
+        'WEIGHTGAINUSER',
+        columns: ['age'],
+        where: 'email = ?',
+        whereArgs: [email],
+      );
+
+      if (result.isNotEmpty) {
+        age = result[0]['age'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('age', age!);
+      }
+    }
+    return age;
+  }
+
+  Future<int> daily_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_daily_cal = WeightGainCalculator();
+
+    return await wg_daily_cal.calculateDailyCaloriesNeededToGainWeight(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> total_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_total_cal = WeightGainCalculator();
+
+    return await wg_total_cal.calculateTotalCaloriesToGainWeight(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> b_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_b_cal = WeightGainCalculator();
+
+    return await wg_b_cal.calculateBreakfastCaloriesToGoal(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> l_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_l_cal = WeightGainCalculator();
+
+    return await wg_l_cal.calculatelunchfastCaloriesToGoal(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> s_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_s_cal = WeightGainCalculator();
+
+    return await wg_s_cal.calculatesnackfastCaloriesToGoal(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
+
+  Future<int> d_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+    Map<String, dynamic> userData = await loadUserData();
+
+    int cweight = userData['cweight'];
+    int gweight = userData['gweight'];
+    int height = userData['height'];
+    int age = userData['age'];
+    String gender = userData['gender'];
+    String activityLevel = userData['activityLevel'];
+    WeightGainCalculator wg_d_cal = WeightGainCalculator();
+
+    return await wg_d_cal.calculatedinnerfastCaloriesToGoal(
+        cweight, gweight, height, age, gender, activityLevel);
+  }
 
   @override
   Widget build(BuildContext context) {
-    _consumedCalories = _takenBreakfastCalories + _takenLunchCalories + _takenSnackCalories + _takenDinnerCalories;
+    final String email = ModalRoute.of(context)?.settings.arguments as String;
 
-    final String email= ModalRoute.of(context)?.settings.arguments as String;
-    Future<Database> openDB() async{
-      Database _database=await DatabaseHandler().openDB();
-      if(_database!=null)
-        return _database;
-      else{
-        print('null db');
-        return _database;
-      }
-      //print('open fun is called in mwg');
-    }
-    Future<int> getAgeFromEmail(String email) async {
-      Database _database=await openDB();
-      var age;
-      if( _database!=null){
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['age'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-        if (result.isNotEmpty) {
-          age = result[0]['age'];
-        }
-        await _database.close();
-
-      }
-      return age;
-
-    }// add ? with int
-    Future<int> getHeightFromEmail(String email) async {
-      Database _database=await openDB();
-      var height;
-      if (_database != null) {
-
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['height'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-
-        if (result.isNotEmpty) {
-          height = result[0]['height'];
-        }
-        await _database.close();
-      }
-      return height;
-    }
-    Future<int> get_cweight_FromEmail(String email) async {
-      Database _database=await openDB();
-      var cweight;
-      if (_database != null) {
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['cweight'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-        if (result.isNotEmpty) {
-          cweight = result[0]['cweight'];
-        }
-
-        await _database.close();
-
-      }
-      return cweight;
-    }
-    Future<int> get_gweight_FromEmail(String email) async {
-      Database _database=await openDB();
-      var gweight;
-      if (_database != null) {
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['gweight'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-        if (result.isNotEmpty) {
-          gweight = result[0]['gweight'];
-        }
-
-        await _database.close();
-      }
-      return gweight;
-    }
-    Future<String> getGenderFromEmail(String email) async {
-      Database _database=await openDB();
-      String gender='Male';
-      if (_database != null) {
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['gender'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-        if (result.isNotEmpty) {
-          gender = result[0]['gender'];
-        }
-
-        await _database.close();
-      }
-      return gender;
-    }
-    Future<String> getActivityLevelFromEmail(String email) async {
-      Database _database=await openDB();
-      String activity_level='Sedentary';
-      if (_database != null) {
-        List<Map<String, dynamic>> result = await _database.query(
-          'WEIGHTGAINUSER',
-          columns: ['activity_level'],
-          where: 'email = ?',
-          whereArgs: [email],
-        );
-
-        if (result.isNotEmpty) {
-          activity_level = result[0]['activity_level'];
-        }
-
-        await _database.close();
-      }
-      return activity_level;
-    }
-
-    Future<int> fage = getAgeFromEmail(email) ;
-    int age=30;
-    fage.then((value) {
-      if (value != null) {
-        age = value.toInt();
-        print(age);
-      }
-    });
-    Future<int> fheight = getHeightFromEmail(email) ;
-    int height=6;
-    fheight.then((value) {
-      if (value != null) {
-        height = value.toInt();
-        print(height);
-      }
-    });
-    Future<int> fcweight = get_cweight_FromEmail(email);
-    int cweight=50;
-    fcweight.then((value) {
-      if (value != null) {
-        cweight = value.toInt();
-        print(cweight);
-      }
-    });
-    Future<int> fgweight = get_gweight_FromEmail(email);
-    int gweight=60;
-    fgweight.then((value) {
-      if (value != null) {
-        gweight = value.toInt();
-        print(gweight);
-      }
-    });
-    Future<String> fgender= getGenderFromEmail(email);
-    String gender='Male';
-    fgender.then((value) {
-      if (value != null) {
-        gender = value.toString();
-        print(gender);
-      }
-    });
-    Future<String> factivity_level= getActivityLevelFromEmail(email);
-    String activity_level='Sedentary';
-    factivity_level.then((value) {
-      if (value != null) {
-        activity_level = value.toString();
-        print(activity_level);
-      }
-    });
-    Future<int> daily_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_daily_cal=new WeightGainCalculator();
-      int daily_calories = await wg_daily_cal.calculateDailyCaloriesNeededToGainWeight
-        (cweight, gweight , height ,age,gender,activity_level) ;
-      return daily_calories;
-    }
-    Future<int> total_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_total_cal=new WeightGainCalculator();
-      int total_calories = await wg_total_cal.calculateTotalCaloriesToGainWeight(cweight ,gweight,height ,age ,gender,activity_level);
-      return total_calories;
-    }
-    Future<int> b_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_b_cal=new WeightGainCalculator();
-      int b_calories = await wg_b_cal.calculateBreakfastCaloriesToGoal(cweight ,gweight,height ,age ,gender,activity_level);
-      return b_calories;
-    }
-    Future<int> l_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_l_cal=new WeightGainCalculator();
-      int l_calories = await wg_l_cal.calculatelunchfastCaloriesToGoal(cweight ,gweight,height ,age ,gender,activity_level);
-      return l_calories;
-    }
-    Future<int> s_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_s_cal=new WeightGainCalculator();
-      int s_calories = await wg_s_cal.calculatesnackfastCaloriesToGoal(cweight ,gweight,height ,age ,gender,activity_level);
-      return s_calories;
-    }
-    Future<int> d_cal() async{
-      int monthsToReach = 2;
-      WeightGainCalculator wg_d_cal=new WeightGainCalculator();
-      int d_calories = await wg_d_cal.calculatedinnerfastCaloriesToGoal(cweight ,gweight,height ,age ,gender,activity_level);
-      return d_calories;
-    }
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -383,42 +489,192 @@ class _MealState extends State<pmeal> {
           ),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.only(right: 20.0),
+      body: FutureBuilder(
+        future: _databaseFuture.then((_database) async {
+          this._database = _database;
+          var initialUserData = await loadUserData();
+
+          var age = await getAgeFromEmail(email) ?? initialUserData['age'];
+          print('Age: $age');
+
+          var height = await getHeightFromEmail(email) ?? initialUserData['height'];
+          print('Height: $height');
+
+          var cweight = await getCWeightFromEmail(email) ?? initialUserData['cweight'];
+          print('Current Weight: $cweight');
+
+          var gweight = await getGWeightFromEmail(email) ?? initialUserData['gweight'];
+          print('Goal Weight: $gweight');
+
+          var gender = await getGenderFromEmail(email) ?? initialUserData['gender'];
+          print('Gender: $gender');
+
+          var activityLevel = await getActivityLevelFromEmail(email) ?? initialUserData['activityLevel'];
+          print('Activity Level: $activityLevel');
+
+          return [age, height, cweight, gweight, gender, activityLevel];
+        }),
+
+        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data == null) {
+            return Center(child: Text('No data available'));
+          } else {
+            int age = snapshot.data![0] as int;
+            int height = snapshot.data![1] as int;
+            int cweight = snapshot.data![2] as int;
+            int gweight = snapshot.data![3] as int;
+            String gender = snapshot.data![4] as String;
+            String activityLevel = snapshot.data![5] as String;
+
+            return SingleChildScrollView(
+              child: Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 20.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          FutureBuilder<int>(
+                            future: total_cal(cweight, gweight, height, age, gender, activityLevel),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return Text("Error/: ${snapshot.error}");
+                              } else {
+                                int totalCalories = snapshot.data ?? 0;
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      'Total Calories: ',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$totalCalories',
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                            },
+                          ),
+                          SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Text(
+                                'Taken Calories: ',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              Text(
+                                '$_displayedConsumedCalories',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: FutureBuilder<int>(
+                        future: daily_cal(cweight, gweight, height, age, gender, activityLevel),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error.: ${snapshot.error}');
+                          } else {
+                            num dailyCalories = snapshot.data ?? 0.0;
+                            return CircularPercentIndicator(
+                              radius: 100,
+                              lineWidth: 10,
+                              circularStrokeCap: CircularStrokeCap.round,
+                              backgroundColor: Colors.transparent,
+                              progressColor: Colors.deepPurple,
+                              percent:  _consumedCalories/dailyCalories,
+                              startAngle: 218,
+                              center: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Today Calories',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    '$dailyCalories',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Consumed: $_consumedCalories',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                    SizedBox(height: 30),
                     FutureBuilder<int>(
-                      future: total_cal(),
+                      future: b_cal(cweight, gweight, height, age, gender, activityLevel),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
-                          return Text("Error: ${snapshot.error}");
+                          return Text('Error,: ${snapshot.error}');
                         } else {
-                          int totalCalories = snapshot.data ?? 0;
+                          _breakfastCalories = snapshot.data ?? 0;
                           return Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Total Calories: ',
+                                'Breakfast Calories: ',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                '$totalCalories',
+                                '$_breakfastCalories',
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
+                                  color: Colors.grey[500],
                                 ),
                               ),
                             ],
@@ -426,248 +682,135 @@ class _MealState extends State<pmeal> {
                         }
                       },
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 30),
+                    FutureBuilder<int>(
+                      future: l_cal(cweight, gweight, height, age, gender, activityLevel),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Errorm: ${snapshot.error}');
+                        } else {
+                          _lunchCalories = snapshot.data ?? 0;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Lunch Calories: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '$_lunchCalories',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: 30),
+                    FutureBuilder<int>(
+                      future: s_cal(cweight, gweight, height, age, gender, activityLevel),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Errorn: ${snapshot.error}');
+                        } else {
+                          _snackCalories = snapshot.data ?? 0;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Snack Time Calories: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '$_snackCalories',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: 30),
+                    FutureBuilder<int>(
+                      future: d_cal(cweight, gweight, height, age, gender, activityLevel),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text('Errorb: ${snapshot.error}');
+                        } else {
+                          _dinnerCalories = snapshot.data ?? 0;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Dinner Calories: ',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                '$_dinnerCalories',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    SizedBox(height: 30),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Text(
-                          'Taken Calories: ',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                        Text(
-                          '$_displayedConsumedCalories',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
-                        ),
+                        _buildSmallSquareBox(Icons.local_dining, 'Breakfast', _breakfastCalories, _takenBreakfastCalories, AppColors.breakfast),
+                        _buildSmallSquareBox(Icons.fastfood, 'Lunch', _lunchCalories, _takenLunchCalories, AppColors.lunch),
+                        _buildSmallSquareBox(Icons.local_cafe, 'Snack', _snackCalories, _takenSnackCalories, AppColors.snack),
+                        _buildSmallSquareBox(Icons.restaurant, 'Dinner', _dinnerCalories, _takenDinnerCalories, AppColors.dinner1),
+                      ],
+                    ),
+                    SizedBox(height: 70),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildMealType('Breakfast', context),
+                        _buildMealType('Lunch', context),
+                        _buildMealType('Snack', context),
+                        _buildMealType('Dinner', context),
                       ],
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 30),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: FutureBuilder<int>(
-                  future: daily_cal(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else {
-                      num dailyCalories = snapshot.data ?? 0.0;
-                      return CircularPercentIndicator(
-                        radius: 100,
-                        lineWidth: 10,
-                        circularStrokeCap: CircularStrokeCap.round,
-                        backgroundColor: Colors.transparent,
-                        progressColor: Colors.deepPurple,
-                        percent: 0.8,
-                        startAngle: 218,
-                        center: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Today Calories',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '$dailyCalories',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'Consumed: $_consumedCalories',
-                              style: TextStyle(
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }
-                  },
-                ),
-              ),
-              SizedBox(height: 30),
-              FutureBuilder<int>(
-                future: b_cal(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    _breakfastCalories = snapshot.data ?? 0;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Breakfast Calories: ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '$_breakfastCalories',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              SizedBox(height: 30),
-              FutureBuilder<int>(
-                future: l_cal(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    _lunchCalories = snapshot.data ?? 0;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Lunch Calories: ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '$_lunchCalories',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              SizedBox(height: 30),
-              FutureBuilder<int>(
-                future: s_cal(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    _snackCalories = snapshot.data ?? 0;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Snack Time Calories: ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '$_snackCalories',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              SizedBox(height: 30),
-              FutureBuilder<int>(
-                future: d_cal(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    _dinnerCalories = snapshot.data ?? 0;
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Dinner Calories: ',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '$_dinnerCalories',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepPurple,
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-              SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildSmallSquareBox(Icons.local_dining, 'Breakfast',
-                      _breakfastCalories, _takenBreakfastCalories,
-                      AppColors.breakfast),
-                  _buildSmallSquareBox(Icons.fastfood, 'Lunch', _lunchCalories,
-                      _takenLunchCalories, AppColors.lunch),
-                  _buildSmallSquareBox(
-                      Icons.local_cafe, 'Snack', _snackCalories,
-                      _takenSnackCalories, AppColors.snack),
-                  _buildSmallSquareBox(
-                      Icons.restaurant, 'Dinner', _dinnerCalories,
-                      _takenDinnerCalories, AppColors.dinner1),
-                ],
-              ),
-              SizedBox(height: 70),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMealType('Breakfast', context),
-                  _buildMealType('Lunch', context),
-                  _buildMealType('Snack', context),
-                  _buildMealType('Dinner', context),
-                ],
-              ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
-
   }
+
 
   Widget _buildSmallSquareBox(IconData iconData, String mealType, int calories,
       int takenCalories, Color color) {
@@ -683,7 +826,7 @@ class _MealState extends State<pmeal> {
           ),
           child: Icon(iconData),
         ),
-        SizedBox(height: 8),
+        SizedBox(height: 4),
         Text(
           mealType,
           style: TextStyle(
@@ -692,7 +835,7 @@ class _MealState extends State<pmeal> {
           ),
         ),
         Text(
-          'Calories: $calories',
+          'Kcal: $calories',
           style: TextStyle(
             fontSize: 14,
           ),
@@ -809,6 +952,11 @@ class _MealState extends State<pmeal> {
                   return Colors.purple; // Background color for enabled state
                 },
               ),
+              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0), // Square-rounded corners
+                ),
+              ),
             ),
             child: Text(
               'Add',
@@ -863,36 +1011,213 @@ class _AddMealDialogState extends State<AddMealDialog> {
 
   Future<List<Map<String, dynamic>>> _getPredefinedMeals(int calorieRange) async {
     Map<String, List<String>> mealMap = {
-      'Breakfast': ["egg - 100 kcal", "cupcake - 200 kcal", "boiled egg - 50 kcal", "oatmeal - 150 kcal", "toast with peanut butter - 250 kcal"],
-      'Lunch': ["salad - 300 kcal", "burger - 500 kcal", "soup - 200 kcal"],
-      'Snack': ["apple - 80 kcal", "chips - 150 kcal", "cookie - 100 kcal"],
-      'Dinner': ["chicken - 300 kcal", "pizza - 400 kcal", "rice - 250 kcal"]
+      'Breakfast': [
+        "1 egg - 100 kcal",
+        "1 cupcake - 200 kcal",
+        "1 boiled egg - 50 kcal",
+        "1 serving oatmeal - 150 kcal",
+        "1 toast with peanut butter - 250 kcal",
+        "1 bowl congee - 120 kcal",
+        "3 pieces dim sum - 180 kcal",
+        "1 bowl miso soup - 50 kcal",
+        "1 cup yogurt with berries - 200 kcal",
+        "1 smoothie - 150 kcal",
+        "1 aloo paratha - 300 kcal",
+        "1 omelette - 150 kcal",
+        "1 cheese omelette - 200 kcal",
+        "1 bowl cereal - 180 kcal",
+        "2 pancakes - 220 kcal",
+        "1 croissant - 230 kcal",
+        "1 cup latte - 150 kcal",
+        "1 cup black coffee - 5 kcal",
+        "1 cup cappuccino - 120 kcal",
+        "1 serving kulcha and chola - 350 kcal",
+        "1 green smoothie - 100 kcal",
+        "1 serving yogurt porridge - 180 kcal",
+            "1 serving roti - 72kcal",
+            "1 Whitebread_slice - 70 kcal",
+        "1 brwonbread_slice - 73",
+
+      ],
+      'Lunch': [
+        "1 serving salad - 300 kcal",
+        "1 burger - 500 kcal",
+        "1 bowl soup - 200 kcal",
+        "1 serving sushi - 350 kcal",
+        "1 serving stir-fried noodles - 400 kcal",
+        "1 bowl pho - 350 kcal",
+        "1 bento box - 450 kcal",
+        "1 serving caesar salad - 350 kcal",
+        "1 serving greek salad - 250 kcal",
+        "1 serving cobb salad - 400 kcal",
+        "1 serving quinoa salad - 300 kcal",
+        "1 serving chickpea salad - 350 kcal",
+        "1 serving caprese salad - 250 kcal",
+        "1 serving tabbouleh - 200 kcal",
+        "1 serving pasta salad - 400 kcal",
+        "1 serving potato salad - 350 kcal",
+        "1 serving pulao - 350 kcal",
+        "1 serving biryani - 450 kcal",
+        "1 roti - 100 kcal",
+        "1 bowl boiled rice - 200 kcal",
+        "1 bowl fried rice - 400 kcal",
+        "1 serving dal (lentils) - 150 kcal",
+        "1 serving chana masala - 250 kcal",
+        "1 serving rajma (kidney beans) - 250 kcal",
+        "1 serving aloo gobi (potato and cauliflower) - 200 kcal",
+        "1 serving palak paneer (spinach and paneer) - 300 kcal",
+        "1 serving baingan bharta (eggplant) - 150 kcal",
+        "1 serving bhindi masala (okra) - 180 kcal"
+      ],
+      'Snack': [
+        "1 apple - 80 kcal",
+        "1 serving chips - 150 kcal",
+        "1 cookie - 100 kcal",
+        "1 orange - 60 kcal",
+        "1 banana - 90 kcal",
+        "1 pear - 100 kcal",
+        "1 bowl grapes - 70 kcal",
+        "1 bowl strawberries - 50 kcal",
+        "1 bowl mixed fruit salad - 150 kcal",
+        "1 bowl tomato soup - 100 kcal",
+        "1 bowl chicken soup - 150 kcal",
+        "1 bowl vegetable soup - 80 kcal",
+        "1 bowl lentil soup - 120 kcal",
+        "1 strawberry smoothie - 150 kcal",
+        "1 banana smoothie - 180 kcal",
+        "1 mango smoothie - 160 kcal",
+        "1 chocolate shake - 200 kcal",
+        "1 vanilla shake - 180 kcal",
+        "1 strawberry shake - 160 kcal",
+        "1 chocolate cupcake - 200 kcal",
+        "1 vanilla cupcake - 180 kcal",
+        "1 serving chocolate cake - 250 kcal",
+        "1 serving vanilla cake - 220 kcal",
+        "1 serving gulab jamun - 150 kcal",
+        "1 serving jalebi - 200 kcal",
+        "1 serving rasgulla - 180 kcal",
+        "1 serving kheer - 250 kcal",
+        "1 serving khajr kheer - 250 kcal",
+        "1 serving soji halwa - 300 kcal",
+        "1 serving khus khus halwa - 250 kcal",
+        "1 serving atta halwa - 300 kcal",
+        "1 serving gajar halwa - 250 kcal",
+        "1 serving chana dal halwa - 250 kcal",
+        "1 serving walnut halwa - 300 kcal",
+        "1 serving dates halwa - 250 kcal",
+        "1 serving badam halwa - 300 kcal",
+        "1 serving laddu - 180 kcal",
+        "1 serving barfi - 200 kcal",
+        "1 serving mixed trail snack - 150 kcal",
+        "1 serving chikki - 200 kcal",
+        "1 serving dried fruit and nut mix - 180 kcal"
+      ],
+      'Dinner': [
+        "1 serving chicken - 300 kcal",
+        "2 slices pizza - 400 kcal",
+        "1 bowl rice - 250 kcal",
+        "1 serving kung pao chicken - 350 kcal",
+        "1 serving pad thai - 450 kcal",
+        "1 bowl fried rice - 400 kcal",
+        "1 serving beef and broccoli - 300 kcal",
+        "1 serving grilled salmon - 350 kcal",
+        "1 serving veggie stir-fry - 250 kcal",
+        "1 serving vegetable biryani - 400 kcal",
+        "1 serving mutton biryani - 500 kcal",
+        "1 serving chicken biryani - 450 kcal",
+        "1 serving pulao - 350 kcal",
+        "1 serving boiled rice - 200 kcal",
+        "1 serving beef steak - 400 kcal",
+        "1 serving mutton curry - 500 kcal",
+        "1 serving salad - 300 kcal",
+        "1 serving lentil soup - 200 kcal",
+        "1 serving chana dal - 250 kcal",
+        "1 serving rajma (kidney beans) - 250 kcal",
+        "1 serving aloo gobi (potato and cauliflower) - 200 kcal",
+        "1 serving palak paneer (spinach and paneer) - 300 kcal",
+        "1 serving baingan bharta (eggplant) - 150 kcal",
+        "1 serving bhindi masala (okra) - 180 kcal",
+        "1 serving sushi - 350 kcal"
+      ]
     };
 
     // Example disease impact on meals
     Map<String, List<String>> diseaseImpact = {
       'Diabetes': [
-        'cupcake - 200 kcal',
-        'burger - 500 kcal',
-        'cookie - 100 kcal',
-        'pizza - 400 kcal'
+        '1 cupcake - 200 kcal',
+        '1 burger - 500 kcal',
+        '1 cookie - 100 kcal',
+        '2 slices pizza - 400 kcal',
+        '3 pieces dim sum - 180 kcal',
+        '1 serving sushi - 350 kcal',
+        '2 spring rolls - 120 kcal',
+        '1 serving kung pao chicken - 350 kcal',
+        '1 serving pad thai - 450 kcal',
+        '1 croissant - 230 kcal',
+        '1 cup latte - 150 kcal',
+        '1 cup cappuccino - 120 kcal',
+        '2 pancakes - 220 kcal',
+        '1 cheese omelette - 200 kcal',
+        '1 serving kulcha and chola - 350 kcal',
+        '1 cup yogurt with berries - 200 kcal',
+        '1 serving biryani - 450 kcal',
+        '1 serving fried rice - 400 kcal',
+        '1 roti - 100 kcal',
+        '1 serving potato salad - 350 kcal',
+        '1 serving pasta salad - 400 kcal'
       ],
-      'Hypertension': ['burger - 500 kcal', 'chips - 150 kcal'],
-      'Heart Disease': ['burger - 500 kcal', 'pizza - 400 kcal']
+      'Hypertension': [
+        '1 burger - 500 kcal',
+        '1 serving chips - 150 kcal',
+        '3 pieces dim sum - 180 kcal',
+        '1 bowl miso soup - 50 kcal',
+        '1 serving sushi - 350 kcal',
+        '2 spring rolls - 120 kcal',
+        '1 serving kung pao chicken - 350 kcal',
+        '1 bowl fried rice - 400 kcal',
+        '1 aloo paratha - 300 kcal',
+        '1 cheese omelette - 200 kcal',
+        '1 cup latte - 150 kcal',
+        '1 cup cappuccino - 120 kcal',
+        '1 serving kulcha and chola - 350 kcal',
+        '2 pancakes - 220 kcal',
+        '1 serving pulao - 350 kcal',
+        '1 serving biryani - 450 kcal',
+        '1 roti - 100 kcal',
+        '1 serving potato salad - 350 kcal',
+        '1 serving pasta salad - 400 kcal'
+      ],
+      'Heart Disease': [
+        '1 burger - 500 kcal',
+        '2 slices pizza - 400 kcal',
+        '3 pieces dim sum - 180 kcal',
+        '1 serving stir-fried noodles - 400 kcal',
+        '1 serving sushi - 350 kcal',
+        '1 serving pad thai - 450 kcal',
+        '1 bowl fried rice - 400 kcal',
+        '1 serving beef and broccoli - 300 kcal',
+        '1 croissant - 230 kcal',
+        '2 pancakes - 220 kcal',
+        '1 cheese omelette - 200 kcal',
+        '1 serving kulcha and chola - 350 kcal',
+        '1 cup yogurt with berries - 200 kcal',
+        '1 serving biryani - 450 kcal',
+        '1 serving fried rice - 400 kcal',
+        '1 serving potato salad - 350 kcal',
+        '1 serving pasta salad - 400 kcal'
+      ]
     };
-
     // Determine the current meal type based on the current hour
     DateTime now = DateTime.now();
-    int hour = now.hour;
-
     String currentMealType = '';
-    if (hour >= 4 && hour < 9) {
+
+    if (now.hour >= 4 && now.hour < 12) {
       currentMealType = 'Breakfast';
-    } else if (hour >= 12 && hour < 15) {
+    } else if (now.hour >= 12 && now.hour < 15) {
       currentMealType = 'Lunch';
-    } else if (hour >= 15 && hour < 18) {
+    } else if (now.hour >= 15 && now.hour < 18) {
       currentMealType = 'Snack';
-    } else if (hour >= 18 && hour < 21) {
+    } else if (now.hour >= 18 || now.hour < 4) {
       currentMealType = 'Dinner';
     }
 
@@ -940,6 +1265,18 @@ class _AddMealDialogState extends State<AddMealDialog> {
       return []; // Return an empty list in case of an error
     }
   }
+
+// Function to calculate impact based on user diseases
+  int calculateImpact(String meal, List<String> userDiseases, Map<String, List<String>> diseaseImpact) {
+    int impact = 0;
+    userDiseases.forEach((disease) {
+      if (diseaseImpact[disease]?.contains(meal) == true) {
+        impact++;
+      }
+    });
+    return impact;
+  }
+
 
 
   void _incrementQuantity(int index) {
@@ -1000,7 +1337,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
-                        title: Text(result),
+                        title: Text(result, style: TextStyle(fontSize: 9),),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

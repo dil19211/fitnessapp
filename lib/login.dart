@@ -9,6 +9,7 @@ import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
 import 'adminpanel.dart';
 import 'const.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -101,7 +102,6 @@ class _LoginPageState extends State<LoginPage> {
                 key: _formKey,
                 child: Column(
                   children: [
-
                     SizedBox(height: 25),
                     Image.asset(image1),
                     Text(
@@ -214,10 +214,14 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () async {
                         sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
 
-
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => admin(),
-                        ));
+                        SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                        await prefs.setString('selectedPage', 'login');
+                        Navigator.of(context).pushReplacement(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => admin(),
+                          ),
+                        );
 
                         // Validate fields
                         _validateFieldsAndSubmit();

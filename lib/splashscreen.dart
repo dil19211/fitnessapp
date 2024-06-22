@@ -1,14 +1,12 @@
 import 'dart:async';
-
 import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/weightgaindashboard.dart';
 import 'package:flutter/material.dart';
-
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'adminpanel.dart';
 import 'getstarted page.dart';
-import 'main.dart';
+import 'login.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -38,10 +36,13 @@ class _SplashScreenState extends State<SplashScreen> {
       // If a selection is made, navigate to the respective dashboard
       switch (selectedPage) {
         case 'weightgain':
-          dashboard =MyHomepage();
+          dashboard = dashboaard();
           break;
         case 'weightloss':
           dashboard = step();
+          break;
+        case 'login':
+          dashboard = admin();
           break;
         default:
         // Handle any other cases here

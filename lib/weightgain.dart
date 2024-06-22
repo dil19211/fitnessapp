@@ -1,4 +1,5 @@
 
+import 'package:fitnessapp/gainPremiumDashboardPage.dart';
 import 'package:fitnessapp/user_model.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:fitnessapp/weightgaindashboard.dart';
@@ -226,7 +227,7 @@ class _WeightGainState extends State<WeightGain> {
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                        builder: (BuildContext context) => MyHomepage(),
+                        builder: (BuildContext context) => dashboaard(),
                         settings: RouteSettings(arguments: nameUser)
                     ),
                   );
@@ -823,7 +824,7 @@ class _WeightGainState extends State<WeightGain> {
   Future<void> insertDB()async {
     _database = await openDB();
     UserRepo userRepo = new UserRepo();
-    userRepo.createTable(_database);
+    userRepo.createTable(_database!);
 
     UserModel userModel = new UserModel(nameController.text.toString(),
         emailController.text.toString(),
@@ -845,14 +846,14 @@ class _WeightGainState extends State<WeightGain> {
 
       print('email doesnot exists ...this is new user');
     }
-    await _database?.close();
+   // await _database?.close();
   }
   Future<void> getFromweightgainusers()async{
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    await userRepo.getweightgainusers(_database);
+    await userRepo.getweightgainusers(_database!);
 
-    await _database?.close();
+ //   await _database?.close();
   }
   Future<String?> getNameFromEmail(String email) async {
     _database=await openDB();
@@ -872,7 +873,7 @@ class _WeightGainState extends State<WeightGain> {
   Future<bool> EmailExists(String email) async {
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    if(await userRepo.isEmailExists(_database,email)) {
+    if(await userRepo.isEmailExists(_database!,email)) {
       return true;
     }
     else{
