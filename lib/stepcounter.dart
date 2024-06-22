@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:pedometer/pedometer.dart';
+import "package:pedometer/pedometer.dart";
 import 'package:lottie/lottie.dart';
 import 'package:sqflite/sqflite.dart';
-
 import 'database_handler.dart';
 import 'gainmealcaculation.dart';
 
@@ -16,7 +15,7 @@ class step extends StatefulWidget {
 }
 class _StepCounterState extends State<step> {
   late StreamSubscription<StepCount> _stepCountStreamSubscription;
-  int _dailyexpectedsteps = 500;
+  int _dailyexpectedsteps = 0;
   int _stepCount = 0;
   int _dailySteps = 0;
   int _todaysSteps = 0; // New variable to store steps without resetting
@@ -50,17 +49,7 @@ class _StepCounterState extends State<step> {
     _database = await openDB();
     await fetchStepData();
   }
-  void checkPermissions() async {
-    PermissionStatus status = await Permission.activityRecognition.request();
-    print("checkPermissions: status=$status");
-    if (status.isGranted) {
-      initializePedometer();
-    } else if (status.isDenied) {
-      showPermissionDialog();
-    } else {
-      // Handle if permission is denied
-    }
-  }
+
   Future<Database> openDB() async {
     Database _database = await DatabaseHandler().openDB();
     return _database;
@@ -74,7 +63,7 @@ class _StepCounterState extends State<step> {
     String gender = await getGenderFromEmail(email);
     String activityLevel = await getActivityLevelFromEmail(email);
 
-    _dailySteps = await dailystep(cweight, gweight, height, age, gender, activityLevel);
+    _dailyexpectedsteps = await dailystep(cweight, gweight, height, age, gender, activityLevel);
     _goalSteps = await totalstep(cweight, gweight, height, age, gender, activityLevel);
 
     setState(() {
@@ -231,7 +220,17 @@ class _StepCounterState extends State<step> {
     );
   }
 
-
+  void checkPermissions() async {
+    PermissionStatus status = await Permission.activityRecognition.request();
+    print("checkPermissions: status=$status");
+    if (status.isGranted) {
+      initializePedometer();
+    } else if (status.isDenied) {
+      showPermissionDialog();
+    } else {
+      // Handle if permission is denied
+    }
+  }
 
   void initializePedometer() {
     _loadStats();
