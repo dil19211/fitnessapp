@@ -26,13 +26,14 @@ class preminum extends StatefulWidget {
 
 class _MyHomePageState extends State<preminum> {
   TextEditingController emailController = TextEditingController();
-
   Database? _database;
+  String username = '';
 
 
   @override
   void initState() {
     super.initState();
+    loadUsername();
     SharedPreferences.getInstance().then((prefs) {
       bool hasShownDialog = prefs.getBool('showUserForminfo') ?? false;
       print("not shown before");
@@ -45,7 +46,20 @@ class _MyHomePageState extends State<preminum> {
 
       }
     });
+  }
+  Future<void> loadUsername() async {
+    final prefs = await SharedPreferences.getInstance();
+    print("called loadmethod");
+    setState(() {
+      username = prefs.getString('username') ?? '';
+    });
+    print("$username  in load method");
+  }
 
+  Future<void> storeUsername(String username) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', username);
+    print("$username instoringfunction");
   }
   Future<void>  _showEmailPopup(BuildContext context) async {
 
@@ -77,6 +91,11 @@ class _MyHomePageState extends State<preminum> {
                         String? name = await getNameFromEmail(email);
                         if (name != null) {
                           Navigator.of(context).pop();
+                          setState(() {
+                            username = name; // Update username in the state
+                          });
+                          print("$username in dailogue");
+                          await storeUsername(name);
                         } else {
                           showDialog(
                             context: context,
@@ -234,6 +253,9 @@ class _MyHomePageState extends State<preminum> {
   @override
   Widget build(BuildContext context) {
     String? usern=ModalRoute.of(context)?.settings.arguments as String?;
+    String displayUsername = usern ?? username; // Use route argument or stored username
+    print("$username useranme variable");
+    print("$displayUsername  display variable");
     // Retrieve email from the controller
     String email = emailController.text.toString();
     Future<String?> getName() async {
@@ -358,7 +380,7 @@ class _MyHomePageState extends State<preminum> {
                               contentPadding: const EdgeInsets.symmetric(horizontal: 20),
                               title: Text(
                                 //  name!=null? 'Hello': 'hello $name',
-                                'Hello $usern',
+                                'Hello $displayUsername',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 23,

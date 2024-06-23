@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:fitnessapp/lossdashboard.dart';
 import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/weightgaindashboard.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen> {
           dashboard = dashboaard();
           break;
         case 'weightloss':
-          dashboard = step();
+          dashboard = lossdashboaard();
           break;
         case 'login':
           dashboard = admin();

@@ -18,7 +18,6 @@ class UserRepo{
   void createpayTable(Database? db){
     db?.execute('CREATE TABLE IF NOT EXISTS PAIDUSER(id INTEGER PRIMARY KEY, name TEXT,email TEXT,phn INTEGER)');
   }
-
   Future<List<Map<String,dynamic>>> getpayusers(Database? db)async {
     final List<Map<String, dynamic>> maps = await db!.query('PAIDUSER');
     if (maps.isNotEmpty) {
@@ -83,10 +82,40 @@ class UserRepo{
       throw Exception("weight gain items NOT FOUND");
     }
   }
+  void createlTable(Database db){
+    db?.execute('CREATE TABLE IF NOT EXISTS WEIGHTLOSSUSER(id INTEGER PRIMARY KEY, name TEXT,email TEXT,age INTEGER,height INTEGER,gender TEXT,activity_level TEXT,cweight INTEGER,gweight INTEGER)');
+  }
+  Future<List<Map<String,dynamic>>> getweightlossusers(Database db)async{
+    final List<Map<String,dynamic>> maps= await db!.query('WEIGHTLOSSUSER');
+    if(maps.isNotEmpty) {
+      print(maps);
+      return maps;
 
+    }
+    else{
+      throw Exception("USERss NOT FOUND");
+    }
+  }
+  Future<bool> EmailExists(Database db,String email) async {
 
-
-
-
+    var result = await db!.rawQuery("SELECT * FROM WEIGHTLOSSUSER WHERE email = ?", [email]);
+    if(result.isNotEmpty) {
+      print(result);
+      return true;
+    }
+    else{
+      return false;
+      throw Exception("many USERs FOUND");
+    }
+  }
+  Future<List<Map<String,dynamic>>> getcurrentweightlossuser(Database db,String email)async{
+    final List<Map<String,dynamic>> map= await db!.query('WEIGHTLOSSUSER',where: 'email="$email"');
+    if(map.isNotEmpty) {
+      print(map);
+      return map; }
+    else{
+      throw Exception("USERcurr NOT FOUND");
+    }
+  }
 
 }

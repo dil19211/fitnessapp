@@ -1,57 +1,67 @@
-import 'dart:async';
-import 'dart:math';
-import 'package:async/async.dart';
-import 'package:fitnessapp/stepcounter.dart';
+
+
+import 'package:fitnessapp/user_model.dart';
+import 'package:fitnessapp/user_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sqflite/sqflite.dart';
+import 'dart:async';
 
-class weightloss extends StatefulWidget {
+import 'database_handler.dart';
+import 'lossdashboard.dart';
+
+
+class Weightloss extends StatefulWidget {
   @override
-  _weightlossState createState() => _weightlossState();
+  _WeightGainState createState() => _WeightGainState();
 }
 
-class _weightlossState extends State<weightloss> {
-
+class _WeightGainState extends State<Weightloss> {
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController ageController = TextEditingController();
   TextEditingController heightFeetController = TextEditingController();
-  TextEditingController heightInchesController = TextEditingController();
   TextEditingController currentWeightController = TextEditingController();
   TextEditingController goalWeightController = TextEditingController();
+  TextEditingController genderController = TextEditingController();
+  TextEditingController activityLevelController = TextEditingController();
 
   String nameError = '';
   String emailError = '';
   String ageError = '';
   String heightFeetError = '';
-  String heightInchesError = '';
   String currentWeightError = '';
   String goalWeightError = '';
-  String suitabilityRecommendation = '';
-
   bool hasError = false;
   Timer? _debounce;
+  Database? _database;
+  String genderError = '';
+  String? selectedActivityLevel;
+  String activityLevelError = '';
+  String? selectedGender;
+
   @override
   void dispose() {
     heightFeetController.dispose();
-    heightInchesController.dispose();
     ageController.dispose();
     currentWeightController.dispose();
     goalWeightController.dispose();
     _debounce?.cancel(); // Cancel the timer when disposing the widget
     super.dispose();
+    genderController.dispose();
+    activityLevelController.dispose();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('My FitnessPlanner'),
-        centerTitle: true,
+        title: Text('GritFit' ,style: TextStyle(
+          color: Colors.white,fontWeight: FontWeight.w900,
+          fontSize: 24,
+        ), ),
+        centerTitle: false,
         backgroundColor: Colors.purple,
       ),
       body: SingleChildScrollView(
@@ -90,62 +100,69 @@ class _weightlossState extends State<weightloss> {
               },
             ),
             SizedBox(height: 25),
-            buildTextField(
-              'Enter Age',
-              ageController,
-              ageError,
+            buildAgeField(),
+            SizedBox(height: 25),
+            buildTextFieldWithValidation(
+              'Enter Height (Feet)',
+              heightFeetController,
+              heightFeetError,
                   (value) {
                 setState(() {
-                  ageError = _validateAge(value);
+                  heightFeetError = _validateHeightFeet(value);
                   checkErrors();
                 });
               },
-              TextInputType.number,
+                  (value) {
+                if (value.isEmpty) {
+                  return 'Height is required.';
+                }
+                return null;
+              },
+            ),SizedBox(height: 25),
+            Text(
+              'Select Gender',
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w300),
             ),
-            SizedBox(height: 25),
+            SizedBox(height: 8),
             Row(
               children: [
-                Expanded(
-                  child: buildTextFieldWithValidation(
-                    'Enter Height (Feet)',
-                    heightFeetController,
-                    heightFeetError,
-                        (value) {
-                      setState(() {
-                        heightFeetError = _validateHeightFeet(value);
-                        checkErrors();
-                      });
-                    },
-                        (value) {
-                      if (value.isEmpty) {
-                        return 'Height is required.';
-                      }
-                      return null;
-                    },
-                  ),
+                Radio<String>(
+                  value: 'Male',
+                  groupValue: selectedGender,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedGender = value;
+                      genderController.text = value ?? '';
+                      // print(genderController.text.toString());
+                      genderError = ''; // Clear gender error when selected
+                      checkErrors(); // Check for other errors
+                    });
+                  },
                 ),
-                SizedBox(width: 25),
-                Expanded(
-                  child: buildTextFieldWithValidation(
-                    'Enter Height (Inches)',
-                    heightInchesController,
-                    heightInchesError,
-                        (value) {
-                      setState(() {
-                        heightInchesError = _validateHeightInches(value);
-                        checkErrors();
-                      });
-                    },
-                        (value) {
-                      if (value.isEmpty) {
-                        return 'Height is required.';
-                      }
-                      return null;
-                    },
-                  ),
+                Text('Male'),
+                Radio<String>(
+                  value: 'Female',
+                  groupValue: selectedGender,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedGender = value;
+                      genderController.text = value ?? '';
+                      genderError = ''; // Clear gender error when selected
+                      checkErrors(); // Check for other errors
+                    });
+                  },
                 ),
+                Text('Female'),
               ],
             ),
+            if (genderError.isNotEmpty) ...[
+              SizedBox(height: 4),
+              Text(
+                genderError,
+                style: TextStyle(color: Colors.red),
+              ),
+            ],
+            buildActivityLevelField(),
             SizedBox(height: 25),
             buildTextFieldWithValidation(
               'Enter Current Weight (Kgs)',
@@ -185,7 +202,7 @@ class _weightlossState extends State<weightloss> {
               },
                   (value) {
                 if (value.isNotEmpty &&
-                    !RegExp(r'^\d*$').hasMatch(value)) {
+                    !RegExp(r'^\d*\.?\d*$').hasMatch(value)) {
                   return 'Please enter a valid weight in kgs.';
                 } else if (value.isNotEmpty &&
                     double.parse(value) >
@@ -200,15 +217,23 @@ class _weightlossState extends State<weightloss> {
               onPressed: hasError
                   ? null
                   : () async {
+                insertDB();
+                getFromweightlossusers();
+                String? nameUser=await getNameFromEmail(emailController.text.toString());
+
                 if (_validateFields()) {
                   SharedPreferences prefs =
                   await SharedPreferences.getInstance();
                   await prefs.setString('selectedPage', 'weightloss');
+
+
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (BuildContext context) => step(),
+                        builder: (BuildContext context) => lossdashboaard(),
+                        settings: RouteSettings(arguments: nameUser)
                     ),
                   );
+
                 }
               },
               child: Text('Submit'),
@@ -217,22 +242,157 @@ class _weightlossState extends State<weightloss> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                backgroundColor: Colors.purple, // Use backgroundColor instead of primary
-                textStyle:
-                TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                foregroundColor: Colors.white,              ),
+                backgroundColor: Colors.purple,
+                textStyle: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ), foregroundColor: Colors.white,
+              ),
             ),
           ],
         ),
       ),
     );
   }
+  Widget buildActivityLevelField() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DropdownButtonFormField<String>(
+            decoration: InputDecoration(
+              labelText: 'Select Activity Level', // Set the labelText here
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.purple),
+              ),
+            ),
+            value: selectedActivityLevel,
+            onChanged: (value) {
+              setState(() {
+                selectedActivityLevel = value;
+                activityLevelController.text = value ?? '';
+                // print(activityLevelController.text.toString());
+                activityLevelError = ''; // Clear activity level error when selected
+                checkErrors(); // Check for other errors
+              });
+            },
+            items: [
+              DropdownMenuItem(
+                value: 'Sedentary',
+                child: Text('Sedentary'),
+              ),
+              DropdownMenuItem(
+                value: 'Lightly active',
+                child: Text('Lightly active'),
+              ),
+              DropdownMenuItem(
+                value: 'Moderately active',
+                child: Text('Moderately active'),
+              ),
+              DropdownMenuItem(
+                value: 'Very active',
+                child: Text('Very active'),
+              ),
+              DropdownMenuItem(
+                value: 'Extra active',
+                child: Text('Extra active'),
+              ),
+            ],
+          ),
+          if (activityLevelError.isNotEmpty) ...[
+            SizedBox(height: 4),
+            Text(
+              activityLevelError,
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget buildAgeField() {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: ageController,
+            readOnly: true,
+            onTap: () {
+              _selectDate(context);
+            },
+            decoration: InputDecoration(
+              labelText: 'Enter Age',
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.purple),
+              ),
+              contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+            ),
+          ),
+          if (ageError.isNotEmpty) ...[
+            SizedBox(height: 4),
+            Text(
+              ageError,
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(DateTime.now().year - 100),
+      lastDate: DateTime.now(),
+      // Customizing calendar appearance
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Colors.purple, // Upper part color
+              onPrimary: Colors.white, // Upper part text color
+            ),
+            dialogBackgroundColor: Colors.white, // Lower part color
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      int age = calculateAge(picked);
+      setState(() {
+        ageController.text = age.toString();
+        ageError = _validateAge(age.toString()); // Clear any previous error related to age
+        checkErrors(); // Check for new errors
+      });
+    }
+  }
+  int calculateAge(DateTime birthDate) {
+    final now = DateTime.now();
+    int age = now.year - birthDate.year;
+    if (now.month < birthDate.month ||
+        (now.month == birthDate.month && now.day < birthDate.day)) {
+      age--;
+    }
+    return age;
+  }
   void _checkGoalWeightSuitability() {
     // Cancel the previous Timer if it's active
     if (_debounce?.isActive ?? false) _debounce!.cancel();
 
-    // Set a new Timer to call _checkWeightSuitability after 500 milliseconds (adjust as needed)
-    _debounce = Timer(Duration(milliseconds: 600), () {
+    // Set a new Timer to call _checkWeightSuitability after 800 milliseconds (adjust as needed)
+    _debounce = Timer(Duration(milliseconds: 800), () {
       // Call _checkWeightSuitability after the debounce period
       _checkWeightSuitability();
     });
@@ -247,8 +407,7 @@ class _weightlossState extends State<weightloss> {
     // Get weight and height in appropriate units
     double weight = double.parse(currentWeightController.text);
     double heightFeet = double.parse(heightFeetController.text);
-    double heightInches = double.parse(heightInchesController.text);
-    double heightInMeters = ((heightFeet * 12) + heightInches) * 0.0254;
+    double heightInMeters = heightFeet * 0.3048; // Convert feet to meters
 
     // Validate height
     if (heightInMeters <= 0) {
@@ -258,84 +417,50 @@ class _weightlossState extends State<weightloss> {
 
     // Calculate BMI using the standard formula
     double bmi = calculateBMI(weight, heightInMeters);
-    bool underweightSuggestionShown = false;
 
-// Interpret BMI based on standard categories
+    // Interpret BMI based on standard categories
     String bmiInterpretation;
     if (bmi < 18.5) {
       bmiInterpretation = "Underweight";
-      if (!underweightSuggestionShown) {
-        double idealWeightMin = 18.5 * heightInMeters * heightInMeters;
-        double weightDifference = idealWeightMin - weight;
-        if (weight < idealWeightMin) {
-          _showBMIResultDialog(
-              "Your BMI is $bmi ($bmiInterpretation). You are considered underweight. We recommend gaining ${weightDifference
-                  .toStringAsFixed(1)} kgs.");
-          underweightSuggestionShown =true;
-          // Set the flag to true after showing the suggestion
-        }
-      }
-    }
-    else if (bmi < 25) {
-
-      bmiInterpretation = "Normal weight";
-      // Check if the current weight is within the ideal range
       double idealWeightMin = 18.5 * heightInMeters * heightInMeters;
       double idealWeightMax = 24.9 * heightInMeters * heightInMeters;
-      if (weight >= idealWeightMin && weight <= idealWeightMax) {
-        // Current weight is within the ideal range, suggest maintaining it
-        _showBMIResultDialog("Your BMI is $bmi ($bmiInterpretation). You are within the normal weight range. We recommend maintaining your weight.");
-        return; // No need to proceed further
-      }
-      // Check if the goal weight is within the ideal range
-      double goalWeight = double.parse(goalWeightController.text);
-      if (goalWeight < idealWeightMin || goalWeight > idealWeightMax) {
-        // Goal weight is not within the ideal range, suggest aiming for the calculated ideal weight range
+      _showBMIResultDialog(
+          "Your BMI is $bmi ($bmiInterpretation). You are considered underweight. We recommend gaining between ${idealWeightMin.toStringAsFixed(1)} and ${idealWeightMax.toStringAsFixed(1)} kgs.");
+    } else if (bmi < 25) {
+      bmiInterpretation = "Normal weight";
+      double idealWeightMin = 18.5 * heightInMeters * heightInMeters;
+      double idealWeightMax = 24.9 * heightInMeters * heightInMeters;
+      if (weight < idealWeightMin || weight > idealWeightMax) {
         double suggestedWeight = (idealWeightMin + idealWeightMax) / 2;
-        String suggestion = 'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs for healthy weight gain.';
+        String suggestion =
+            'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs.';
         _showSuggestionDialog(suggestion);
       } else {
-        // Goal weight is within the ideal range
-        _showBMIResultDialog("Your BMI is $bmi ($bmiInterpretation). We recommend consulting a healthcare professional for guidance on healthy weight loss.");
+        _showBMIResultDialog("Your BMI is $bmi ($bmiInterpretation). Maintain your current weight as it is already within the normal range.");
       }
     } else if (bmi < 30) {
       bmiInterpretation = "Overweight";
-      // Check if the current weight is within the ideal range
       double idealWeightMin = 18.5 * heightInMeters * heightInMeters;
       double idealWeightMax = 24.9 * heightInMeters * heightInMeters;
-      if (weight >= idealWeightMin && weight <= idealWeightMax) {
-        // Current weight is within the ideal range, suggest maintaining it
-        _showBMIResultDialog("Your BMI is $bmi ($bmiInterpretation). You are overweight but your current weight is within the ideal range. We recommend maintaining your weight.");
-        return; // No need to proceed further
-      }
-      // Check if the goal weight is within the ideal range
-      double goalWeight = double.parse(goalWeightController.text);
-      if (goalWeight < idealWeightMin || goalWeight > idealWeightMax) {
-        // Goal weight is not within the ideal range, suggest aiming for the calculated ideal weight range
+      if (weight < idealWeightMin || weight > idealWeightMax) {
         double suggestedWeight = (idealWeightMin + idealWeightMax) / 2;
-        String suggestion = 'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs for healthy weight loss.';
+        String suggestion =
+            'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs.';
         _showSuggestionDialog(suggestion);
       }
     } else {
       bmiInterpretation = "Obese";
-      // Check if the current weight is within the ideal range
       double idealWeightMin = 18.5 * heightInMeters * heightInMeters;
       double idealWeightMax = 24.9 * heightInMeters * heightInMeters;
-      if (weight >= idealWeightMin && weight <= idealWeightMax) {
-        // Current weight is within the ideal range, suggest maintaining it
-        _showBMIResultDialog("Your BMI is $bmi ($bmiInterpretation). You are obese but your current weight is within the ideal range. We recommend maintaining your weight.");
-        return; // No need to proceed further
-      }
-      // Check if the goal weight is within the ideal range
-      double goalWeight = double.parse(goalWeightController.text);
-      if (goalWeight < idealWeightMin || goalWeight > idealWeightMax) {
-        // Goal weight is not within the ideal range, suggest aiming for the calculated ideal weight range
+      if (weight < idealWeightMin || weight > idealWeightMax) {
         double suggestedWeight = (idealWeightMin + idealWeightMax) / 2;
-        String suggestion = 'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs for healthy weight loss.';
+        String suggestion =
+            'Your goal weight is not within the ideal range for your height and BMI. We suggest aiming for ${suggestedWeight.toStringAsFixed(1)} kgs.';
         _showSuggestionDialog(suggestion);
       }
     }
   }
+
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
@@ -368,7 +493,7 @@ class _weightlossState extends State<weightloss> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: Text('OK'),
+              child: Text('Got it'),
             ),
           ],
         );
@@ -399,21 +524,13 @@ class _weightlossState extends State<weightloss> {
   double calculateBMI(double weightInKg, double heightInMeters) {
     return weightInKg / (heightInMeters * heightInMeters);
   }
-
-  double calculateWeightGain(double weight, double height, double currentBMI) {
-    return ((18.5 * height * height) - weight);
-  }
-/////
-
-
-  // Validation functions, text field builders, and other methods remain unchanged.
-
   Widget buildTextField(
       String labelText,
       TextEditingController controller,
       String errorText,
       Function(String) onChanged,
-      TextInputType keyboardType) {
+      TextInputType keyboardType,
+      ) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 9),
       child: Column(
@@ -454,7 +571,8 @@ class _weightlossState extends State<weightloss> {
       TextEditingController controller,
       String errorText,
       Function(String) onChanged,
-      String? Function(String) validator) {
+      String? Function(String)? validator,
+      ) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 9),
       child: Column(
@@ -466,7 +584,7 @@ class _weightlossState extends State<weightloss> {
               onChanged(value);
               // Call the validator function when the user types
               setState(() {
-                errorText = validator(controller.text) ?? '';
+                errorText = validator!(controller.text) ?? '';
               });
             },
             decoration: InputDecoration(
@@ -484,7 +602,7 @@ class _weightlossState extends State<weightloss> {
             onSubmitted: (_) {
               // Call the validator function when the user submits
               setState(() {
-                errorText = validator(controller.text) ?? '';
+                errorText = validator!(controller.text) ?? '';
               });
             },
           ),
@@ -516,8 +634,9 @@ class _weightlossState extends State<weightloss> {
       if (!RegExp(
           r'^[a-z]+[a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
           .hasMatch(email)) {
-        return ' Email format. Example: john_doe123@gmail.com,alice123@my-mail.com';
+        return 'Invalid email format. Example: john_doe123@gmail.com, alice123@my-mail.com';
       }
+
     }
     return '';
   }
@@ -527,12 +646,13 @@ class _weightlossState extends State<weightloss> {
       return 'Age is required.';
     } else {
       int ageValue = int.tryParse(age) ?? 0;
-      if (ageValue < 16 || ageValue > 60) {
-        return 'Age should be between 16 and 60.';
+      if (ageValue < 18 || ageValue > 60) {
+        return 'Age should be between 18 and 60.';
       }
     }
     return '';
   }
+
 
   String _validateHeightFeet(String feet) {
     if (feet.isEmpty) {
@@ -541,18 +661,6 @@ class _weightlossState extends State<weightloss> {
       int feetValue = int.tryParse(feet) ?? 0;
       if (feetValue < 4 || feetValue > 6) {
         return 'Feet should be between 4 and 6.';
-      }
-    }
-    return '';
-  }
-
-  String _validateHeightInches(String inches) {
-    if (inches.isEmpty) {
-      return 'Height is required.';
-    } else {
-      int inchesValue = int.tryParse(inches) ?? 0;
-      if (inchesValue < 1 || inchesValue > 10) {
-        return 'Inches should be between 1 and 6.';
       }
     }
     return '';
@@ -617,17 +725,14 @@ class _weightlossState extends State<weightloss> {
       });
     }
 
-    if (heightFeetController.text.isEmpty &&
-        heightInchesController.text.isEmpty) {
+    if (heightFeetController.text.isEmpty) {
       setState(() {
         heightFeetError = 'Height is required.';
-        heightInchesError = 'Height is required.';
         isValid = false;
       });
     } else {
       setState(() {
         heightFeetError = '';
-        heightInchesError = '';
       });
     }
 
@@ -674,6 +779,27 @@ class _weightlossState extends State<weightloss> {
         goalWeightError = '';
       });
     }
+    if (selectedGender == null) {
+      setState(() {
+        genderError = 'Gender selection is required.';
+        isValid = false;
+      });
+    } else {
+      setState(() {
+        genderError = '';
+      });
+    }
+    if (selectedActivityLevel == null) {
+      setState(() {
+        activityLevelError = 'Activity Level selection is required.';
+      });
+      return false;
+    } else {
+      setState(() {
+        activityLevelError = '';
+      });
+    }
+
 
     return isValid;
   }
@@ -684,25 +810,77 @@ class _weightlossState extends State<weightloss> {
           emailError.isNotEmpty ||
           ageError.isNotEmpty ||
           heightFeetError.isNotEmpty ||
-          heightInchesError.isNotEmpty ||
           currentWeightError.isNotEmpty ||
+          genderError.isNotEmpty||
+          activityLevelError.isNotEmpty||
           goalWeightError.isNotEmpty;
     });
   }
-}
 
-class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('My Home Page'),
-      ),
-      body: Center(
-        child: Text('Welcome to Home Page!'),
-      ),
-    );
+
+  Future<Database?> openDB() async{
+    _database=await DatabaseHandler().openDB();
+
+    return _database;
   }
+  Future<void> insertDB()async {
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
+    userRepo.createlTable(_database!);
+
+    UserModel userModel = new UserModel(nameController.text.toString(),
+        emailController.text.toString(),
+        int.tryParse(ageController.text.toString())!,
+        int.tryParse(heightFeetController.text.toString())!,
+        genderController.text.toString(),
+        activityLevelController.text.toString(),
+        int.tryParse(currentWeightController.text.toString())!,
+        int.tryParse(goalWeightController.text.toString())!);
+    await _database?.insert('WEIGHTLOSSUSER', userModel.toMap());
+
+    //
+
+    if (await EmailExists(emailController.text.toString())) {
+      print("email exists!!!!!!!!!!!!!!!!!!!!!!!!!");
+    }
+    else {
+
+
+      print('email doesnot exists ...this is new user');
+    }
+    // await _database?.close();
+  }
+  Future<void> getFromweightlossusers()async{
+    _database=await openDB();
+    UserRepo userRepo=new UserRepo();
+    await userRepo.getweightlossusers(_database!);
+
+    //   await _database?.close();
+  }
+  Future<String?> getNameFromEmail(String email) async {
+    _database=await openDB();
+    List<Map<String, dynamic>> result = await _database!.query(
+      'WEIGHTLOSSUSER',
+      columns: ['name'],
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    String? name;
+    if (result.isNotEmpty) {
+      name = result[0]['name'];
+    }
+    await _database!.close();
+    return name;
+  }
+  Future<bool> EmailExists(String email) async {
+    _database=await openDB();
+    UserRepo userRepo=new UserRepo();
+    if(await userRepo.EmailExists(_database!,email)) {
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
+
 }
-
-

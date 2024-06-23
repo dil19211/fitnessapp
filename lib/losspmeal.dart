@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
@@ -5,23 +6,23 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'color.dart';
 import 'database_handler.dart';
-import 'gainmealcaculation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
+import 'gainmealcaculation.dart';
 import 'notification.dart';
 
-class pmeal extends StatefulWidget {
+class losspmeal extends StatefulWidget {
   @override
   _MealState createState() => _MealState();
 }
 
-class _MealState extends State<pmeal> {
+class _MealState extends State<losspmeal> {
   int _breakfastCalories = 400;
   int _lunchCalories = 800;
   int _snackCalories = 600;
-  int _dinnerCalories =1700;
+  int _dinnerCalories =700;
 
   int _consumedCalories = 0;
   int _displayedConsumedCalories = 0;
@@ -273,7 +274,7 @@ class _MealState extends State<pmeal> {
     int? height;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['height'],
         where: 'email = ?',
         whereArgs: [email],
@@ -292,7 +293,7 @@ class _MealState extends State<pmeal> {
     int? cweight;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['cweight'],
         where: 'email = ?',
         whereArgs: [email],
@@ -311,7 +312,7 @@ class _MealState extends State<pmeal> {
     int? gweight;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['gweight'],
         where: 'email = ?',
         whereArgs: [email],
@@ -330,7 +331,7 @@ class _MealState extends State<pmeal> {
     String? gender;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['gender'],
         where: 'email = ?',
         whereArgs: [email],
@@ -349,7 +350,7 @@ class _MealState extends State<pmeal> {
     String? activityLevel;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['activity_level'],
         where: 'email = ?',
         whereArgs: [email],
@@ -368,7 +369,7 @@ class _MealState extends State<pmeal> {
     int? age;
     if (_database != null) {
       List<Map<String, dynamic>> result = await _database!.query(
-        'WEIGHTGAINUSER',
+        'WEIGHTLOSSUSER',
         columns: ['age'],
         where: 'email = ?',
         whereArgs: [email],
@@ -394,7 +395,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_daily_cal = WeightGainCalculator();
 
-    return await wg_daily_cal.calculateDailyCaloriesNeededToGainWeight(
+    return await wg_daily_cal.calculateDailyCaloriesNeededTolossWeight(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -409,7 +410,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_total_cal = WeightGainCalculator();
 
-    return await wg_total_cal.calculateTotalCaloriesToGainWeight(
+    return await wg_total_cal.calculateTotalCaloriesTolossWeight(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -424,7 +425,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_b_cal = WeightGainCalculator();
 
-    return await wg_b_cal.calculateBreakfastCaloriesToGoal(
+    return await wg_b_cal.calculateBreakfastCaloriesToGoalloss(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -439,7 +440,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_l_cal = WeightGainCalculator();
 
-    return await wg_l_cal.calculatelunchfastCaloriesToGoal(
+    return await wg_l_cal.calculatelunchfastCaloriesToloss(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -454,7 +455,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_s_cal = WeightGainCalculator();
 
-    return await wg_s_cal.calculatesnackfastCaloriesToGoal(
+    return await wg_s_cal.calculatesnackfastCaloriesToGoalloss(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -469,7 +470,7 @@ class _MealState extends State<pmeal> {
     String activityLevel = userData['activityLevel'];
     WeightGainCalculator wg_d_cal = WeightGainCalculator();
 
-    return await wg_d_cal.calculatedinnerfastCaloriesToGoal(
+    return await wg_d_cal.calculatedinnerfastCaloriesToGoalloss(
         cweight, gweight, height, age, gender, activityLevel);
   }
 
@@ -859,8 +860,8 @@ class _MealState extends State<pmeal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 6 && now.hour < 12;
-        timing = '6 AM - 9 AM';
+        isButtonEnabled = now.hour >= 7 && now.hour <15;
+        timing = '7AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
       case 'Lunch':
@@ -1215,7 +1216,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
     int hour = now.hour;
 
     String currentMealType = '';
-    if (hour >= 4 && hour < 9) {
+    if (hour >= 7 && hour < 15) {
       currentMealType = 'Breakfast';
     } else if (hour >= 12 && hour < 15) {
       currentMealType = 'Lunch';
@@ -1375,3 +1376,5 @@ class _AddMealDialogState extends State<AddMealDialog> {
     );
   }
 }
+
+

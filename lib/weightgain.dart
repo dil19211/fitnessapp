@@ -647,8 +647,8 @@ class _WeightGainState extends State<WeightGain> {
       return 'Age is required.';
     } else {
       int ageValue = int.tryParse(age) ?? 0;
-      if (ageValue < 16 || ageValue > 60) {
-        return 'Age should be between 16 and 60.';
+      if (ageValue < 18 || ageValue > 60) {
+        return 'Age should be between 18 and 60.';
       }
     }
     return '';

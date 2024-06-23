@@ -1,10 +1,10 @@
-import 'package:fitnessapp/waterchecked.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'firstrun.dart';
+
 
 class Water extends StatefulWidget {
   @override

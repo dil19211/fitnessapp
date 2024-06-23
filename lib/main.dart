@@ -1,12 +1,6 @@
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fitnessapp/adminpanel.dart';
-import 'package:fitnessapp/gainmeal.dart';
-import 'package:fitnessapp/getstarted%20page.dart';
-import 'package:fitnessapp/login.dart';
-import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/splashscreen.dart';
-import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/workout.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -228,7 +222,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(), // Use the HomePage widget as the home page
+      home:SplashScreen(), // Use the HomePage widget as the home page
     );
   }
 

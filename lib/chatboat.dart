@@ -79,18 +79,12 @@ class _ChatBotState extends State<ChatBot> {
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
                 fontStyle: FontStyle.italic,
-                shadows: [
-                  Shadow(
-                    blurRadius: 6.0,
-                    color: Colors.black,
-                    offset: Offset(5, 5),
-                  ),
-                ],
+
               ),
             ),
           ],
         ),
-        centerTitle: true,
+        centerTitle: false,
         shadowColor: Colors.black,
       ),
       body: currentUser == null

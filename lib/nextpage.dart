@@ -109,7 +109,7 @@ class page extends StatelessWidget {
                       ),
                       onTap: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (BuildContext context) => weightloss(),
+                          builder: (BuildContext context) => Weightloss(),
                         ));
                       },
                     ),

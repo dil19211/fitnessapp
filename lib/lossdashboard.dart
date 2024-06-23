@@ -1,20 +1,19 @@
+
 import 'dart:convert';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:fitnessapp/pgainmeal.dart';
+
 import 'package:fitnessapp/servicechecker.dart';
-import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/unpaidrecipe.dart';
 import 'package:fitnessapp/unpiadworkout.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:fitnessapp/workout.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'chatboat.dart';
 import 'database_handler.dart';
 import 'gainPremiumDashboardPage.dart';
-import 'gainmeal.dart';
+import 'loddmeal.dart';
+import 'losspremimumdashboard.dart';
 import 'nextpage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mailer/mailer.dart';
@@ -23,15 +22,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'package:http/http.dart' as http;
+import 'package:carousel_slider/carousel_slider.dart';
 
-class dashboaard extends StatefulWidget {
-  const dashboaard({Key? key}) : super(key: key);
+class lossdashboaard extends StatefulWidget {
+  const lossdashboaard({Key? key}) : super(key: key);
 
   @override
-  State<dashboaard> createState() => _MyHomePageState();
+  State<lossdashboaard> createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<dashboaard> {
+class _MyHomePageState extends State<lossdashboaard> {
   Map<String, dynamic>? paymentIntentData;
   TextEditingController emailController = TextEditingController();
   Database? _database;
@@ -72,7 +72,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<void> navigateToPremiumPage() async {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => preminum()),
+      MaterialPageRoute(builder: (context) => losspreminum()),
     );
   }
   void _showEmailPopup() async {
@@ -102,7 +102,7 @@ class _MyHomePageState extends State<dashboaard> {
                             'Hello User!',
                             'Welcome! you are using the un-paid version of GritFit.Enjoy some extra features after getting paid. Thanks...',
                           );
-                          getcurrentweightgainuser(emailController.text.toString());
+                          getcurrentweightlossuser(emailController.text.toString());
                           String Email = emailController.text.toString();
                           String? name = await getNameFromEmail(Email);
                           if (name != null) {
@@ -173,7 +173,7 @@ class _MyHomePageState extends State<dashboaard> {
     // Return true if the email exists, false otherwise
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    if(await userRepo.isEmailExists(_database!,email)) {
+    if(await userRepo.EmailExists(_database!,email)) {
       return true;
 
     }
@@ -283,10 +283,10 @@ class _MyHomePageState extends State<dashboaard> {
     }
     return FutureBuilder<String?>(
       future:getName(),
-        builder: (context, snapshot) {
+      builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // While waiting for the name, show a loading indicator
-        //  return CircularProgressIndicator();
+          //  return CircularProgressIndicator();
           return Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
@@ -396,7 +396,7 @@ class _MyHomePageState extends State<dashboaard> {
                                   () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (BuildContext context) => meal(),
+                                    builder: (BuildContext context) => lossmeal(),
                                     settings: RouteSettings(arguments: emailController.text.toString()),
                                   ),
                                 );
@@ -407,7 +407,7 @@ class _MyHomePageState extends State<dashboaard> {
                         ),
                       ),
                     ),
-                   // SizedBox(height: 30),
+                    // SizedBox(height: 30),
                     SizedBox(height: 60),
                     CarouselSlider(
                       options: CarouselOptions(
@@ -740,16 +740,16 @@ class _MyHomePageState extends State<dashboaard> {
 
     return _database;
   }
-  Future<void> getcurrentweightgainuser(String email)async{
+  Future<void> getcurrentweightlossuser(String email)async{
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    await userRepo.getcurrentweightgainuser(_database!, email);
+    await userRepo.getcurrentweightlossuser(_database!, email);
     //  await _database?.close();
   }
   Future<String?> getNameFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['name'],
       where: 'email = ?',
       whereArgs: [email],
@@ -764,7 +764,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<int> getAgeFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['age'],
       where: 'email = ?',
       whereArgs: [email],
@@ -779,7 +779,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<int> getHeightFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['height'],
       where: 'email = ?',
       whereArgs: [email],
@@ -794,7 +794,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<int> get_cweight_FromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['cweight'],
       where: 'email = ?',
       whereArgs: [email],
@@ -809,7 +809,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<int> get_gweight_FromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['gweight'],
       where: 'email = ?',
       whereArgs: [email],
@@ -824,7 +824,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<String?> getGenderFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['gender'],
       where: 'email = ?',
       whereArgs: [email],
@@ -839,7 +839,7 @@ class _MyHomePageState extends State<dashboaard> {
   Future<String?> getActivityLevelFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTGAINUSER',
+      'WEIGHTLOSSUSER',
       columns: ['activity_level'],
       where: 'email = ?',
       whereArgs: [email],
