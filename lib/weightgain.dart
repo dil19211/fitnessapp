@@ -226,7 +226,12 @@ class _WeightGainState extends State<WeightGain> {
                   SharedPreferences prefs =
                   await SharedPreferences.getInstance();
                   await prefs.setString('selectedPage', 'weightgain');
-
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Form submitted successfully! Your goal is set.'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
 
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(

@@ -5,11 +5,10 @@ import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
-
 import 'color.dart';
 import 'database_handler.dart';
 import 'gainmealcaculation.dart';
-import 'notification.dart';
+
 
 class lossmeal extends StatefulWidget {
   @override
@@ -43,7 +42,6 @@ class _MealState extends State<lossmeal> {
     _checkAndTriggerReset();
     _databaseFuture = openDB();
     loadUserData();
-
   }
 
   void _loadCaloriesFromSharedPreferences() async {
@@ -245,7 +243,8 @@ class _MealState extends State<lossmeal> {
     return age;
   }
 
-  Future<int> daily_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> daily_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -260,7 +259,8 @@ class _MealState extends State<lossmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> total_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> total_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -275,7 +275,8 @@ class _MealState extends State<lossmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> b_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> b_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -290,7 +291,8 @@ class _MealState extends State<lossmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> l_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> l_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -305,7 +307,8 @@ class _MealState extends State<lossmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> s_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> s_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -320,7 +323,8 @@ class _MealState extends State<lossmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> d_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> d_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -344,7 +348,10 @@ class _MealState extends State<lossmeal> {
 
   @override
   Widget build(BuildContext context) {
-    final String email = ModalRoute.of(context)?.settings.arguments as String;
+    final String email = ModalRoute
+        .of(context)
+        ?.settings
+        .arguments as String;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -366,19 +373,24 @@ class _MealState extends State<lossmeal> {
             var age = await getAgeFromEmail(email) ?? initialUserData['age'];
             print('Age: $age');
 
-            var height = await getHeightFromEmail(email) ?? initialUserData['height'];
+            var height = await getHeightFromEmail(email) ??
+                initialUserData['height'];
             print('Height: $height');
 
-            var cweight = await getCWeightFromEmail(email) ?? initialUserData['cweight'];
+            var cweight = await getCWeightFromEmail(email) ??
+                initialUserData['cweight'];
             print('Current Weight: $cweight');
 
-            var gweight = await getGWeightFromEmail(email) ?? initialUserData['gweight'];
+            var gweight = await getGWeightFromEmail(email) ??
+                initialUserData['gweight'];
             print('Goal Weight: $gweight');
 
-            var gender = await getGenderFromEmail(email) ?? initialUserData['gender'];
+            var gender = await getGenderFromEmail(email) ??
+                initialUserData['gender'];
             print('Gender: $gender');
 
-            var activityLevel = await getActivityLevelFromEmail(email) ?? initialUserData['activityLevel'];
+            var activityLevel = await getActivityLevelFromEmail(email) ??
+                initialUserData['activityLevel'];
             print('Activity Level: $activityLevel');
 
             return [age, height, cweight, gweight, gender, activityLevel];
@@ -474,7 +486,8 @@ class _MealState extends State<lossmeal> {
                       Padding(
                         padding: const EdgeInsets.all(20.0),
                         child: FutureBuilder<int>(
-                          future: daily_cal(cweight, gweight, height, age, gender,
+                          future: daily_cal(
+                              cweight, gweight, height, age, gender,
                               activityLevel),
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
@@ -486,12 +499,15 @@ class _MealState extends State<lossmeal> {
                               num dailyCalories = snapshot.data ?? 0.0;
                               return CircularPercentIndicator(
                                 radius: 100,
-                                lineWidth: 10,
+                                lineWidth: 7,
+                                animation: true,
+                                curve: Curves.easeInOut,
+                                animationDuration: 1000, // in milliseconds
                                 circularStrokeCap: CircularStrokeCap.round,
-                                backgroundColor: Colors.transparent,
+                                backgroundColor: Colors.pink[100]!,
                                 progressColor: Colors.deepPurple,
                                 percent: _consumedCalories / dailyCalories,
-                                startAngle: 218,
+                                startAngle: 170,
                                 center: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
@@ -527,7 +543,8 @@ class _MealState extends State<lossmeal> {
                       SizedBox(height: 30),
                       FutureBuilder<int>(
                         future: b_cal(
-                            cweight, gweight, height, age, gender, activityLevel),
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState
                               .waiting) {
@@ -562,7 +579,8 @@ class _MealState extends State<lossmeal> {
                       SizedBox(height: 30),
                       FutureBuilder<int>(
                         future: l_cal(
-                            cweight, gweight, height, age, gender, activityLevel),
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState
                               .waiting) {
@@ -597,7 +615,8 @@ class _MealState extends State<lossmeal> {
                       SizedBox(height: 30),
                       FutureBuilder<int>(
                         future: s_cal(
-                            cweight, gweight, height, age, gender, activityLevel),
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState
                               .waiting) {
@@ -632,7 +651,8 @@ class _MealState extends State<lossmeal> {
                       SizedBox(height: 30),
                       FutureBuilder<int>(
                         future: d_cal(
-                            cweight, gweight, height, age, gender, activityLevel),
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState == ConnectionState
                               .waiting) {
@@ -670,7 +690,8 @@ class _MealState extends State<lossmeal> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildSmallSquareBox(Icons.local_dining, 'Breakfast',
+                            _buildSmallSquareBox(
+                                Icons.local_dining, 'Breakfast',
                                 _breakfastCalories, _takenBreakfastCalories,
                                 AppColors.breakfast),
                             _buildSmallSquareBox(
@@ -703,10 +724,7 @@ class _MealState extends State<lossmeal> {
           }
       ),
     );
-
   }
-
-
 
 
   Widget _buildSmallSquareBox(IconData iconData, String mealType, int calories,
@@ -838,21 +856,29 @@ class _MealState extends State<lossmeal> {
                 },
               );
             }
-                : null,
+                : () {
+              // Show a different message when the button is disabled
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'The $mealType button is only enabled during $timing.',
+                  ),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    // Square rounded corners
-                    return Colors
-                        .deepPurple; // Background color for disabled state
-                  }
-                  return Colors.purple; // Background color for enabled state
+                  return isButtonEnabled
+                      ? Colors.purple // Background color for enabled state
+                      : Colors.grey; // Background color for disabled state
                 },
               ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0), // Square-rounded corners
+                  borderRadius: BorderRadius.circular(
+                      10.0), // Square-rounded corners
                 ),
               ),
             ),
@@ -870,8 +896,7 @@ class _MealState extends State<lossmeal> {
     );
   }
 }
-
-class AddMealDialog extends StatefulWidget {
+  class AddMealDialog extends StatefulWidget {
   final Function(int) onMealAdded;
   final String mealType;
 
@@ -997,7 +1022,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
-                        title: Text(result,style: TextStyle(fontSize: 9),),
+                        title: Text(result,style: TextStyle(fontSize: 11),),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

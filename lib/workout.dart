@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:is_first_run/is_first_run.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 
 class Workout extends StatefulWidget {
@@ -815,6 +815,17 @@ class _WorkoutState extends State<Workout> {
                               ),
                             );
                           }
+                          else {
+                            // Show snackbar if the exercise is not enabled
+                            Fluttertoast.showToast(msg: "Beacuse of your diability plan you are not allowed to perform gis excersie",
+                                toastLength: Toast.LENGTH_LONG,
+                                gravity: ToastGravity.TOP,
+                                timeInSecForIosWeb: 2,
+                                backgroundColor: Colors.pink[100],
+                                textColor: Colors.white,
+                                fontSize: 15
+                            );
+                          }
                         },
                         child: Text(
                           exercise,
@@ -1556,7 +1567,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.cancel),
+                            icon: Icon(Icons.cancel_outlined),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
@@ -1565,7 +1576,16 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                         controller: emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
+                          labelStyle: TextStyle(
+                            fontSize: 18.0, // Set the font size for the label text
+                          ),
                           hintText: 'example@gmail.com',
+                          hintStyle: TextStyle(
+                            fontSize: 16.0, // Set the font size for the hint text
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontSize: 16.0, // Set the font size for the input text
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
