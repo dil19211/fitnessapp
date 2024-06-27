@@ -22,7 +22,7 @@ class _MealState extends State<losspmeal> {
   int _breakfastCalories = 400;
   int _lunchCalories = 800;
   int _snackCalories = 600;
-  int _dinnerCalories =700;
+  int _dinnerCalories = 700;
 
   int _consumedCalories = 0;
   int _displayedConsumedCalories = 0;
@@ -44,7 +44,8 @@ class _MealState extends State<losspmeal> {
         // Show the dialog only if it has not been shown before
         Future.delayed(Duration(seconds: 2), () {
           _showDiseaseDialog(context);
-          prefs.setBool('hasShownDiseaseDialog', true); // Set flag to indicate the dialog has been shown
+          prefs.setBool('hasShownDiseaseDialog',
+              true); // Set flag to indicate the dialog has been shown
           print("called");
         });
       }
@@ -72,7 +73,7 @@ class _MealState extends State<losspmeal> {
       "1",
       "show_notification_task",
       frequency: Duration(days: 1), // Repeat daily
-      initialDelay: NotificationUtils.calculateInitialDelay(7,5),
+      initialDelay: NotificationUtils.calculateInitialDelay(7, 5),
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
@@ -93,35 +94,35 @@ class _MealState extends State<losspmeal> {
       "4",
       "lunch time Reminder",
       frequency: Duration(days: 1),
-      initialDelay: NotificationUtils.calculateInitialDelay(14,15 ), // 2:15 pm
+      initialDelay: NotificationUtils.calculateInitialDelay(14, 15), // 2:15 pm
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
       "5",
       "snack time",
       frequency: Duration(days: 1),
-      initialDelay: NotificationUtils.calculateInitialDelay(15,10), // 3:10pm
+      initialDelay: NotificationUtils.calculateInitialDelay(15, 10), // 3:10pm
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
       "6",
       "snack time Reminder",
       frequency: Duration(days: 1),
-      initialDelay: NotificationUtils.calculateInitialDelay(17,20), // 5:20 pm
+      initialDelay: NotificationUtils.calculateInitialDelay(17, 20), // 5:20 pm
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
       "7",
       "dinner time",
       frequency: Duration(days: 1),
-      initialDelay: NotificationUtils.calculateInitialDelay(18,15), // 6:12 pm
+      initialDelay: NotificationUtils.calculateInitialDelay(18, 15), // 6:12 pm
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
       "8",
       "dinner time Reminder",
       frequency: Duration(days: 1),
-      initialDelay: NotificationUtils.calculateInitialDelay(20,30), // 8:15 pm
+      initialDelay: NotificationUtils.calculateInitialDelay(20, 30), // 8:15 pm
       inputData: {},
     );
     Workmanager().registerPeriodicTask(
@@ -131,15 +132,19 @@ class _MealState extends State<losspmeal> {
       initialDelay: NotificationUtils.calculateInitialDelay(15, 30), // 8:30 AM
       inputData: {},
     );
-
   }
+
   void _showDiseaseDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         List<String> selectedDiseases = []; // To store selected diseases
-        final List<String> allDiseases = ['Diabetes', 'Hypertension', 'Heart Disease'];
+        final List<String> allDiseases = [
+          'Diabetes',
+          'Hypertension',
+          'Heart Disease'
+        ];
 
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
@@ -168,7 +173,8 @@ class _MealState extends State<losspmeal> {
                 TextButton(
                   onPressed: () async {
                     // Save selected diseases to SharedPreferences
-                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    SharedPreferences prefs = await SharedPreferences
+                        .getInstance();
                     prefs.setStringList('diseases', selectedDiseases);
                     Navigator.of(context).pop(); // Close the dialog
                   },
@@ -181,7 +187,6 @@ class _MealState extends State<losspmeal> {
       },
     );
   }
-
 
 
   void _checkAndTriggerReset() async {
@@ -221,7 +226,6 @@ class _MealState extends State<losspmeal> {
   }
 
 
-
   void _loadCaloriesFromSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -244,6 +248,7 @@ class _MealState extends State<losspmeal> {
     prefs.setInt('taken_dinner_calories', _takenDinnerCalories);
     prefs.setInt('displayed_consumed_calories', _displayedConsumedCalories);
   }
+
   // Helper function to open the database
   Future<Map<String, dynamic>> loadUserData() async {
     final prefs = await SharedPreferences.getInstance();
@@ -384,7 +389,8 @@ class _MealState extends State<losspmeal> {
     return age;
   }
 
-  Future<int> daily_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> daily_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -399,7 +405,8 @@ class _MealState extends State<losspmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> total_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> total_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -414,7 +421,8 @@ class _MealState extends State<losspmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> b_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> b_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -429,7 +437,8 @@ class _MealState extends State<losspmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> l_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> l_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -444,7 +453,8 @@ class _MealState extends State<losspmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> s_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> s_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -459,7 +469,8 @@ class _MealState extends State<losspmeal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> d_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> d_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -476,7 +487,10 @@ class _MealState extends State<losspmeal> {
 
   @override
   Widget build(BuildContext context) {
-    final String email = ModalRoute.of(context)?.settings.arguments as String;
+    final String email = ModalRoute
+        .of(context)
+        ?.settings
+        .arguments as String;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -499,19 +513,24 @@ class _MealState extends State<losspmeal> {
           var age = await getAgeFromEmail(email) ?? initialUserData['age'];
           print('Age: $age');
 
-          var height = await getHeightFromEmail(email) ?? initialUserData['height'];
+          var height = await getHeightFromEmail(email) ??
+              initialUserData['height'];
           print('Height: $height');
 
-          var cweight = await getCWeightFromEmail(email) ?? initialUserData['cweight'];
+          var cweight = await getCWeightFromEmail(email) ??
+              initialUserData['cweight'];
           print('Current Weight: $cweight');
 
-          var gweight = await getGWeightFromEmail(email) ?? initialUserData['gweight'];
+          var gweight = await getGWeightFromEmail(email) ??
+              initialUserData['gweight'];
           print('Goal Weight: $gweight');
 
-          var gender = await getGenderFromEmail(email) ?? initialUserData['gender'];
+          var gender = await getGenderFromEmail(email) ??
+              initialUserData['gender'];
           print('Gender: $gender');
 
-          var activityLevel = await getActivityLevelFromEmail(email) ?? initialUserData['activityLevel'];
+          var activityLevel = await getActivityLevelFromEmail(email) ??
+              initialUserData['activityLevel'];
           print('Activity Level: $activityLevel');
 
           return [age, height, cweight, gweight, gender, activityLevel];
@@ -544,9 +563,12 @@ class _MealState extends State<losspmeal> {
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           FutureBuilder<int>(
-                            future: total_cal(cweight, gweight, height, age, gender, activityLevel),
+                            future: total_cal(
+                                cweight, gweight, height, age, gender,
+                                activityLevel),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
                                 return CircularProgressIndicator();
                               } else if (snapshot.hasError) {
                                 return Text("Error/: ${snapshot.error}");
@@ -603,9 +625,11 @@ class _MealState extends State<losspmeal> {
                     Padding(
                       padding: const EdgeInsets.all(20.0),
                       child: FutureBuilder<int>(
-                        future: daily_cal(cweight, gweight, height, age, gender, activityLevel),
+                        future: daily_cal(cweight, gweight, height, age, gender,
+                            activityLevel),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
                             return CircularProgressIndicator();
                           } else if (snapshot.hasError) {
                             return Text('Error.: ${snapshot.error}');
@@ -613,12 +637,15 @@ class _MealState extends State<losspmeal> {
                             num dailyCalories = snapshot.data ?? 0.0;
                             return CircularPercentIndicator(
                               radius: 100,
-                              lineWidth: 10,
+                              lineWidth: 7,
+                              animation: true,
+                              curve: Curves.easeInOut,
+                              animationDuration: 1000, // in milliseconds
                               circularStrokeCap: CircularStrokeCap.round,
-                              backgroundColor: Colors.transparent,
+                              backgroundColor: Colors.pink[100]!,
                               progressColor: Colors.deepPurple,
-                              percent:  _consumedCalories/dailyCalories,
-                              startAngle: 218,
+                              percent: _consumedCalories / dailyCalories,
+                              startAngle: 170,
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -653,9 +680,11 @@ class _MealState extends State<losspmeal> {
                     ),
                     SizedBox(height: 30),
                     FutureBuilder<int>(
-                      future: b_cal(cweight, gweight, height, age, gender, activityLevel),
+                      future: b_cal(
+                          cweight, gweight, height, age, gender, activityLevel),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState
+                            .waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Error,: ${snapshot.error}');
@@ -686,9 +715,11 @@ class _MealState extends State<losspmeal> {
                     ),
                     SizedBox(height: 30),
                     FutureBuilder<int>(
-                      future: l_cal(cweight, gweight, height, age, gender, activityLevel),
+                      future: l_cal(
+                          cweight, gweight, height, age, gender, activityLevel),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState
+                            .waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Errorm: ${snapshot.error}');
@@ -719,9 +750,11 @@ class _MealState extends State<losspmeal> {
                     ),
                     SizedBox(height: 30),
                     FutureBuilder<int>(
-                      future: s_cal(cweight, gweight, height, age, gender, activityLevel),
+                      future: s_cal(
+                          cweight, gweight, height, age, gender, activityLevel),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState
+                            .waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Errorn: ${snapshot.error}');
@@ -752,9 +785,11 @@ class _MealState extends State<losspmeal> {
                     ),
                     SizedBox(height: 30),
                     FutureBuilder<int>(
-                      future: d_cal(cweight, gweight, height, age, gender, activityLevel),
+                      future: d_cal(
+                          cweight, gweight, height, age, gender, activityLevel),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState == ConnectionState
+                            .waiting) {
                           return CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text('Errorb: ${snapshot.error}');
@@ -787,10 +822,18 @@ class _MealState extends State<losspmeal> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _buildSmallSquareBox(Icons.local_dining, 'Breakfast', _breakfastCalories, _takenBreakfastCalories, AppColors.breakfast),
-                        _buildSmallSquareBox(Icons.fastfood, 'Lunch', _lunchCalories, _takenLunchCalories, AppColors.lunch),
-                        _buildSmallSquareBox(Icons.local_cafe, 'Snack', _snackCalories, _takenSnackCalories, AppColors.snack),
-                        _buildSmallSquareBox(Icons.restaurant, 'Dinner', _dinnerCalories, _takenDinnerCalories, AppColors.dinner1),
+                        _buildSmallSquareBox(
+                            Icons.local_dining, 'Breakfast', _breakfastCalories,
+                            _takenBreakfastCalories, AppColors.breakfast),
+                        _buildSmallSquareBox(
+                            Icons.fastfood, 'Lunch', _lunchCalories,
+                            _takenLunchCalories, AppColors.lunch),
+                        _buildSmallSquareBox(
+                            Icons.local_cafe, 'Snack', _snackCalories,
+                            _takenSnackCalories, AppColors.snack),
+                        _buildSmallSquareBox(
+                            Icons.restaurant, 'Dinner', _dinnerCalories,
+                            _takenDinnerCalories, AppColors.dinner1),
                       ],
                     ),
                     SizedBox(height: 70),
@@ -860,8 +903,8 @@ class _MealState extends State<losspmeal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 7 && now.hour <15;
-        timing = '7AM - 9 AM';
+        isButtonEnabled = now.hour >= 6 && now.hour < 12;
+        timing = '6 AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
       case 'Lunch':
@@ -943,20 +986,29 @@ class _MealState extends State<losspmeal> {
                 },
               );
             }
-                : null,
+                : () {
+              // Show a different message when the button is disabled
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'The $mealType button is only enabled during $timing.',
+                  ),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
-                    return Colors
-                        .deepPurple; // Background color for disabled state
-                  }
-                  return Colors.purple; // Background color for enabled state
+                  return isButtonEnabled
+                      ? Colors.purple // Background color for enabled state
+                      : Colors.grey; // Background color for disabled state
                 },
               ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0), // Square-rounded corners
+                  borderRadius: BorderRadius.circular(
+                      10.0), // Square-rounded corners
                 ),
               ),
             ),
@@ -974,7 +1026,7 @@ class _MealState extends State<losspmeal> {
     );
   }
 }
-class AddMealDialog extends StatefulWidget {
+  class AddMealDialog extends StatefulWidget {
   final Function(int) onMealAdded;
   final String mealType;
   final int calorieRange;
@@ -1332,7 +1384,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
-                        title: Text(result, style: TextStyle(fontSize: 9),),
+                        title: Text(result, style: TextStyle(fontSize: 11),),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

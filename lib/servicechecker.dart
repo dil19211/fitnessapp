@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
-
-
+import 'package:toastification/toastification.dart';
+import 'firstrun.dart';
 
 class Water extends StatefulWidget {
   @override
@@ -29,7 +29,7 @@ class _WaterState extends State<Water> {
   bool checked=true;
   Future<void> isfirstime()async {// Load saved
 
-   await _loadWaterCount();
+    await _loadWaterCount();
     print("initState: _isFirstRun=$checked");
     if (checked) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -87,9 +87,9 @@ class _WaterState extends State<Water> {
       setState(() {
         _waterCount = 0;
         _totalWaterCount = 0;
-         dailyGoal = 8; // Reset daily goal to default value
+        dailyGoal = 8; // Reset daily goal to default value
         checked = prefs.getBool('isFirstRun') ?? true;
-         prefs.setString('lastStoredDate', currentDate);
+        prefs.setString('lastStoredDate', currentDate);
         _saveWaterCount();
       });
     } else {

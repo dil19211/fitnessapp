@@ -42,7 +42,6 @@ class _MealState extends State<meal> {
     _checkAndTriggerReset();
     _databaseFuture = openDB();
     loadUserData();
-
   }
 
   void _loadCaloriesFromSharedPreferences() async {
@@ -244,7 +243,8 @@ class _MealState extends State<meal> {
     return age;
   }
 
-  Future<int> daily_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> daily_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -259,7 +259,8 @@ class _MealState extends State<meal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> total_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> total_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -274,7 +275,8 @@ class _MealState extends State<meal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> b_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> b_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -289,7 +291,8 @@ class _MealState extends State<meal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> l_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> l_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -304,7 +307,8 @@ class _MealState extends State<meal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> s_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> s_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -319,7 +323,8 @@ class _MealState extends State<meal> {
         cweight, gweight, height, age, gender, activityLevel);
   }
 
-  Future<int> d_cal(int cweight, int gweight, int height, int age, String gender, String activityLevel) async {
+  Future<int> d_cal(int cweight, int gweight, int height, int age,
+      String gender, String activityLevel) async {
     Map<String, dynamic> userData = await loadUserData();
 
     int cweight = userData['cweight'];
@@ -343,7 +348,10 @@ class _MealState extends State<meal> {
 
   @override
   Widget build(BuildContext context) {
-    final String email = ModalRoute.of(context)?.settings.arguments as String;
+    final String email = ModalRoute
+        .of(context)
+        ?.settings
+        .arguments as String;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -358,357 +366,368 @@ class _MealState extends State<meal> {
         ),
       ),
       body: FutureBuilder(
-        future: _databaseFuture.then((_database) async {
-          this._database = _database;
-          var initialUserData = await loadUserData();
+          future: _databaseFuture.then((_database) async {
+            this._database = _database;
+            var initialUserData = await loadUserData();
 
-          var age = await getAgeFromEmail(email) ?? initialUserData['age'];
-          print('Age: $age');
+            var age = await getAgeFromEmail(email) ?? initialUserData['age'];
+            print('Age: $age');
 
-          var height = await getHeightFromEmail(email) ?? initialUserData['height'];
-          print('Height: $height');
+            var height = await getHeightFromEmail(email) ??
+                initialUserData['height'];
+            print('Height: $height');
 
-          var cweight = await getCWeightFromEmail(email) ?? initialUserData['cweight'];
-          print('Current Weight: $cweight');
+            var cweight = await getCWeightFromEmail(email) ??
+                initialUserData['cweight'];
+            print('Current Weight: $cweight');
 
-          var gweight = await getGWeightFromEmail(email) ?? initialUserData['gweight'];
-          print('Goal Weight: $gweight');
+            var gweight = await getGWeightFromEmail(email) ??
+                initialUserData['gweight'];
+            print('Goal Weight: $gweight');
 
-          var gender = await getGenderFromEmail(email) ?? initialUserData['gender'];
-          print('Gender: $gender');
+            var gender = await getGenderFromEmail(email) ??
+                initialUserData['gender'];
+            print('Gender: $gender');
 
-          var activityLevel = await getActivityLevelFromEmail(email) ?? initialUserData['activityLevel'];
-          print('Activity Level: $activityLevel');
+            var activityLevel = await getActivityLevelFromEmail(email) ??
+                initialUserData['activityLevel'];
+            print('Activity Level: $activityLevel');
 
-          return [age, height, cweight, gweight, gender, activityLevel];
-        }),
+            return [age, height, cweight, gweight, gender, activityLevel];
+          }),
 
-        builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data == null) {
-            return Center(child: Text('No data available'));
-          } else {
-            int age = snapshot.data![0] as int;
-            int height = snapshot.data![1] as int;
-            int cweight = snapshot.data![2] as int;
-            int gweight = snapshot.data![3] as int;
-            String gender = snapshot.data![4] as String;
-            String activityLevel = snapshot.data![5] as String;
+          builder: (context, AsyncSnapshot<List<dynamic>> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data == null) {
+              return Center(child: Text('No data available'));
+            } else {
+              int age = snapshot.data![0] as int;
+              int height = snapshot.data![1] as int;
+              int cweight = snapshot.data![2] as int;
+              int gweight = snapshot.data![3] as int;
+              String gender = snapshot.data![4] as String;
+              String activityLevel = snapshot.data![5] as String;
 
-            return SingleChildScrollView(
-              //scrollDirection: Axis.horizontal,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 20.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          FutureBuilder<int>(
-                            future: total_cal(
-                                cweight, gweight, height, age, gender,
-                                activityLevel),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text("Error: ${snapshot.error}");
-                              } else {
-                                int totalCalories = snapshot.data ?? 0;
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+              return SingleChildScrollView(
+                //scrollDirection: Axis.horizontal,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 30),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 20.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            FutureBuilder<int>(
+                              future: total_cal(
+                                  cweight, gweight, height, age, gender,
+                                  activityLevel),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return CircularProgressIndicator();
+                                } else if (snapshot.hasError) {
+                                  return Text("Error: ${snapshot.error}");
+                                } else {
+                                  int totalCalories = snapshot.data ?? 0;
+                                  return Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        'Total Calories: ',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        '$totalCalories',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.deepPurple,
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }
+                              },
+                            ),
+                            SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Taken Calories: ',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                                Text(
+                                  '$_displayedConsumedCalories',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      Padding(
+                        padding: const EdgeInsets.all(20.0),
+                        child: FutureBuilder<int>(
+                          future: daily_cal(cweight, gweight, height, age,
+                              gender,
+                              activityLevel),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return CircularProgressIndicator();
+                            } else if (snapshot.hasError) {
+                              return Text('Error: ${snapshot.error}');
+                            } else {
+                              num dailyCalories = snapshot.data ?? 0.0;
+                              return CircularPercentIndicator(
+                                radius: 100,
+                                lineWidth: 7,
+                                animation: true,
+                                curve: Curves.easeInOut,
+                                animationDuration: 1000, // in milliseconds
+                                circularStrokeCap: CircularStrokeCap.round,
+                                backgroundColor: Colors.pink[100]!,
+                                progressColor: Colors.deepPurple,
+                                percent: _consumedCalories / dailyCalories,
+                                startAngle: 170,
+                                center: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'Total Calories: ',
+                                      'Today Calories',
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
+                                    SizedBox(height: 8),
                                     Text(
-                                      '$totalCalories',
+                                      '$dailyCalories',
                                       style: TextStyle(
-                                        fontSize: 18,
+                                        fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.deepPurple,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Consumed: $_consumedCalories',
+                                      style: TextStyle(
+                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
-                                );
-                              }
-                            },
-                          ),
-                          SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(
-                                'Taken Calories: ',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w400,
                                 ),
-                              ),
-                              Text(
-                                '$_displayedConsumedCalories',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              );
+                            }
+                          },
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 30),
-                    Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: FutureBuilder<int>(
-                        future: daily_cal(cweight, gweight, height, age, gender,
+                      SizedBox(height: 30),
+                      FutureBuilder<int>(
+                        future: b_cal(
+                            cweight, gweight, height, age, gender,
                             activityLevel),
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState
+                              .waiting) {
                             return CircularProgressIndicator();
                           } else if (snapshot.hasError) {
                             return Text('Error: ${snapshot.error}');
                           } else {
-                            num dailyCalories = snapshot.data ?? 0.0;
-                            return CircularPercentIndicator(
-                              radius: 100,
-                              lineWidth: 10,
-                              circularStrokeCap: CircularStrokeCap.round,
-                              backgroundColor: Colors.transparent,
-                              progressColor: Colors.deepPurple,
-                              percent: _consumedCalories / dailyCalories,
-                              startAngle: 218,
-                              center: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Today Calories',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                            _breakfastCalories = snapshot.data ?? 0;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Breakfast Calories: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    '$dailyCalories',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                ),
+                                Text(
+                                  '$_breakfastCalories',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[500],
                                   ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Consumed: $_consumedCalories',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                                ),
+                              ],
                             );
                           }
                         },
                       ),
-                    ),
-                    SizedBox(height: 30),
-                    FutureBuilder<int>(
-                      future: b_cal(
-                          cweight, gweight, height, age, gender, activityLevel),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState
-                            .waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          _breakfastCalories = snapshot.data ?? 0;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Breakfast Calories: ',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                      SizedBox(height: 30),
+                      FutureBuilder<int>(
+                        future: l_cal(
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState
+                              .waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            _lunchCalories = snapshot.data ?? 0;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Lunch Calories: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '$_breakfastCalories',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[500],
+                                Text(
+                                  '$_lunchCalories',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[500],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    FutureBuilder<int>(
-                      future: l_cal(
-                          cweight, gweight, height, age, gender, activityLevel),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState
-                            .waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          _lunchCalories = snapshot.data ?? 0;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Lunch Calories: ',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                      SizedBox(height: 30),
+                      FutureBuilder<int>(
+                        future: s_cal(
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState
+                              .waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            _snackCalories = snapshot.data ?? 0;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Snack Time Calories: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '$_lunchCalories',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[500],
+                                Text(
+                                  '$_snackCalories',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[500],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    FutureBuilder<int>(
-                      future: s_cal(
-                          cweight, gweight, height, age, gender, activityLevel),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState
-                            .waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          _snackCalories = snapshot.data ?? 0;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Snack Time Calories: ',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                      SizedBox(height: 30),
+                      FutureBuilder<int>(
+                        future: d_cal(
+                            cweight, gweight, height, age, gender,
+                            activityLevel),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState
+                              .waiting) {
+                            return CircularProgressIndicator();
+                          } else if (snapshot.hasError) {
+                            return Text('Error: ${snapshot.error}');
+                          } else {
+                            _dinnerCalories = snapshot.data ?? 0;
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  'Dinner Calories: ',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '$_snackCalories',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[500],
+                                Text(
+                                  '$_dinnerCalories',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[500],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    FutureBuilder<int>(
-                      future: d_cal(
-                          cweight, gweight, height, age, gender, activityLevel),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState
-                            .waiting) {
-                          return CircularProgressIndicator();
-                        } else if (snapshot.hasError) {
-                          return Text('Error: ${snapshot.error}');
-                        } else {
-                          _dinnerCalories = snapshot.data ?? 0;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Dinner Calories: ',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                '$_dinnerCalories',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey[500],
-                                ),
-                              ),
-                            ],
-                          );
-                        }
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    SingleChildScrollView(
-                     // scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              ],
+                            );
+                          }
+                        },
+                      ),
+                      SizedBox(height: 30),
+                      SingleChildScrollView(
+                        // scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildSmallSquareBox(
+                                Icons.local_dining, 'Breakfast',
+                                _breakfastCalories, _takenBreakfastCalories,
+                                AppColors.breakfast),
+                            _buildSmallSquareBox(
+                                Icons.fastfood, 'Lunch', _lunchCalories,
+                                _takenLunchCalories, AppColors.lunch),
+                            _buildSmallSquareBox(
+                                Icons.local_cafe, 'Snack', _snackCalories,
+                                _takenSnackCalories, AppColors.snack),
+                            _buildSmallSquareBox(
+                                Icons.restaurant, 'Dinner', _dinnerCalories,
+                                _takenDinnerCalories, AppColors.dinner1),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 70),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildSmallSquareBox(Icons.local_dining, 'Breakfast',
-                              _breakfastCalories, _takenBreakfastCalories,
-                              AppColors.breakfast),
-                          _buildSmallSquareBox(
-                              Icons.fastfood, 'Lunch', _lunchCalories,
-                              _takenLunchCalories, AppColors.lunch),
-                          _buildSmallSquareBox(
-                              Icons.local_cafe, 'Snack', _snackCalories,
-                              _takenSnackCalories, AppColors.snack),
-                          _buildSmallSquareBox(
-                              Icons.restaurant, 'Dinner', _dinnerCalories,
-                              _takenDinnerCalories, AppColors.dinner1),
+                          _buildMealType('Breakfast', context),
+                          _buildMealType('Lunch', context),
+                          _buildMealType('Snack', context),
+                          _buildMealType('Dinner', context),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 70),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildMealType('Breakfast', context),
-                        _buildMealType('Lunch', context),
-                        _buildMealType('Snack', context),
-                        _buildMealType('Dinner', context),
-                      ],
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            }
           }
-        }
-    ),
+      ),
     );
-
   }
 
 
-
-
-    Widget _buildSmallSquareBox(IconData iconData, String mealType, int calories,
+  Widget _buildSmallSquareBox(IconData iconData, String mealType, int calories,
       int takenCalories, Color color) {
     return Column(
       children: [
@@ -837,21 +856,29 @@ class _MealState extends State<meal> {
                 },
               );
             }
-                : null,
+                : () {
+              // Show a different message when the button is disabled
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    'The $mealType button is only enabled during $timing.',
+                  ),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            },
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.resolveWith<Color>(
                     (Set<MaterialState> states) {
-                  if (states.contains(MaterialState.disabled)) {
-                      // Square rounded corners
-                    return Colors
-                        .deepPurple; // Background color for disabled state
-                  }
-                  return Colors.purple; // Background color for enabled state
+                  return isButtonEnabled
+                      ? Colors.purple // Background color for enabled state
+                      : Colors.grey; // Background color for disabled state
                 },
               ),
               shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0), // Square-rounded corners
+                  borderRadius: BorderRadius.circular(
+                      10.0), // Square-rounded corners
                 ),
               ),
             ),
@@ -870,7 +897,7 @@ class _MealState extends State<meal> {
   }
 }
 
-class AddMealDialog extends StatefulWidget {
+  class AddMealDialog extends StatefulWidget {
   final Function(int) onMealAdded;
   final String mealType;
 
@@ -996,7 +1023,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
                     return Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: ListTile(
-                        title: Text(result,style: TextStyle(fontSize: 9),),
+                        title: Text(result,style: TextStyle(fontSize: 11),),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [

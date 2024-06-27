@@ -858,10 +858,18 @@ class _MyHomePageState extends State<dashboaard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Premium Offer'),
-          content: Text(
-            'Subscribe to our premium plan to get a structured diet plan, exercise plan, and access to the step counter facility. Do you want to proceed?',
-            textAlign: TextAlign.center,
+          title: Text('Premium Offer',style: TextStyle(
+            fontSize: 15.0,fontWeight: FontWeight.w700, // Adjust the font size if needed
+          ),),
+          content: Container(
+            padding: EdgeInsets.all(10.0), // Add some padding around the text
+            child: Text(
+              'Subscribe to our premium plan to get a structured diet plan,exercise plan,and access to the step counter facility.Do you want to proceed?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.0, // Adjust the font size if needed
+              ),
+            ),
           ),
           actions: [
             TextButton(
@@ -882,6 +890,7 @@ class _MyHomePageState extends State<dashboaard> {
       },
     );
   }
+
   void showInternetConnectionDialog(BuildContext context) {
     showDialog(
       context: context,

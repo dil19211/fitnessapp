@@ -222,11 +222,16 @@ class _WeightGainState extends State<Weightloss> {
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
 
                 if (_validateFields()) {
+
                   SharedPreferences prefs =
                   await SharedPreferences.getInstance();
                   await prefs.setString('selectedPage', 'weightloss');
-
-
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Form submitted successfully! Your goal is set.'),
+                      duration: Duration(seconds: 3),
+                    ),
+                  );
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
                         builder: (BuildContext context) => lossdashboaard(),

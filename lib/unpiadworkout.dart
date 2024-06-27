@@ -735,7 +735,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           IconButton(
-                            icon: Icon(Icons.cancel),
+                            icon: Icon(Icons.cancel_outlined),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                         ],
@@ -744,7 +744,16 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                         controller: emailController,
                         decoration: InputDecoration(
                           labelText: 'Email',
+                          labelStyle: TextStyle(
+                            fontSize: 18.0, // Set the font size for the label text
+                          ),
                           hintText: 'example@gmail.com',
+                          hintStyle: TextStyle(
+                            fontSize: 16.0, // Set the font size for the hint text
+                          ),
+                        ),
+                        style: TextStyle(
+                          fontSize: 16.0, // Set the font size for the input text
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {

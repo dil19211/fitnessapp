@@ -49,6 +49,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+
+
+
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -70,6 +74,7 @@ dev_dependencies:
   flutter_local_notifications: ^17.0.1
   mailer: ^6.1.0
   awesome_notifications: ^0.8.2
+  flutter_launcher_icons: ^0.13.1
   flutter_stripe: ^10.1.1
   cloud_firestore: ^4.15.8
   firebase_database: ^10.4.5
@@ -77,8 +82,21 @@ dev_dependencies:
   firebase_auth: ^4.17.8
   carousel_slider: ^4.2.1
   is_first_run: ^1.0.0
+  connectivity_plus: ^6.0.3
+  internet_connection_checker: ^1.0.0+1
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
 
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  remove_alpha_Ios: true
+  image_path: "assets/images/heartlogo.jpg"
+  min_sdk_android: 21
 
 
 
