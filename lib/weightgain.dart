@@ -1,5 +1,6 @@
-
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fitnessapp/gainPremiumDashboardPage.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:fitnessapp/user_model.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:fitnessapp/weightgaindashboard.dart';
@@ -9,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'dart:math';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'database_handler.dart';
 import 'main.dart';
@@ -53,6 +55,15 @@ class _WeightGainState extends State<WeightGain> {
     genderController.dispose();
     activityLevelController.dispose();
   }
+
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    } return true;}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +229,21 @@ class _WeightGainState extends State<WeightGain> {
               onPressed: hasError
                   ? null
                   : () async {
+                bool isConnected = await  _isConnected();
+                print("not entered");
+                if (!isConnected) {
+    //   _showNoInternetDialog();
+                  Fluttertoast.showToast(
+                    msg: "Connected to the Internet,No intenet Conection!!!",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  return;
+                }
                 insertDB();
                 getFromweightgainusers();
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
@@ -248,7 +274,7 @@ class _WeightGainState extends State<WeightGain> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                 backgroundColor: Colors.purple,
+                backgroundColor: Colors.purple,
                 textStyle: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -854,14 +880,14 @@ class _WeightGainState extends State<WeightGain> {
 
       print('email doesnot exists ...this is new user');
     }
-   // await _database?.close();
+    // await _database?.close();
   }
   Future<void> getFromweightgainusers()async{
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
     await userRepo.getweightgainusers(_database!);
 
- //   await _database?.close();
+    //   await _database?.close();
   }
   Future<String?> getNameFromEmail(String email) async {
     _database=await openDB();

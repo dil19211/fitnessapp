@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:math';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -238,7 +239,17 @@ class _MealState extends State<losspmeal> {
           prefs.getInt('displayed_consumed_calories') ?? _consumedCalories;
     });
   }
-
+  Color getBackgroundColor(double percentage) {
+    if (percentage < 0.25) {
+      return Colors.green[100]!;
+    } else if (percentage < 0.5) {
+      return Colors.yellow[100]!;
+    } else if (percentage < 0.75) {
+      return Colors.orange[100]!;
+    } else {
+      return Colors.red[100]!;
+    }
+  }
   void _saveCaloriesToSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('consumed_calories', _consumedCalories);
@@ -635,16 +646,19 @@ class _MealState extends State<losspmeal> {
                             return Text('Error.: ${snapshot.error}');
                           } else {
                             num dailyCalories = snapshot.data ?? 0.0;
+                            double percentage = (dailyCalories > 0) ? (_consumedCalories / dailyCalories) : 0.0;
                             return CircularPercentIndicator(
-                              radius: 100,
+                              radius: 120,
                               lineWidth: 7,
                               animation: true,
                               curve: Curves.easeInOut,
                               animationDuration: 1000, // in milliseconds
                               circularStrokeCap: CircularStrokeCap.round,
-                              backgroundColor: Colors.pink[100]!,
-                              progressColor: Colors.deepPurple,
-                              percent: _consumedCalories / dailyCalories,
+                              backgroundColor:getBackgroundColor(percentage),
+                              //  progressColor: Colors.deepPurple,
+                              progressColor: percentage >= 1.0 ? Colors.purpleAccent: Colors.deepPurple,
+                              percent: percentage.clamp(0.0, 1.0),
+                              // percent: _consumedCalories / dailyCalories,
                               startAngle: 170,
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -1042,8 +1056,6 @@ class _AddMealDialogState extends State<AddMealDialog> {
   List<Map<String, dynamic>> _searchResults = [];
 
 
-
-
   @override
   void initState() {
     super.initState();
@@ -1056,16 +1068,16 @@ class _AddMealDialogState extends State<AddMealDialog> {
   }
 
   void _onSearchChanged() async {
-    List<Map<String, dynamic>> results = await _getPredefinedMeals(widget.calorieRange);
+    List<Map<String, dynamic>> results = await _getPredefinedMeals(
+        widget.calorieRange);
     setState(() {
       _searchResults = results;
     });
   }
 
 
-  Future<List<Map<String, dynamic>>> _getPredefinedMeals(int calorieRange) async {
-
-
+  Future<List<Map<String, dynamic>>> _getPredefinedMeals(
+      int calorieRange) async {
     Map<String, List<String>> mealMap = {
       'Breakfast': [
         "1 egg - 100 kcal",
@@ -1090,10 +1102,9 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving kulcha and chola - 350 kcal",
         "1 green smoothie - 100 kcal",
         "1 serving yogurt porridge - 180 kcal",
-        "1 serving roti - 72kcal",
+        "1 serving roti - 72 kcal",
         "1 Whitebread_slice - 70 kcal",
         "1 brwonbread_slice - 73",
-
       ],
       'Lunch': [
         "1 serving salad - 300 kcal",
@@ -1263,65 +1274,139 @@ class _AddMealDialogState extends State<AddMealDialog> {
         '1 serving pasta salad - 400 kcal'
       ]
     };
-    // Determine the current meal type based on the current hour
-    DateTime now = DateTime.now();
-    int hour = now.hour;
+    List<Map<String, dynamic>> generateWeeklyPlan(List<String> userDiseases) {
+      List<Map<String, dynamic>> weeklyPlan = [];
+      List<String> daysOfWeek = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday'
+      ];
+      Random random = Random();
 
-    String currentMealType = '';
-    if (hour >= 7 && hour < 15) {
-      currentMealType = 'Breakfast';
-    } else if (hour >= 12 && hour < 15) {
-      currentMealType = 'Lunch';
-    } else if (hour >= 15 && hour < 18) {
-      currentMealType = 'Snack';
-    } else if (hour >= 18 && hour < 21) {
-      currentMealType = 'Dinner';
-    }
+      daysOfWeek.forEach((day) {
+        Map<String, dynamic> dailyPlan = {'day': day, 'meals': {}};
+        print('Generating plan for $day');
 
-    // Get user diseases from shared preferences
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      List<String> userDiseases = prefs.getStringList('diseases') ?? [];
-      print("$userDiseases");
+        ['Breakfast', 'Lunch', 'Snack', 'Dinner'].forEach((mealType) {
+          List<String> meals = mealMap[mealType]!;
+          List<Map<String, dynamic>> filteredMeals = [];
 
-      // Initialize variables to track the best meal candidate
-      String? bestMeal;
-      int minImpact = mealMap[currentMealType]!.length; // Initialize with max impact
-
-      List<Map<String, dynamic>> filteredMeals = [];
-
-      // Iterate over meals for the current meal type
-      mealMap[currentMealType]!.forEach((meal) {
-        int calories = int.parse(meal.split(' - ')[1].trim().split(' ')[0]);
-
-        // Check if the meal is within the calorie range
-        if (calories <= calorieRange) {
-          // Count the impact of diseases on the meal
-          int impact = 0;
-          userDiseases.forEach((disease) {
-            if (diseaseImpact[disease]?.contains(meal) == true) {
-              impact++;
+          meals.forEach((meal) {
+            int calories = int.parse(meal.split(' - ')[1].trim().split(' ')[0]);
+            if (calories <= calorieRange) {
+              int impact = 0;
+              if (userDiseases.isNotEmpty) {
+                userDiseases.forEach((disease) {
+                  if (diseaseImpact[disease]?.contains(meal) ?? false) {
+                    impact++;
+                  }
+                });
+              }
+              filteredMeals.add(
+                  {'meal': meal, 'impact': impact, 'calories': calories});
+              print(
+                  'Meal: $meal, Impact: $impact'); // Print statement for meal and its impact
             }
           });
 
-          // If the meal has lower impact, update the best meal candidate
-          if (impact < minImpact) {
-            bestMeal = meal;
-            minImpact = impact;
-            filteredMeals.clear(); // Clear the list since we found a better meal
-            filteredMeals.add({'meal': bestMeal, 'quantity': 1}); // Add the new best meal
-          } else if (impact == minImpact) {
-            filteredMeals.add({'meal': meal, 'quantity': 1}); // Add meals with equal impact
+          if (userDiseases.isNotEmpty) {
+            filteredMeals.sort((a, b) => a['impact'].compareTo(b['impact']));
           }
-        }
+
+          print(
+              'Filtered meals for $mealType on $day: $filteredMeals'); // Print statement for filtered meals
+
+          List<Map<String, dynamic>> selectedMeals = [];
+          int totalCalories = 0;
+
+          for (int i = 0; i < filteredMeals.length &&
+              totalCalories < calorieRange; i++) {
+            String selectedMeal = filteredMeals[i]['meal'];
+            int mealCalories = filteredMeals[i]['calories'];
+            if (totalCalories + mealCalories <= calorieRange) {
+              selectedMeals.add({'meal': selectedMeal, 'quantity': 1});
+              totalCalories += mealCalories;
+            }
+          }
+
+          dailyPlan['meals'][mealType] = {
+            'selectedMeals': selectedMeals,
+            'totalCalories': totalCalories
+          };
+
+          print(
+              'Added $mealType meals - Total Calories: $totalCalories'); // Debug statement for total calories
+
+        });
+
+        weeklyPlan.add(dailyPlan);
       });
 
-      return filteredMeals;
+      print('Generated weekly plan: $weeklyPlan');
+      return weeklyPlan;
+    }
+    List<Map<String, dynamic>> getCurrentMealsFromWeeklyPlan(
+        List<Map<String, dynamic>> weeklyPlan) {
+      DateTime now = DateTime.now();
+      String currentDay = [
+        'Sunday',
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday'
+      ][now.weekday % 7];
+      int hour = now.hour;
+      String currentMealType = '';
+
+      if (hour >= 7 && hour < 12) {
+        currentMealType = 'Breakfast';
+      } else if (hour >= 12 && hour < 15) {
+        currentMealType = 'Lunch';
+      } else if (hour >= 15 && hour < 18) {
+        currentMealType = 'Snack';
+      } else if (hour >= 18 && hour < 21) {
+        currentMealType = 'Dinner';
+      }
+
+      var todayPlan = weeklyPlan.firstWhere(
+              (dayPlan) => dayPlan['day'] == currentDay,
+          orElse: () => {'day': currentDay, 'meals': {}}
+      );
+
+      List<Map<String,
+          dynamic>> mealsList = todayPlan['meals'][currentMealType]?['selectedMeals'] ??
+          [];
+
+      return mealsList;
+    }
+
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      List<String> userDiseases = prefs.getStringList('diseases') ?? [];
+      print('User diseases: $userDiseases');
+
+      List<Map<String, dynamic>> weeklyPlan = generateWeeklyPlan(userDiseases);
+
+      List<Map<String, dynamic>> currentMeals = getCurrentMealsFromWeeklyPlan(
+          weeklyPlan);
+      if (currentMeals.isNotEmpty) {
+        print('Current meals: $currentMeals');
+        return currentMeals;
+      }
+
+      return [];
     } catch (error) {
       print('Error retrieving user diseases: $error');
-      return []; // Return an empty list in case of an error
+      return [];
     }
   }
+
 
 
 

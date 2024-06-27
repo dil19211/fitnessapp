@@ -396,7 +396,7 @@ class _MyHomePageState extends State<dashboaard> {
                                   () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (BuildContext context) => meal(),
+                                    builder: (BuildContext context) => pmeal(),
                                     settings: RouteSettings(arguments: emailController.text.toString()),
                                   ),
                                 );

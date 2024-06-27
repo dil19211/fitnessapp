@@ -1,5 +1,5 @@
-
-
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fitnessapp/user_model.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +52,12 @@ class _WeightGainState extends State<Weightloss> {
     genderController.dispose();
     activityLevelController.dispose();
   }
+
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    } return true;}
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +224,21 @@ class _WeightGainState extends State<Weightloss> {
                   ? null
                   : () async {
                 insertDB();
+                bool isConnected = await  _isConnected();
+                print("not entered");
+                if (!isConnected) {
+                  //   _showNoInternetDialog();
+                  Fluttertoast.showToast(
+                    msg: "Connected to the Internet,No intenet Conection!!!",
+                    toastLength: Toast.LENGTH_LONG,
+                    gravity: ToastGravity.TOP,
+                    timeInSecForIosWeb: 1,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                    fontSize: 16.0,
+                  );
+                  return;
+                }
                 getFromweightlossusers();
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
 

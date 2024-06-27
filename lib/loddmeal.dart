@@ -56,6 +56,17 @@ class _MealState extends State<lossmeal> {
           prefs.getInt('displayed_consumed_calories') ?? _consumedCalories;
     });
   }
+  Color getBackgroundColor(double percentage) {
+    if (percentage < 0.25) {
+      return Colors.green[100]!;
+    } else if (percentage < 0.5) {
+      return Colors.yellow[100]!;
+    } else if (percentage < 0.75) {
+      return Colors.orange[100]!;
+    } else {
+      return Colors.red[100]!;
+    }
+  }
 
   void _saveCaloriesToSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -497,16 +508,19 @@ class _MealState extends State<lossmeal> {
                               return Text('Error: ${snapshot.error}');
                             } else {
                               num dailyCalories = snapshot.data ?? 0.0;
+                              double percentage = (dailyCalories > 0) ? (_consumedCalories / dailyCalories) : 0.0;
                               return CircularPercentIndicator(
-                                radius: 100,
+                                radius: 120,
                                 lineWidth: 7,
                                 animation: true,
                                 curve: Curves.easeInOut,
                                 animationDuration: 1000, // in milliseconds
                                 circularStrokeCap: CircularStrokeCap.round,
-                                backgroundColor: Colors.pink[100]!,
-                                progressColor: Colors.deepPurple,
-                                percent: _consumedCalories / dailyCalories,
+                                backgroundColor:getBackgroundColor(percentage),
+                                //  progressColor: Colors.deepPurple,
+                                progressColor: percentage >= 1.0 ? Colors.purpleAccent: Colors.deepPurple,
+                                percent: percentage.clamp(0.0, 1.0),
+                                // percent: _consumedCalories / dailyCalories,
                                 startAngle: 170,
                                 center: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
