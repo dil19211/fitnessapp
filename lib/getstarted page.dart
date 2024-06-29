@@ -15,11 +15,25 @@ class welcome extends StatelessWidget {
             Lottie.asset('assets/images/getstarted.json'), // Replace with your animation file path
             SizedBox(height: 100), // Adjust the height as needed// Adjust the height as needed
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0), // Add padding for better text alignment
-              child: Text(
-                'Welcome to GritFit! Get ready to transform your fitness journey with our tailored workouts, nutrition plans, and progress tracking.',
+              padding: const EdgeInsets.symmetric(horizontal: 17.0), // Add padding for better text alignment
+              child: RichText(
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.black54,fontStyle: FontStyle.italic), // Adjust text style as needed
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: 'Welcome to ',
+                      style: TextStyle(fontSize: 17, color: Colors.purple,fontWeight: FontWeight.w800),
+                    ),
+                    TextSpan(
+                      text: 'GritFit',
+                      style: TextStyle(fontSize: 16, color: Colors.purple,fontWeight: FontWeight.w800),
+                    ),
+                    TextSpan(
+                      text: '! Get ready to transform your fitness journey with our tailored workouts, nutrition plans, and progress tracking.',
+                      style: TextStyle(fontSize: 16, color: Colors.black54,),
+                    ),
+                  ],
+                ),
               ),
             ),
             SizedBox(height: 40),

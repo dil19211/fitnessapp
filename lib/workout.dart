@@ -821,8 +821,8 @@ class _WorkoutState extends State<Workout> {
                                 toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.TOP,
                                 timeInSecForIosWeb: 2,
-                                backgroundColor: Colors.pink[100],
-                                textColor: Colors.white,
+                                backgroundColor: Colors.purple[100],
+                                textColor: Colors.black,
                                 fontSize: 15
                             );
                           }
@@ -1324,68 +1324,80 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
   void _setTimer() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Enable scroll control for smaller screens
       builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Set Timer (in minutes)',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Minutes',
-                ),
-                onChanged: (value) {
-                  _timeInMinutes = int.tryParse(value) ?? 0;
-                },
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  List<int>? timeRange = exerciseTimeRange[widget.exerciseName];
-                  if (timeRange != null &&
-                      (_timeInMinutes < timeRange[0] ||
-                          _timeInMinutes > timeRange[1])) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Invalid Time'),
-                          content: Text(
-                              'Please enter a time between ${timeRange[0]} and ${timeRange[1]} minutes for ${widget.exerciseName}.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
+        return GestureDetector( // GestureDetector to handle taps outside the keyboard area
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode()); // Dismiss keyboard on tap outside
+          },
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+            ),
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Set Timer (in minutes)',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Minutes',
+                    ),
+                    onChanged: (value) {
+                      _timeInMinutes = int.tryParse(value) ?? 0;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      List<int>? timeRange = exerciseTimeRange[widget.exerciseName];
+                      if (timeRange != null &&
+                          (_timeInMinutes < timeRange[0] ||
+                              _timeInMinutes > timeRange[1])) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Invalid Time'),
+                              content: Text(
+                                  'Please enter a time between ${timeRange[0]} and ${timeRange[1]} minutes for ${widget.exerciseName}.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
                         );
-                      },
-                    );
-                  } else {
-                    setState(() {
-                      _timerSet = true;
-                      _timeInSeconds = _timeInMinutes * 60;
-                    });
-                  }
-                },
-                child: Text('Set'),
+                      } else {
+                        setState(() {
+                          _timerSet = true;
+                          _timeInSeconds = _timeInMinutes * 60;
+                        });
+                      }
+                    },
+                    child: Text('Set'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
     );
   }
+
 
   void _startTimer() {
     print('Timer started');
@@ -1548,6 +1560,9 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
     final _formKey = GlobalKey<FormState>();
     AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
 
+    // Initialize the email controller with an initial value if needed
+    emailController.text = ''; // Replace with initial email value if available
+
     showDialog(
       context: context,
       builder: (context) {
@@ -1556,7 +1571,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
             return AlertDialog(
               contentPadding: EdgeInsets.zero,
               content: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 120.0),
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 40.0),
                 child: Form(
                   key: _formKey,
                   autovalidateMode: _autoValidateMode,
@@ -1577,15 +1592,17 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                         decoration: InputDecoration(
                           labelText: 'Email',
                           labelStyle: TextStyle(
-                            fontSize: 18.0, // Set the font size for the label text
+                            color: Colors.purple, // Ensure the color is set to purple
+                            fontSize: 18.0,
                           ),
                           hintText: 'example@gmail.com',
                           hintStyle: TextStyle(
-                            fontSize: 16.0, // Set the font size for the hint text
+                            fontSize: 16.0,
                           ),
                         ),
                         style: TextStyle(
-                          fontSize: 16.0, // Set the font size for the input text
+                          color: Colors.purple, // Ensure the color is set to purple
+                          fontSize: 16.0,
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
@@ -1631,6 +1648,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
       },
     );
   }
+
 //piad workout
   void showInternetConnectionDialog(BuildContext context, String videoUrl) {
     showDialog(

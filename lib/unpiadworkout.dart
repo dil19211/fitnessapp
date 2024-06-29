@@ -712,6 +712,8 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
       ),
     );
   }
+
+  //unpiad workut dilog
   void showUserForm(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
     AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
@@ -799,7 +801,8 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
     );
   }
 
-  ///unpiad workut dilog
+
+
   void showInternetConnectionDialog(BuildContext context) {
     showDialog(
       context: context,

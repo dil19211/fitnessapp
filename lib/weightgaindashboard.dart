@@ -423,7 +423,7 @@ class _MyHomePageState extends State<dashboaard> {
 
                       items: [
                         {
-                          'text': 'Every step you take brings you closer to a stronger\n, healthier you\nKeep moving forward!',
+                          'text': 'Every step you take brings you closer to a stronger\n,healthier you\nKeep moving forward!',
                           'animation': 'assets/images/ggg.json',
                           'gradient': LinearGradient(
                             colors: [Colors.blue[200]!, Colors.purple],
@@ -858,16 +858,25 @@ class _MyHomePageState extends State<dashboaard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Premium Offer',style: TextStyle(
-            fontSize: 15.0,fontWeight: FontWeight.w700, // Adjust the font size if needed
-          ),),
+          title: Text(
+            'Premium Offer',
+            style: TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.purple,
+            ),
+          ),
           content: Container(
-            padding: EdgeInsets.all(10.0), // Add some padding around the text
+            padding: EdgeInsets.all(10.0),
             child: Text(
-              'Subscribe to our premium plan to get a structured diet plan,exercise plan,and access to the step counter facility.Do you want to proceed?',
+              'Subscribe to our premium plan to get:\n\n'
+                  '- A structured diet plan\n'
+                  '- Exercise plan\n'
+                  '- Access to the step counter facility\n\n'
+                  'Do you want to proceed?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 13.0, // Adjust the font size if needed
+                fontSize: 13.0,
               ),
             ),
           ),
@@ -947,7 +956,7 @@ class _MyHomePageState extends State<dashboaard> {
 
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
-      paymentIntentData = await createPaymentIntent('20', 'USD');
+      paymentIntentData = await createPaymentIntent('300', 'USD');
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentData!['client_secret'],

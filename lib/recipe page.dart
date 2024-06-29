@@ -631,7 +631,7 @@ class _RecipePageState extends State<RecipePage> {
             return AlertDialog(
               contentPadding: EdgeInsets.zero,
               content: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 120.0),
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 40.0),
                 child: Form(
                   key: _formKey,
                   autovalidateMode: _autoValidateMode,

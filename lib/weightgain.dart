@@ -237,9 +237,9 @@ class _WeightGainState extends State<WeightGain> {
                     msg: "Connected to the Internet,No intenet Conection!!!",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.TOP,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.green,
-                    textColor: Colors.white,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: Colors.purple[100]!,
+                    textColor: Colors.black,
                     fontSize: 16.0,
                   );
                   return;

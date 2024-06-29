@@ -619,6 +619,8 @@ class _RecipePageState extends State<uRecipePage> {
     );
   }
 
+
+//unpiad dialog
   void showUserForm(BuildContext context, Map<String, String> recipe) {
     final _formKey = GlobalKey<FormState>();
     AutovalidateMode _autoValidateMode = AutovalidateMode.disabled;
@@ -708,7 +710,6 @@ class _RecipePageState extends State<uRecipePage> {
       },
     );
   }
-//unpiad dialog
   void showInternetConnectionDialog(BuildContext context,
       Map<String, String> recipe) {
     showDialog(
