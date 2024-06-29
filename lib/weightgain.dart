@@ -1,4 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:fitnessapp/gainPremiumDashboardPage.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:fitnessapp/user_model.dart';
@@ -238,14 +240,29 @@ class _WeightGainState extends State<WeightGain> {
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.TOP,
                     timeInSecForIosWeb: 2,
-                    backgroundColor: Colors.purple[100]!,
-                    textColor: Colors.black,
+                    backgroundColor: Colors.redAccent,
+                    textColor: Colors.white,
                     fontSize: 16.0,
                   );
                   return;
                 }
                 insertDB();
                 getFromweightgainusers();
+                CollectionReference collref= FirebaseFirestore.instance.collection('weight_gain_users');
+                collref.add({
+                  'name': nameController.text,
+                  'email':emailController.text,
+                  'age':ageController.text,
+                  'height':heightFeetController.text,
+                  'gender':genderController.text,
+                  'activity_level':activityLevelController.text,
+                  'cweight':currentWeightController.text,
+                  'gweight':goalWeightController.text,
+                }).then((value) {
+                  print("User Added in firebase");
+                }).catchError((error) {
+                  print("Failed to add user in firebase: $error");
+                });
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
 
                 if (_validateFields()) {

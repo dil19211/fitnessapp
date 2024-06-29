@@ -159,7 +159,7 @@ class _WaterState extends State<Water> {
             child: TextField(
               controller: goalController,
               keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: 'Enter your daily goal (min 6)'),
+              decoration: InputDecoration(labelText: 'Enter your daily goal (min 8)'),
             ),
           ),
           actions: [
@@ -170,9 +170,12 @@ class _WaterState extends State<Water> {
                   if (newGoal >= 8 && newGoal <= 12) {
                     dailyGoal = newGoal;
                     prefs.setInt('dailyGoal', dailyGoal); // Save the new daily goal
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Daily water goal is set.')),
+                    );
                     _saveWaterCount();
-                  } else {
 
+                  } else {
                     // Show a warning if the goal is set below the minimum
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Daily water goal must be between 8 and 12 glasses according to Doctor recommendation.')),

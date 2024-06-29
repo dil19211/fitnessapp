@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database_handler.dart';
 import 'lossdashboard.dart';
 
@@ -232,14 +232,29 @@ class _WeightGainState extends State<Weightloss> {
                     msg: "Connected to the Internet,No intenet Conection!!!",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.TOP,
-                    timeInSecForIosWeb: 1,
-                    backgroundColor: Colors.green,
+                    timeInSecForIosWeb: 2,
+                    backgroundColor: Colors.redAccent,
                     textColor: Colors.white,
                     fontSize: 16.0,
                   );
                   return;
                 }
                 getFromweightlossusers();
+                CollectionReference collref= FirebaseFirestore.instance.collection('weight_loss_users');
+                collref.add({
+                  'name': nameController.text,
+                  'email':emailController.text,
+                  'age':ageController.text,
+                  'height':heightFeetController.text,
+                  'gender':genderController.text,
+                  'activity_level':activityLevelController.text,
+                  'cweight':currentWeightController.text,
+                  'gweight':goalWeightController.text,
+                }).then((value) {
+                  print("User Added in firebase");
+                }).catchError((error) {
+                  print("Failed to add user in firebase: $error");
+                });
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
 
                 if (_validateFields()) {

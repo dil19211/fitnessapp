@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 //import 'package:db4/user_repo.dart';
 
+import 'losspmeal.dart';
 import 'lossstep.dart';
 import 'nextpage.dart';
 import 'package:fitnessapp/pgainmeal.dart';
@@ -90,6 +92,14 @@ class _MyHomePageState extends State<losspreminum> {
                           'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
                         getcurrentweightlossuser(emailController.text.toString());
+                        CollectionReference collref= FirebaseFirestore.instance.collection('pkg_payment_users');
+                        collref.add({
+                          'email':emailController.text,
+                       }).then((value) {
+                          print("User Added in firebase");
+                        }).catchError((error) {
+                          print("Failed to add user in firebase: $error");
+                        });
                         String email = emailController.text.toString();
                         String? name = await getNameFromEmail(email);
                         if (name != null) {
@@ -187,6 +197,10 @@ class _MyHomePageState extends State<losspreminum> {
                           'Hello User!',
                           'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
+                        CollectionReference collref= FirebaseFirestore.instance.collection('weight_loss_users');
+                        collref.add({
+                          'email':emailController.text,
+                        });
                         getcurrentweightlossuser(emailController.text.toString());
                         String email = emailController.text.toString();
                         String? name = await getNameFromEmail(email);
@@ -476,7 +490,7 @@ class _MyHomePageState extends State<losspreminum> {
                                   () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (BuildContext context) => losspreminum(),
+                                    builder: (BuildContext context) =>  losspmeal(),
                                     settings: RouteSettings(arguments: emailController.text.toString()),
                                   ),
                                 );

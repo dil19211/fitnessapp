@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'nextpage.dart';
 import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/recipe%20page.dart';
@@ -87,6 +88,14 @@ class _MyHomePageState extends State<preminum> {
                           'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
                         getcurrentweightgainuser(emailController.text.toString());
+                        CollectionReference collref= FirebaseFirestore.instance.collection('pkg_payment_users');
+                        collref.add({
+                          'email':emailController.text,
+                        }).then((value) {
+                          print("User Added in firebase");
+                        }).catchError((error) {
+                          print("Failed to add user in firebase: $error");
+                        });
                         String email = emailController.text.toString();
                         String? name = await getNameFromEmail(email);
                         if (name != null) {

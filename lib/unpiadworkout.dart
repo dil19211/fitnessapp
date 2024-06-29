@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:http/http.dart' as http;
@@ -726,7 +727,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
             return AlertDialog(
               contentPadding: EdgeInsets.zero,
               content: SingleChildScrollView(
-                padding: EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 120.0),
+                padding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 40.0),
                 child: Form(
                   key: _formKey,
                   autovalidateMode: _autoValidateMode,
@@ -755,6 +756,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                           ),
                         ),
                         style: TextStyle(
+                          color:Colors.purple,
                           fontSize: 16.0, // Set the font size for the input text
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -825,6 +827,14 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                       'Payment Successful',
                       'Welcome! you have subscribed the premium package of GritFit.',
                     );
+                    CollectionReference collref= FirebaseFirestore.instance.collection('partial_payment_users');
+                    collref.add({
+                      'email':emailController.text,
+                    }).then((value) {
+                      print("User Added in firebase");
+                    }).catchError((error) {
+                      print("Failed to add user in firebase: $error");
+                    });
                     launchVideo(widget.videoUrl);
                   } else {
                     showDialog(

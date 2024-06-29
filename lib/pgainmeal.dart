@@ -488,9 +488,9 @@ class _MealState extends State<pmeal> {
     if (percentage < 0.25) {
       return Colors.green[100]!;
     } else if (percentage < 0.5) {
-      return Colors.yellow[100]!;
+      return Colors.purple[100]!;
     } else if (percentage < 0.75) {
-      return Colors.orange[100]!;
+      return Colors.orange[200]!;
     } else {
       return Colors.red[100]!;
     }
@@ -646,7 +646,7 @@ class _MealState extends State<pmeal> {
                             return Text('Error.: ${snapshot.error}');
                           } else {
                             num dailyCalories = snapshot.data ?? 0.0;
-                            double percentage = (dailyCalories > 0) ? (_consumedCalories / dailyCalories) : 0.0;
+                            double percentage = (dailyCalories > 0) ? ( _consumedCalories/dailyCalories ).clamp(0.0, 1.0) : 0.0;
                             return CircularPercentIndicator(
                               radius: 120,
                               lineWidth: 7,
@@ -655,12 +655,11 @@ class _MealState extends State<pmeal> {
                               animationDuration: 1000, // in milliseconds
                               circularStrokeCap: CircularStrokeCap.round,
                               backgroundColor:getBackgroundColor(percentage),
-                            //  progressColor: Colors.deepPurple,
+                              //  progressColor: Colors.deepPurple,
                               progressColor: percentage >= 1.0 ? Colors.purpleAccent: Colors.deepPurple,
                               percent: percentage.clamp(0.0, 1.0),
                               // percent: _consumedCalories / dailyCalories,
                               startAngle: 170,
-
                               center: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -923,17 +922,17 @@ class _MealState extends State<pmeal> {
         calorieRange = _breakfastCalories;
         break;
       case 'Lunch':
-        isButtonEnabled = now.hour >= 12 && now.hour < 15;//15
+        isButtonEnabled = now.hour >= 8 && now.hour < 15;//15
         timing = '12 PM - 3 PM';
         calorieRange = _lunchCalories;
         break;
       case 'Snack':
-        isButtonEnabled = now.hour >= 15 && now.hour < 18;//18
+        isButtonEnabled = now.hour >= 9 && now.hour < 18;//18
         timing = '3 PM - 6 PM';
         calorieRange = _snackCalories;
         break;
       case 'Dinner':
-        isButtonEnabled = now.hour >= 18 && now.hour < 21;//21
+        isButtonEnabled = now.hour >= 10 && now.hour < 21;//21
         timing = '6 PM - 9 PM';
         calorieRange = _dinnerCalories;
         break;
@@ -1104,10 +1103,16 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving yogurt porridge - 180 kcal",
         "1 serving roti - 72 kcal",
         "1 Whitebread_slice - 70 kcal",
-        "1 brwonbread_slice - 73",
+        "1 brwonbread_slice - 73 kcal",
+        "1 Avocado_toast  - 130 kcal",
+        "1 Egg White Omelette - 60 kcal ",
+        "1cup_blactea - 2 kcal  ",
+        "1cup_greentea - 2 kcal",
+        "1cup_herbaltea - 0 kcal",
+        "1cup_milltea - 10 kcal",
+        "1 radish_paratha - 150 kcal",
       ],
       'Lunch': [
-        "1 serving salad - 300 kcal",
         "1 burger - 500 kcal",
         "1 bowl soup - 200 kcal",
         "1 serving sushi - 350 kcal",
@@ -1134,7 +1139,14 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving aloo gobi (potato and cauliflower) - 200 kcal",
         "1 serving palak paneer (spinach and paneer) - 300 kcal",
         "1 serving baingan bharta (eggplant) - 150 kcal",
-        "1 serving bhindi masala (okra) - 180 kcal"
+        "1 serving bhindi masala (okra) - 180 kcal",
+        "1 fried_chickenSlice - 150 kcal",
+        "1 serving_codfish - 90 kcal ",
+        " 1 Beef_meatball - 60 kcal ",
+        "1 chicken_meatball - 60 kcal",
+        "1 pork_meatball - 35 kcal",
+        " 1 cucumber_slice - 16 kcal"
+
       ],
       'Snack': [
         "1 apple - 80 kcal",
@@ -1182,7 +1194,8 @@ class _AddMealDialogState extends State<AddMealDialog> {
       'Dinner': [
         "1 serving chicken - 300 kcal",
         "2 slices pizza - 400 kcal",
-        "1 bowl rice - 250 kcal",
+        "1 palletter_whiteRice - 250 kcal",
+        "1 palletter_vegetablesRice - 250 kcal",
         "1 serving kung pao chicken - 350 kcal",
         "1 serving pad thai - 450 kcal",
         "1 bowl fried rice - 400 kcal",
@@ -1204,7 +1217,8 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving palak paneer (spinach and paneer) - 300 kcal",
         "1 serving baingan bharta (eggplant) - 150 kcal",
         "1 serving bhindi masala (okra) - 180 kcal",
-        "1 serving sushi - 350 kcal"
+        "1 serving sushi - 350 kcal",
+
       ]
     };
 
@@ -1312,7 +1326,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
           List<Map<String, dynamic>> selectedMeals = [];
           int totalCalories = 0;
 
-          for (int i = 0; i < filteredMeals.length && totalCalories < calorieRange; i++) {
+          for (int i = 0; i < filteredMeals.length && totalCalories <=calorieRange; i++) {
             String selectedMeal = filteredMeals[i]['meal'];
             int mealCalories = filteredMeals[i]['calories'];
             if (totalCalories + mealCalories <= calorieRange) {
@@ -1344,11 +1358,11 @@ class _AddMealDialogState extends State<AddMealDialog> {
 
       if (hour >= 7 && hour < 12) {
         currentMealType = 'Breakfast';
-      } else if (hour >= 12 && hour < 15) {
+      } else if (hour >= 8 && hour < 15) {
         currentMealType = 'Lunch';
-      } else if (hour >= 15 && hour < 18) {
+      } else if (hour >= 9 && hour < 18) {
         currentMealType = 'Snack';
-      } else if (hour >= 18 && hour < 21) {
+      } else if (hour >= 10 && hour < 21) {
         currentMealType = 'Dinner';
       }
 

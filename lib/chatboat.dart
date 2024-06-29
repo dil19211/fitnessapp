@@ -67,7 +67,7 @@ class _ChatBotState extends State<ChatBot> {
     }
 
     try {
-      final response = await http.get(Uri.parse('https://www.google.com')).timeout(Duration(seconds: 5));
+      final response = await http.get(Uri.parse('https://www.google.com')).timeout(Duration(seconds: 4));
       if (response.statusCode == 200) {
         return true;
       }
@@ -97,7 +97,7 @@ class _ChatBotState extends State<ChatBot> {
       appBar: AppBar(
         backgroundColor: Colors.purple[500],
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Icon(
               Icons.chat,
