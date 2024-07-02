@@ -120,7 +120,51 @@ class NotificationUtils {
       id: 90,
       channelKey: 'basic_channel',
       title: '',
-      body: 'Mkae Sure you have taken your Today"s steps!!!!',
+      body: 'Make Sure you have taken your Today"s steps',
+      color: Colors.lightBlueAccent,
+      backgroundColor: Colors.white70,
+    ),
+  );
+  }
+  static void waterremindermorning(){AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 100,
+      channelKey: 'basic_channel',
+      title: '',
+      body: 'Good morning! Kickstart your day with a glass of water. Remember, staying hydrated is key to a great day!',
+      color: Colors.lightBlueAccent,
+      backgroundColor: Colors.white70,
+    ),
+  );
+  }
+  static void waterreminderday(){AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 110,
+      channelKey: 'basic_channel',
+      title: '',
+      body: 'Its midday! Dont forget to drink water to keep your energy levels up.',
+      color: Colors.lightBlueAccent,
+      backgroundColor: Colors.white70,
+    ),
+  );
+  }
+  static void waterreminderevening(){AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 120,
+      channelKey: 'basic_channel',
+      title: '',
+      body: 'Hydration reminder: Make sure youre halfway to your waterintake goal for today.',
+      color: Colors.lightBlueAccent,
+      backgroundColor: Colors.white70,
+    ),
+  );
+  }
+  static void waterremindenight(){AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 130,
+      channelKey: 'basic_channel',
+      title: '',
+      body: 'Before you wind down, drink a final glass of water to stay hydrated overnight.',
       color: Colors.lightBlueAccent,
       backgroundColor: Colors.white70,
     ),

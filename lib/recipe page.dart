@@ -479,17 +479,25 @@ class _RecipePageState extends State<RecipePage> {
                     children: [
                       Image.asset(recipe['image'] ?? ''),
                       SizedBox(height: 10),
-                      Text('Ingredients:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['ingredients'] ?? ''),
                       SizedBox(height: 10),
-                      Text('Recipe:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Recipe:', style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['recipe'] ?? ''),
+                      SizedBox(height: 10),
+                      Text(
+                        'Calories: ${recipe['calories']} kcal',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                          fontSize: 11.0,
+                        ),
+                      ),
                       SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () async {
-                          showUserForm(context, recipe);
+                          //showUserForm(context, recipe);
+                          showInternetConnectionDialog(context, recipe);
                         },
                         style: ElevatedButton.styleFrom(
                           shape: RoundedRectangleBorder(
@@ -504,19 +512,6 @@ class _RecipePageState extends State<RecipePage> {
                     ],
                   ),
                 ),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  padding: EdgeInsets.symmetric(horizontal: 13.0, vertical: 8.0),
-                  child: Text(
-                    'Calories: ${recipe['calories']} kcal',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                      fontSize: 11.0,
-
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -524,6 +519,7 @@ class _RecipePageState extends State<RecipePage> {
       },
     );
   }
+
 
 
   @override

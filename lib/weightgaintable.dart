@@ -1,17 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 class gaintable extends StatefulWidget {
   @override
-  _TableLossState createState() => _TableLossState();
+  _GainTableState createState() => _GainTableState();
 }
 
-class _TableLossState extends State<gaintable> {
-  List<Map<String, String>> userData = [];
+class _GainTableState extends State<gaintable> {
+  List<Map<String, dynamic>> userData = [];
 
   @override
   void initState() {
     super.initState();
-    fetchDataFromDatabase();
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    try {
+      QuerySnapshot querySnapshot = await _firestore.collection('weight_gain_users').get();
+      setState(() {
+        userData = querySnapshot.docs.asMap().entries.map((entry) {
+          int index = entry.key + 1; // Incremental ID starts from 1
+          Map<String, dynamic> data = entry.value.data() as Map<String, dynamic>;
+          data['id'] = index; // Add ID to the data
+          return data;
+        }).toList();
+      });
+    } catch (e) {
+      print("Error fetching data: $e");
+    }
   }
 
   @override
@@ -41,36 +60,35 @@ class _TableLossState extends State<gaintable> {
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Container(
-            padding: EdgeInsets.all(8.0), // Add padding for the border
+            padding: EdgeInsets.all(8.0),
             child: DataTable(
-              border: TableBorder.all(color: Colors.purple, width: 2.0), // Table border
+              border: TableBorder.all(color: Colors.black26, width: 2.0),
               columnSpacing: 16.0,
               dataRowHeight: 60.0,
-              columns: userData.isNotEmpty
-                  ? userData[0].keys.map((fieldName) {
-                return DataColumn(
-                  label: Container(
-                    child: Text(
-                      fieldName,
-                      style: TextStyle(color: Colors.purple),
-                    ),
-                  ),
-                );
-              }).toList()
-                  : [],
-              rows: userData.map((data) {
+              columns: [
+                DataColumn(label: Text('ID')),
+                DataColumn(label: Text('Name')),
+                DataColumn(label: Text('Email')),
+                DataColumn(label: Text('Age')),
+                DataColumn(label: Text('Height')),
+                DataColumn(label: Text('Gender')),
+                DataColumn(label: Text('Activity-level')),
+                DataColumn(label: Text('Current-weight')),
+                DataColumn(label: Text('Goal-weight')),
+              ],
+              rows: userData.map((users) {
                 return DataRow(
-                  cells: data.keys.map((fieldName) {
-                    return DataCell(
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 7.0,
-                          horizontal: 12.0,
-                        ),
-                        child: Text(data[fieldName] ?? ''),
-                      ),
-                    );
-                  }).toList(),
+                  cells: <DataCell>[
+                    DataCell(Text(users['id']?.toString() ?? '')),
+                    DataCell(Text(users['name'] ?? '')),
+                    DataCell(Text(users['email'] ?? '')),
+                    DataCell(Text(users['age']?.toString() ?? '')),
+                    DataCell(Text(users['height']?.toString() ?? '')),
+                    DataCell(Text(users['gender'] ?? '')),
+                    DataCell(Text(users['activity_level'] ?? '')),
+                    DataCell(Text(users['cweight']?.toString() ?? '')),
+                    DataCell(Text(users['gweight']?.toString() ?? '')),
+                  ],
                 );
               }).toList(),
             ),
@@ -79,7 +97,7 @@ class _TableLossState extends State<gaintable> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          fetchDataFromDatabase();
+          fetchData();
         },
         label: Text(
           'Records: ${userData.length}',
@@ -101,42 +119,5 @@ class _TableLossState extends State<gaintable> {
         backgroundColor: Colors.purple,
       ),
     );
-  }
-
-  void fetchDataFromDatabase() {
-    setState(() {
-      userData = [
-        {
-          'name': 'Jane Doe',
-          'age': '25',
-          'height': '5\'6"',
-          'currentWeight': '140 lbs',
-          'gainWeight': 'Yes',
-          'gender': 'Female',
-          'email': 'jane@example.com',
-          'activityLevel': 'Medium'
-        },
-        {
-          'name': 'John Doe',
-          'age': '30',
-          'height': '6\'0"',
-          'currentWeight': '180 lbs',
-          'gainWeight': 'No',
-          'gender': 'Male',
-          'email': 'john@example.com',
-          'activityLevel': 'High'
-        },
-        {
-          'name': 'John Doe',
-          'age': '30',
-          'height': '6\'0"',
-          'currentWeight': '180 lbs',
-          'gainWeight': 'No',
-          'gender': 'Male',
-          'email': 'john@example.com',
-          'activityLevel': 'High'
-        },
-      ];
-    });
   }
 }

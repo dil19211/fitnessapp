@@ -10,7 +10,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database_handler.dart';
 import 'lossdashboard.dart';
-
+import 'package:http/http.dart' as http;
 
 class Weightloss extends StatefulWidget {
   @override
@@ -57,7 +57,20 @@ class _WeightGainState extends State<Weightloss> {
     bool hasConnection = await InternetConnectionChecker().hasConnection;
     if (!hasConnection) {
       return false;
-    } return true;}
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'))
+          .timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -264,7 +277,7 @@ class _WeightGainState extends State<Weightloss> {
                   await prefs.setString('selectedPage', 'weightloss');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Form submitted successfully! Your goal is set.'),
+                      content: Text('Your goal is set Sucessfully.'),
                       duration: Duration(seconds: 3),
                     ),
                   );
@@ -527,7 +540,7 @@ class _WeightGainState extends State<Weightloss> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('BMI Result'),
+          title: Text('BMI Result',style: TextStyle(fontWeight: FontWeight.w500,color: Colors.purple,fontSize: 18,),),
           content: Text(message),
           actions: [
             TextButton(
@@ -547,7 +560,7 @@ class _WeightGainState extends State<Weightloss> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Weight Suggestion'),
+          title: Text('BMI Result',style: TextStyle(fontWeight: FontWeight.w500,color: Colors.purple,fontSize: 18,),),
           content: Text(suggestion),
           actions: [
             TextButton(

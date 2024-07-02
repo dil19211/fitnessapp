@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import 'package:fitnessapp/gainPremiumDashboardPage.dart';
+import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:fitnessapp/user_model.dart';
 import 'package:fitnessapp/user_repo.dart';
@@ -58,12 +57,23 @@ class _WeightGainState extends State<WeightGain> {
     activityLevelController.dispose();
   }
 
+
   Future<bool> _isConnected() async {
     bool hasConnection = await InternetConnectionChecker().hasConnection;
     if (!hasConnection) {
       return false;
-    } return true;}
+    }
 
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com')).timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
 
 
 
@@ -271,9 +281,9 @@ class _WeightGainState extends State<WeightGain> {
                   await prefs.setString('selectedPage', 'weightgain');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Form submitted successfully! Your goal is set.'),
+                      content: Text('Your goal is set Sucessfully.'),
                       duration: Duration(seconds: 3),
-                    ),
+                    )
                   );
 
                   Navigator.of(context).pushReplacement(
@@ -535,7 +545,7 @@ class _WeightGainState extends State<WeightGain> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('BMI Result'),
+          title: Text('BMI Result',style: TextStyle(fontWeight: FontWeight.w500,color: Colors.purple,fontSize: 18,),),
           content: Text(message),
           actions: [
             TextButton(
@@ -555,7 +565,7 @@ class _WeightGainState extends State<WeightGain> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Weight Suggestion'),
+          title: Text('BMI Result',style: TextStyle(fontWeight: FontWeight.w500,color: Colors.purple,fontSize: 18,),),
           content: Text(suggestion),
           actions: [
             TextButton(

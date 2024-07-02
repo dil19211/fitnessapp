@@ -1,4 +1,5 @@
-
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +50,42 @@ class _LoginPageState extends State<LoginPage> {
     _obscureText.dispose();
     super.dispose();
   }
+  void _showNoInternetToast() {
+    Fluttertoast.showToast(
+      msg: "No internet connection available",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.redAccent,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
+  void _login() async {
+    bool isConnected = await _isConnected();
+    if (!isConnected) {
+      _showNoInternetToast();
+      return;
+    }
+  }
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'))
+          .timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
+
 
   void _validateEmail() {
     final value = _emailController.text;
@@ -81,6 +118,28 @@ class _LoginPageState extends State<LoginPage> {
     bool hasErrors = _showEmailError || _showPasswordError;
 
     return Scaffold(
+    //  backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(kToolbarHeight),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [g1, g1], // Replace with your gradient colors
+
+            ),
+          ),
+          child: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                Navigator.of(context).pop(); // Navigate back to previous screen
+              },
+            ),
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () {
           _emailFocus.unfocus();
@@ -213,10 +272,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       onPressed: () async {
                         sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
-
-                        SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                        await prefs.setString('selectedPage', 'login');
                         Navigator.of(context).pushReplacement(
                           MaterialPageRoute(
                             builder: (BuildContext context) => admin(),
@@ -224,6 +279,7 @@ class _LoginPageState extends State<LoginPage> {
                         );
 
                         // Validate fields
+                        _login();
                         _validateFieldsAndSubmit();
                         if (!_showEmailError && !_showPasswordError) {
                           Future<User?> loginUsingEmailPassword(
@@ -237,6 +293,9 @@ class _LoginPageState extends State<LoginPage> {
                                   email: email, password: password);
                               user = userCredential.user;
                               // sendMail(recipientEmail: _emailController.text.toString(),mailMessage: 'u are using gritfit!!!');
+
+                              SharedPreferences prefs = await SharedPreferences.getInstance();
+                              await prefs.setString('selectedPage', 'login');
 
                             } on FirebaseAuthException catch (e) {
 
@@ -258,12 +317,12 @@ class _LoginPageState extends State<LoginPage> {
                                     fontSize: 15
                                 );
                               }
-                              Navigator.of(context).push(MaterialPageRoute(
+                              Navigator.of(context).pushReplacement(MaterialPageRoute(
                                 builder: (BuildContext context) =>
                                     LoginPage(), ));
                               return user;
                             }
-                            Navigator.of(context).push(MaterialPageRoute(
+                            Navigator.of(context).pushReplacement(MaterialPageRoute(
                               builder: (BuildContext context) =>
                                   admin(),
                             ));
@@ -277,7 +336,8 @@ class _LoginPageState extends State<LoginPage> {
                       },
                     ), SizedBox(height: 15),
                     ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
+
                         if (_emailController.text.isEmpty) {
                           Fluttertoast.showToast(
                             msg: "Please enter your email first",
@@ -324,8 +384,8 @@ class _LoginPageState extends State<LoginPage> {
 
 
 
-                          // All validations pass, perform login or submit data
-                          // Access email and password using _emailController.text and _passwordController.text
+  // All validations pass, perform login or submit data
+  // Access email and password using _emailController.text and _passwordController.text
   void _validateFieldsAndSubmit() {
     // Validate email and password
     _validateEmail();

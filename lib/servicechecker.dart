@@ -45,7 +45,7 @@ class _WaterState extends State<Water> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Welcome to GritFit Health!'),
+          title: Text('Stay Hydrated!',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.purple,),),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,

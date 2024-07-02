@@ -143,7 +143,7 @@ class _StepCounterState extends State<lossstep> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Disability Confirmation"),
+          title: Text("Disability Confirmation",style: TextStyle(fontSize: 16,fontWeight:FontWeight.w600,color:Colors.pink),),
           content: Text("Do you have a disability that prevents you from using the step counter feature?"),
           actions: <Widget>[
             TextButton(

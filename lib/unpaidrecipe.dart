@@ -11,6 +11,8 @@ import 'package:flutter_stripe/flutter_stripe.dart' as stripe;
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mailer/mailer.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class uRecipePage extends StatefulWidget {
   @override
@@ -438,8 +440,8 @@ class _RecipePageState extends State<uRecipePage> {
     showDialog(
       context: context,
       builder: (context) {
-        return SingleChildScrollView(
-          clipBehavior: Clip.none,
+        return SingleChildScrollView( // Wrap with SingleChildScrollView
+          clipBehavior: Clip.none, // Set clipBehavior to Clip.none
           child: AlertDialog(
             contentPadding: EdgeInsets.zero,
             content: Column(
@@ -451,13 +453,8 @@ class _RecipePageState extends State<uRecipePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        'Recipe Details',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      Text('Recipe Details', style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.bold)),
                       IconButton(
                         icon: Icon(Icons.close, color: Colors.white),
                         onPressed: () => Navigator.of(context).pop(),
@@ -472,17 +469,20 @@ class _RecipePageState extends State<uRecipePage> {
                     children: [
                       Image.asset(recipe['image'] ?? ''),
                       SizedBox(height: 10),
-                      Text(
-                        'Ingredients:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      Text('Ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['ingredients'] ?? ''),
                       SizedBox(height: 10),
-                      Text(
-                        'Recipe:',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      Text('Recipe:', style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['recipe'] ?? ''),
+                      SizedBox(height: 10),
+                      Text(
+                        'Calories: ${recipe['calories']} kcal',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple,
+                          fontSize: 11.0,
+                        ),
+                      ),
                       SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () async {
@@ -493,24 +493,12 @@ class _RecipePageState extends State<uRecipePage> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           backgroundColor: Colors.purple[300],
+                          // Text color of the button
                           foregroundColor: Colors.white,
                         ),
                         child: Text('See Video'),
                       ),
                     ],
-                  ),
-                ),
-                Container(
-                  alignment: Alignment.bottomCenter,
-                  padding: EdgeInsets.symmetric(horizontal: 13.0, vertical: 8.0),
-                  child: Text(
-                    'Calories: ${recipe['calories']} kcal',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
-                      fontSize: 11.0,
-
-                    ),
                   ),
                 ),
               ],
@@ -520,7 +508,6 @@ class _RecipePageState extends State<uRecipePage> {
       },
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -735,8 +722,6 @@ class _RecipePageState extends State<uRecipePage> {
                       SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () async {
-
-
                           // Set autovalidate mode to always when submitting the form
                           setState(() {
                             _autoValidateMode = AutovalidateMode.always;
@@ -780,6 +765,11 @@ class _RecipePageState extends State<uRecipePage> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
+                bool isConnected = await _isConnected();
+                if (!isConnected) {
+                  _showNoInternetToast();
+                  return;
+                }
                 insert_payusers();
                 getFrompayusers();
                 await makePayment((paymentSuccessful) {
@@ -826,6 +816,35 @@ class _RecipePageState extends State<uRecipePage> {
       },
     );
   }
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'))
+          .timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
+
+  void _showNoInternetToast() {
+    Fluttertoast.showToast(
+      msg: "No internet connection available",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.redAccent,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
 
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {

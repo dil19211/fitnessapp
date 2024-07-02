@@ -786,7 +786,7 @@ class _MealState extends State<meal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 6 && now.hour < 12;
+        isButtonEnabled = now.hour >= 7 && now.hour < 9;
         timing = '6 AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
@@ -801,7 +801,7 @@ class _MealState extends State<meal> {
         calorieRange = _snackCalories;
         break;
       case 'Dinner':
-        isButtonEnabled = now.hour >= 18 && now.hour < 23;
+        isButtonEnabled = now.hour >= 18 && now.hour < 21;
         timing = '6 PM - 9 PM';
         calorieRange = _dinnerCalories;
         break;

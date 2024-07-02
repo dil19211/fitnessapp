@@ -32,7 +32,7 @@ class _SplashScreenState extends State<SplashScreen> {
       // If no selection is made, clear all stored data
       await prefs.clear();
       // Navigate to the welcome page or any default page
-      dashboard = welcome(); // Replace with your default page
+      dashboard = Welcome(); // Replace with your default page
     } else {
       // If a selection is made, navigate to the respective dashboard
       switch (selectedPage) {
@@ -47,7 +47,7 @@ class _SplashScreenState extends State<SplashScreen> {
           break;
         default:
         // Handle any other cases here
-          dashboard = welcome(); // Replace with your default page
+          dashboard = Welcome(); // Replace with your default page
           break;
       }
     }

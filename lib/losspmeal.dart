@@ -133,6 +133,34 @@ class _MealState extends State<losspmeal> {
       initialDelay: NotificationUtils.calculateInitialDelay(15, 30), // 8:30 AM
       inputData: {},
     );
+    Workmanager().registerPeriodicTask(
+      "10",
+      "water remindermorning",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(8, 20), // 8:30 AM
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "11",
+      "water remindermidday",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(14, 20), // 8:30 AM
+      inputData: {},
+    );
+    Workmanager().registerPeriodicTask(
+      "12",
+      "water reminderevening",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(17, 20), // 8:30 AM
+      inputData: {},
+    ); Workmanager().registerPeriodicTask(
+      "13",
+      "water remindernight",
+      frequency: Duration(days: 1),
+      initialDelay: NotificationUtils.calculateInitialDelay(20, 20), // 8:30 AM
+      inputData: {},
+    );
+
   }
 
   void _showDiseaseDialog(BuildContext context) {
@@ -150,7 +178,7 @@ class _MealState extends State<losspmeal> {
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text('Select Your Diseases if you have any'),
+              title: Text('Select Your Diseases if you have any',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.purple),),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: allDiseases.map((disease) {
@@ -917,7 +945,7 @@ class _MealState extends State<losspmeal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 6 && now.hour < 12;
+        isButtonEnabled = now.hour >= 7 && now.hour <9;
         timing = '6 AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
@@ -932,7 +960,7 @@ class _MealState extends State<losspmeal> {
         calorieRange = _snackCalories;
         break;
       case 'Dinner':
-        isButtonEnabled = now.hour >= 18 && now.hour < 23;
+        isButtonEnabled = now.hour >= 18 && now.hour < 21;
         timing = '6 PM - 9 PM';
         calorieRange = _dinnerCalories;
         break;
@@ -1080,7 +1108,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
       int calorieRange) async {
     Map<String, List<String>> mealMap = {
       'Breakfast': [
-        "1 egg - 100 kcal",
+        "1 fried_egg - 100 kcal",
         "1 cupcake - 200 kcal",
         "1 boiled egg - 50 kcal",
         "1 serving oatmeal - 150 kcal",
@@ -1089,7 +1117,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "3 pieces dim sum - 180 kcal",
         "1 bowl miso soup - 50 kcal",
         "1 cup yogurt with berries - 200 kcal",
-        "1 smoothie - 150 kcal",
+        "1 banana_smoothie - 150 kcal",
         "1 aloo paratha - 300 kcal",
         "1 omelette - 150 kcal",
         "1 cheese omelette - 200 kcal",
@@ -1103,11 +1131,17 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 green smoothie - 100 kcal",
         "1 serving yogurt porridge - 180 kcal",
         "1 serving roti - 72 kcal",
-        "1 Whitebread_slice - 70 kcal",
-        "1 brwonbread_slice - 73",
+        "1 whitebread_slice - 70 kcal",
+        "1 brwonbread_slice - 73 kcal",
+        "1 avocado_toast  - 130 kcal",
+        "1 egg white omelette - 60 kcal",
+        "1 cup_blactea - 2 kcal",
+        "1 cup_greentea - 2 kcal",
+        "1 cup_herbaltea - 0 kcal",
+        "1 Milk_tea - 10 kcal",
+        "1 radish_paratha - 150 kcal",
       ],
       'Lunch': [
-        "1 serving salad - 300 kcal",
         "1 burger - 500 kcal",
         "1 bowl soup - 200 kcal",
         "1 serving sushi - 350 kcal",
@@ -1134,7 +1168,13 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving aloo gobi (potato and cauliflower) - 200 kcal",
         "1 serving palak paneer (spinach and paneer) - 300 kcal",
         "1 serving baingan bharta (eggplant) - 150 kcal",
-        "1 serving bhindi masala (okra) - 180 kcal"
+        "1 serving bhindi masala (okra) - 180 kcal",
+        "1 fried_chickenSlice - 150 kcal",
+        "1 serving_codfish - 90 kcal ",
+        "1 beef_meatball - 60 kcal ",
+        "1 chicken_meatball - 60 kcal",
+        "1 pork_meatball - 35 kcal",
+        "1 cucumber_slice - 16 kcal"
       ],
       'Snack': [
         "1 apple - 80 kcal",
@@ -1182,7 +1222,8 @@ class _AddMealDialogState extends State<AddMealDialog> {
       'Dinner': [
         "1 serving chicken - 300 kcal",
         "2 slices pizza - 400 kcal",
-        "1 bowl rice - 250 kcal",
+        "1 palletter_whiteRice - 250 kcal",
+        "1 palletter_vegetablesRice - 250 kcal",
         "1 serving kung pao chicken - 350 kcal",
         "1 serving pad thai - 450 kcal",
         "1 bowl fried rice - 400 kcal",
@@ -1204,7 +1245,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
         "1 serving palak paneer (spinach and paneer) - 300 kcal",
         "1 serving baingan bharta (eggplant) - 150 kcal",
         "1 serving bhindi masala (okra) - 180 kcal",
-        "1 serving sushi - 350 kcal"
+        "1 serving sushi - 350 kcal",
       ]
     };
 
@@ -1274,17 +1315,41 @@ class _AddMealDialogState extends State<AddMealDialog> {
         '1 serving pasta salad - 400 kcal'
       ]
     };
-    List<Map<String, dynamic>> generateWeeklyPlan(List<String> userDiseases) {
+    Map<String, List<String>> allergyImpact = {
+      'Egg': [
+        "1 fried_egg - 100 kcal",
+        "1 boiled egg - 50 kcal",
+        "1 serving oatmeal - 150 kcal",
+        "1 omelette - 150 kcal",
+        "1 cheese omelette - 200 kcal",
+        // Add other meals impacting egg allergy
+      ],
+      'Milk': [ "1 Milk_tea - 10 kcal" ,"1 chocolate shake - 200 kcal",
+        "1 vanilla shake - 180 kcal",
+        "1 strawberry shake - 160 kcal",],
+      'Diary': [
+        "1 cup yogurt with berries - 200 kcal",
+        "1 serving yogurt porridge - 180 kcal",
+        "1 strawberry smoothie - 150 kcal",
+        "1 banana smoothie - 180 kcal",
+        "1 mango smoothie - 160 kcal",
+        "1 toast with peanut butter - 250 kcal",
+      ],
+      'Wheat':[ "1 roti - 100 kcal", "1 serving khus khus halwa - 250 kcal",
+        "1 serving atta halwa - 300 kcal",],
+      'Soy':[],
+      'Fish':["1 serving sushi - 350 kcal"],
+      'Tree Nuts':["1 serving walnut halwa - 300 kcal","1 serving badam halwa - 300 kcal",],
+      'Peanuts':[ "1 serving badam halwa - 300 kcal","1 serving walnut halwa - 300 kcal", "1 serving mixed trail snack - 150 kcal", "1 serving dried fruit and nut mix - 180 kcal"],
+      'Shellfish':["1 serving sushi - 350 kcal",],
+
+
+
+      // Define other allergies and their impacting meals
+    };
+    List<Map<String, dynamic>> generateWeeklyPlan(List<String> userDiseases, List<String> userAllergies) {
       List<Map<String, dynamic>> weeklyPlan = [];
-      List<String> daysOfWeek = [
-        'Monday',
-        'Tuesday',
-        'Wednesday',
-        'Thursday',
-        'Friday',
-        'Saturday',
-        'Sunday'
-      ];
+      List<String> daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
       Random random = Random();
 
       daysOfWeek.forEach((day) {
@@ -1297,8 +1362,10 @@ class _AddMealDialogState extends State<AddMealDialog> {
 
           meals.forEach((meal) {
             int calories = int.parse(meal.split(' - ')[1].trim().split(' ')[0]);
-            if (calories <= calorieRange) {
+            if (calories <= calorieRange) { // Adjust calorieRange according to your needs
               int impact = 0;
+              bool isAllergic = false;
+
               if (userDiseases.isNotEmpty) {
                 userDiseases.forEach((disease) {
                   if (diseaseImpact[disease]?.contains(meal) ?? false) {
@@ -1306,28 +1373,36 @@ class _AddMealDialogState extends State<AddMealDialog> {
                   }
                 });
               }
-              filteredMeals.add(
-                  {'meal': meal, 'impact': impact, 'calories': calories});
-              print(
-                  'Meal: $meal, Impact: $impact'); // Print statement for meal and its impact
+
+              if (userAllergies.isNotEmpty) {
+                userAllergies.forEach((allergy) {
+                  if (allergyImpact[allergy] != null && allergyImpact[allergy]!.contains(meal)) {
+                    impact++;
+                    isAllergic = true; // Set flag if meal contains allergen
+                  }
+                });
+              }
+
+              if (!isAllergic) { // Only add non-allergic meals
+                filteredMeals.add({'meal': meal, 'impact': impact, 'calories': calories});
+                print('Meal: $meal, Impact: $impact');
+              }
             }
           });
 
-          if (userDiseases.isNotEmpty) {
+          if (userDiseases.isNotEmpty || userAllergies.isNotEmpty) {
             filteredMeals.sort((a, b) => a['impact'].compareTo(b['impact']));
           }
 
-          print(
-              'Filtered meals for $mealType on $day: $filteredMeals'); // Print statement for filtered meals
+          print('Filtered meals for $mealType on $day: $filteredMeals'); // Print statement for filtered meals
 
           List<Map<String, dynamic>> selectedMeals = [];
           int totalCalories = 0;
 
-          for (int i = 0; i < filteredMeals.length &&
-              totalCalories < calorieRange; i++) {
+          for (int i = 0; i < filteredMeals.length && totalCalories <= calorieRange; i++) { // Adjust calorieRange here too
             String selectedMeal = filteredMeals[i]['meal'];
             int mealCalories = filteredMeals[i]['calories'];
-            if (totalCalories + mealCalories <= calorieRange) {
+            if (totalCalories + mealCalories <=calorieRange ) { // Adjust calorieRange here too
               selectedMeals.add({'meal': selectedMeal, 'quantity': 1});
               totalCalories += mealCalories;
             }
@@ -1338,8 +1413,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
             'totalCalories': totalCalories
           };
 
-          print(
-              'Added $mealType meals - Total Calories: $totalCalories'); // Debug statement for total calories
+          print('Added $mealType meals - Total Calories: $totalCalories'); // Debug statement for total calories
 
         });
 
@@ -1364,7 +1438,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
       int hour = now.hour;
       String currentMealType = '';
 
-      if (hour >= 7 && hour < 12) {
+      if (hour >= 7 && hour <12) {
         currentMealType = 'Breakfast';
       } else if (hour >= 12 && hour < 15) {
         currentMealType = 'Lunch';
@@ -1389,9 +1463,11 @@ class _AddMealDialogState extends State<AddMealDialog> {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       List<String> userDiseases = prefs.getStringList('diseases') ?? [];
+      List<String>userAllergies = prefs.getStringList('allergies') ?? [];
       print('User diseases: $userDiseases');
+      print('User allergies: $userAllergies');
 
-      List<Map<String, dynamic>> weeklyPlan = generateWeeklyPlan(userDiseases);
+      List<Map<String, dynamic>> weeklyPlan = generateWeeklyPlan(userDiseases,userAllergies);
 
       List<Map<String, dynamic>> currentMeals = getCurrentMealsFromWeeklyPlan(
           weeklyPlan);
@@ -1406,9 +1482,6 @@ class _AddMealDialogState extends State<AddMealDialog> {
       return [];
     }
   }
-
-
-
 
 
   void _incrementQuantity(int index) {

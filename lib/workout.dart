@@ -1497,7 +1497,8 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                 SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () {
-                    showUserForm(context, widget.videoUrl);
+                   // showUserForm(context, widget.videoUrl);
+                    showInternetConnectionDialog(context, widget.videoUrl);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.purple,

@@ -1,5 +1,7 @@
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fitnessapp/getstarted%20page.dart';
+import 'package:fitnessapp/recipe%20page.dart';
 import 'package:fitnessapp/splashscreen.dart';
 import 'package:fitnessapp/workout.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
@@ -15,6 +17,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
+import 'adminpanel.dart';
 import 'consst.dart';
 import 'notification.dart';
 
@@ -81,6 +84,23 @@ void main() async {
           print('Background task executed for  pM');
           NotificationUtils.stepreminder();
           break;
+        case "water remindermorning":
+          print('Background task executed for  pM');
+          NotificationUtils.waterremindermorning();
+          break;
+        case "water remindermidday":
+          print('Background task executed for  pM');
+          NotificationUtils. waterreminderday();
+          break;
+        case "water reminderevening":
+          print('Background task executed for  pM');
+          NotificationUtils.waterreminderevening();
+          break;
+        case "water remindernight":
+          print('Background task executed for  pM');
+          NotificationUtils.waterremindenight();
+          break;
+
       }
       return Future.value(true); // Return a Future to indicate task completion
     });

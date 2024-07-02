@@ -1,6 +1,7 @@
 
 import 'dart:convert';
-
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fitnessapp/servicechecker.dart';
 import 'package:fitnessapp/unpaidrecipe.dart';
 import 'package:fitnessapp/unpiadworkout.dart';
@@ -86,7 +87,7 @@ class _MyHomePageState extends State<lossdashboaard> {
           return StatefulBuilder(
             builder: (BuildContext context, setState) {
               return AlertDialog(
-                title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple)),
+                title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
                 content: TextField(
                   controller: emailController,
                 ),
@@ -574,7 +575,7 @@ class _MyHomePageState extends State<lossdashboaard> {
                     color: Colors.white,
                     icon: Icon(Icons.exit_to_app_sharp),
                     onPressed: () {
-                      showLogoutDialog();
+                      showLogoutDialog(context);
                     },
                   ),
                 ),
@@ -596,7 +597,7 @@ class _MyHomePageState extends State<lossdashboaard> {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
                 } else {
                   // Handle navigation for the home icon
-                  navigateToPage(page());
+                  navigateToPage(lossdashboaard ());
                 }
               },
             ),
@@ -698,32 +699,106 @@ class _MyHomePageState extends State<lossdashboaard> {
       MaterialPageRoute(builder: (context) => page()),
     );
   }
-  void showLogoutDialog() {
+  void showLogoutDialog(BuildContext context) {
+    TextEditingController emailController = TextEditingController();
+    bool showError = false;
+    bool showEmailField = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Exit'),
-          content: Text('Are you sure you want to exit?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-              },
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Clear shared preferences data
-                clearSharedPreferences();
-                // Navigate to the next page
-                navigateToNextPage();
-              },
-              child: Text('Yes'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Exit',style: TextStyle(fontWeight: FontWeight.w500,fontSize:15,),),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Are you sure you want to exit?'),
+                  if (showEmailField)
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        errorText: showError ? 'Please enter your email' : null,
+                      ),
+                      onChanged: (value) {
+                        if (showError && value.isNotEmpty) {
+                          setState(() {
+                            showError = false;
+                          });
+                        }
+                      },
+                    ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                  child: Text('No'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (showEmailField) {
+                      if (emailController.text.isEmpty) {
+                        setState(() {
+                          showError = true;
+                        });
+                      } else {
+                        bool emailExists = await checkEmailExists(emailController.text);
+                        if (emailExists) {
+                          clearSharedPreferences();
+                          await deleteUser(emailController.text);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Exit successfully'),
+                            ),
+                          );
+                          navigateToNextPage();
+                        } else {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Error'),
+                                content: Text('Email not found in the database. Please try again.'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close error dialog
+                                      emailController.clear();
+                                    },
+                                    child: Text('Try Again'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      }
+                    } else {
+                      setState(() {
+                        showEmailField = true;
+                      });
+                    }
+                  },
+                  child: Text('Yes'),
+                ),
+              ],
+            );
+          },
         );
       },
+    );
+  }
+  Future<void> deleteUser(String email) async {
+    final db = await _database;
+    await db!.delete(
+      'WEIGHTLOSSUSER',
+      where: 'email = ?',
+      whereArgs: [email],
     );
   }
 
@@ -858,14 +933,25 @@ class _MyHomePageState extends State<lossdashboaard> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Premium Offer'),
+          title: Text(
+            'Premium Offer',
+            style: TextStyle(
+              fontSize: 15.0,
+              fontWeight: FontWeight.w700,
+              color: Colors.purple,
+            ),
+          ),
           content: Container(
-            padding: EdgeInsets.all(10.0), // Add some padding around the text
+            padding: EdgeInsets.all(10.0),
             child: Text(
-              'Subscribe to our premium plan to get a structured diet plan, exercise plan, and access to the step counter facility. Do you want to proceed?',
+              'Subscribe to our premium plan to get:\n\n'
+                  '- A structured diet plan\n'
+                  '- Exercise plan\n'
+                  '- Access to the step counter facility\n\n'
+                  'Do you want to proceed?',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 16.0, // Adjust the font size if needed
+                fontSize: 13.0,
               ),
             ),
           ),
@@ -902,39 +988,75 @@ class _MyHomePageState extends State<lossdashboaard> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                await makePayment((paymentSuccessful) {
-                  if (paymentSuccessful) {
 
-                    sendEmail(
-                      emailController.text,
-                      'Payment Successful!',
-                      'Welcome! you are using the premium package of GritFit. Thanks...',
-                    );
-                    handleSuccessfulPayment();
-                  } else {
-                    showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text('Payment Failed'),
-                          content: Text('Payment failed. Please try again.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.of(context).pop(),
-                              child: Text('OK'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                  }
-                });
+                // Check internet connection
+                bool isConnected = await _isConnected();
+                if (!isConnected) {
+                  _showNoInternetToast();
+                } else {
+                  // Show payment sheet
+                  await makePayment((paymentSuccessful) {
+                    if (paymentSuccessful) {
+                      sendEmail(
+                        emailController.text,
+                        'Payment Successful!',
+                        'Welcome! you are using the premium package of GritFit. Thanks...',
+                      );
+                      handleSuccessfulPayment();
+                    } else {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text('Payment Failed'),
+                            content: Text('Payment failed. Please try again.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(context).pop(),
+                                child: Text('OK'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  });
+                }
               },
               child: Text('OK'),
             ),
           ],
         );
       },
+    );
+  }
+
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'))
+          .timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
+
+  void _showNoInternetToast() {
+    Fluttertoast.showToast(
+      msg: "No internet connection available",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.redAccent,
+      textColor: Colors.white,
+      fontSize: 16.0,
     );
   }
   Future<void> handleSuccessfulPayment() async {

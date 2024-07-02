@@ -8,6 +8,8 @@ import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 class uWorkout extends StatefulWidget {
   @override
   _WorkoutState createState() => _WorkoutState();
@@ -818,7 +820,11 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-
+                bool isConnected = await _isConnected();
+                if (!isConnected) {
+                  _showNoInternetToast();
+                  return;
+                }
                 await makePayment((paymentSuccessful) {
                   if (paymentSuccessful) {
                     //  launchVideo(recipe['videoUrl']!);
@@ -861,8 +867,38 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
         );
       },
     );
-
   }
+
+  Future<bool> _isConnected() async {
+    bool hasConnection = await InternetConnectionChecker().hasConnection;
+    if (!hasConnection) {
+      return false;
+    }
+
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'))
+          .timeout(Duration(seconds: 4));
+      if (response.statusCode == 200) {
+        return true;
+      }
+    } catch (e) {
+      print('Error checking internet connection: $e');
+    }
+    return false;
+  }
+
+  void _showNoInternetToast() {
+    Fluttertoast.showToast(
+      msg: "No internet connection available",
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      backgroundColor: Colors.redAccent,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
+
+
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
       paymentIntentData = await createPaymentIntent('20', 'USD');

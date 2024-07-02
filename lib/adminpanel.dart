@@ -1,13 +1,20 @@
+
+import 'package:fitnessapp/partialpayment.dart';
 import 'package:fitnessapp/weightgaintable.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
-import 'approved table.dart';
 
+import 'approved table.dart';
 import 'login.dart';
-import 'losstable.dart';
-import 'nextpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-class admin extends StatelessWidget {
+
+import 'losstable.dart';
+
+class admin extends StatefulWidget {
+  @override
+  _AdminState createState() => _AdminState();
+}
+class _AdminState extends State<admin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +33,7 @@ class admin extends StatelessWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.exit_to_app,color: Colors.white,),
+            icon: Icon(Icons.exit_to_app, color: Colors.white),
             onPressed: () {
               showLogoutDialog(context);
             },
@@ -58,7 +65,7 @@ class admin extends StatelessWidget {
             ),
             // Lottie Animation
             Lottie.asset(
-              'assets/images/admin.json',
+              'assets/images/changeadmin.json',
               width: 280,
               height: 250,
               repeat: true,
@@ -152,7 +159,7 @@ class admin extends StatelessWidget {
                       ),
                       onTap: () {
                         Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => tableloss(),
+                          builder: (BuildContext context) => losstable(),
                         ));
                       },
                     ),
@@ -195,9 +202,7 @@ class admin extends StatelessWidget {
                         text: 'Payment',
                       ),
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => Approved(),
-                        ));
+                        showPaymentOptions(context);
                       },
                     ),
                   ),
@@ -209,16 +214,18 @@ class admin extends StatelessWidget {
       ),
     );
   }
+
   void navigateToNextPage(BuildContext context) {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => LoginPage()),
     );
   }
+
   void showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: ( context) {
+      builder: (context) {
         return AlertDialog(
           title: Text('Exit'),
           content: Text('Are you sure you want to exit?'),
@@ -244,18 +251,44 @@ class admin extends StatelessWidget {
     );
   }
 
-
   void clearSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // Clear all data stored in SharedPreferences
   }
 
-    }
-
-
-
-
-
-
-
-
+  void showPaymentOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              ListTile(
+                leading: Icon(Icons.payments),
+                title: Text('Partial Payment'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Close the modal
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => partialpayment(),
+                  ));
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.payment),
+                title: Text('Full Payment'),
+                onTap: () {
+                  Navigator.of(context).pop(); // Close the modal
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (BuildContext context) => wholepayment(),
+                  ));
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}

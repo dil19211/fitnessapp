@@ -63,7 +63,6 @@ class _MyHomePageState extends State<preminum> {
     print("$username instoringfunction");
   }
   Future<void>  _showEmailPopup(BuildContext context) async {
-
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -71,7 +70,7 @@ class _MyHomePageState extends State<preminum> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple)),
+              title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontSize:17,fontWeight: FontWeight.w600)),
               content: TextField(
                 controller: emailController,
               ),
@@ -255,9 +254,6 @@ class _MyHomePageState extends State<preminum> {
 
 
   // Get name asynchronously
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -492,7 +488,6 @@ class _MyHomePageState extends State<preminum> {
                         ),
                       ),
                     ),
-
                   ],
                 ),
 
@@ -503,7 +498,7 @@ class _MyHomePageState extends State<preminum> {
                     color: Colors.white,
                     icon: Icon(Icons.exit_to_app_sharp),
                     onPressed: () {
-                      showLogoutDialog();
+                      showLogoutDialog(context);
                     },
                   ),
                 ),
@@ -525,7 +520,7 @@ class _MyHomePageState extends State<preminum> {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
                 } else {
                   // Handle navigation for the home icon
-                  navigateToPage(page());
+                  navigateToPage(preminum());
                 }
               },
             ),
@@ -622,32 +617,114 @@ class _MyHomePageState extends State<preminum> {
     );
   }
 
-  void showLogoutDialog() {
+  void showLogoutDialog(BuildContext context) {
+    TextEditingController emailController = TextEditingController();
+    bool showError = false;
+    bool showEmailField = false;
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Exit'),
-          content: Text('Are you sure you want to exit?'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Dismiss the dialog
-              },
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () async {
-                // Clear shared preferences data
-                clearSharedPreferences();
-                // Navigate to the next page
-                navigateToNextPage();
-              },
-              child: Text('Yes'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(
+                'Exit',
+                style: TextStyle(
+                  fontSize: 17, // Example font size
+                  fontWeight: FontWeight.bold, // Example font weight
+                  color: Colors.purple, // Example text color
+                ),
+              ),
+
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Are you sure you want to exit?'),
+                  if (showEmailField)
+                    TextField(
+                      controller: emailController,
+                      decoration: InputDecoration(
+                        labelText: 'Email',
+                        errorText: showError ? 'Please enter your email' : null,
+                      ),
+                      onChanged: (value) {
+                        if (showError && value.isNotEmpty) {
+                          setState(() {
+                            showError = false;
+                          });
+                        }
+                      },
+                    ),
+                ],
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog
+                  },
+                  child: Text('No'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    if (showEmailField) {
+                      if (emailController.text.isEmpty) {
+                        setState(() {
+                          showError = true;
+                        });
+                      } else {
+                        bool emailExists = await checkEmailExists(emailController.text);
+                        if (emailExists) {
+                          clearSharedPreferences();
+                          await deleteUser(emailController.text);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Exit successfully'),
+                            ),
+                          );
+                          navigateToNextPage();
+                        } else {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: Text('Error'),
+                                content: Text('Email not found in the database. Please try again.'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop(); // Close error dialog
+                                      emailController.clear();
+                                    },
+                                    child: Text('Try Again'),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      }
+                    } else {
+                      setState(() {
+                        showEmailField = true;
+                      });
+                    }
+                  },
+                  child: Text('Yes'),
+                ),
+              ],
+            );
+          },
         );
       },
+    );
+  }
+  Future<void> deleteUser(String email) async {
+    final db = await _database;
+    await db!.delete(
+      'WEIGHTGAINUSER',
+      where: 'email = ?',
+      whereArgs: [email],
     );
   }
 

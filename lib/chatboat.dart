@@ -110,7 +110,6 @@ class _ChatBotState extends State<ChatBot> {
                 color: Colors.white,
                 fontSize: 25,
                 fontWeight: FontWeight.bold,
-                fontStyle: FontStyle.italic,
               ),
             ),
           ],

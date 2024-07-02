@@ -3,12 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-class  wholepayment extends StatefulWidget {
+class partialpayment extends StatefulWidget {
   @override
-  _WholePaymentState createState() => _WholePaymentState();
+  _PartialPaymentState createState() => _PartialPaymentState();
 }
 
-class _WholePaymentState extends State< wholepayment> {
+class _PartialPaymentState extends State<partialpayment> {
   List<Map<String, dynamic>> userData = [];
 
   @override
@@ -19,7 +19,7 @@ class _WholePaymentState extends State< wholepayment> {
 
   Future<void> fetchData() async {
     try {
-      QuerySnapshot querySnapshot = await _firestore.collection('pkg_payment_users').get();
+      QuerySnapshot querySnapshot = await _firestore.collection('partial_payment_users').get();
       setState(() {
         userData = querySnapshot.docs.asMap().entries.map((entry) {
           int index = entry.key + 1; // Incremental ID starts from 1
@@ -38,7 +38,7 @@ class _WholePaymentState extends State< wholepayment> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Package Payment User Records',
+          'Partial Payment User Records',
           style: TextStyle(
             color: Colors.white,
             shadows: [

@@ -38,87 +38,85 @@ class page extends StatelessWidget {
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              SizedBox(height: 40),
-              // Lottie Animation
-              Lottie.asset(
-                'assets/images/nextpage.json',
-                // Replace with the actual path to your Lottie animation file
-                width: 280,
-                height: 280, // Adjust the height as needed
-                repeat: true,
-                reverse: true,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            SizedBox(height: 40),
+            // Lottie Animation
+            Lottie.asset(
+              'assets/images/nextpage.json',
+              // Replace with the actual path to your Lottie animation file
+              width: 280,
+              height: 280, // Adjust the height as needed
+              repeat: true,
+              reverse: true,
+            ),
+            SizedBox(height: 40),
+            Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Choose Your Goal',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  SizedBox(height: 40),
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.purple, width: 3),
+                      ),
+                    ),
+                    readOnly: true,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                    controller: TextEditingController(
+                      text: 'Weight Gain',
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => WeightGain(),
+                      ));
+                    },
+                  ),
+                  SizedBox(height: 30),
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.purple, width: 3),
+                      ),
+                    ),
+                    readOnly: true,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                    controller: TextEditingController(
+                      text: 'Weight Loss',
+                    ),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (BuildContext context) => Weightloss(),
+                      ));
+                    },
+                  ),
+                ],
               ),
-              SizedBox(height: 40),
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Choose Your Goal',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                    SizedBox(height: 40),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.purple, width: 3),
-                        ),
-                      ),
-                      readOnly: true,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      controller: TextEditingController(
-                        text: 'Weight Gain',
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (BuildContext context) => WeightGain(),
-                        ));
-                      },
-                    ),
-                    SizedBox(height: 30),
-                    TextField(
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.purple, width: 3),
-                        ),
-                      ),
-                      readOnly: true,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontStyle: FontStyle.italic,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                      controller: TextEditingController(
-                        text: 'Weight Loss',
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pushReplacement(MaterialPageRoute(
-                          builder: (BuildContext context) => Weightloss(),
-                        ));
-                      },
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
