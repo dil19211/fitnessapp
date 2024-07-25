@@ -1438,7 +1438,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
       int hour = now.hour;
       String currentMealType = '';
 
-      if (hour >= 7 && hour <12) {
+      if (hour >= 7 && hour <9) {
         currentMealType = 'Breakfast';
       } else if (hour >= 12 && hour < 15) {
         currentMealType = 'Lunch';

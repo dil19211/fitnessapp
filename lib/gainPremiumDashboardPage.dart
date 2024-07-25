@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessapp/userchat.dart';
 import 'nextpage.dart';
 import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/recipe%20page.dart';
@@ -29,7 +30,7 @@ class _MyHomePageState extends State<preminum> {
   TextEditingController emailController = TextEditingController();
   Database? _database;
   String username = '';
-
+  int _unreadMessageCount = 0;
 
   @override
   void initState() {
@@ -38,16 +39,18 @@ class _MyHomePageState extends State<preminum> {
     SharedPreferences.getInstance().then((prefs) {
       bool hasShownDialog = prefs.getBool('showUserForminfo') ?? false;
       print("not shown before");
-      if (!hasShownDialog) {// Show the dialog only if it has not been shown before
+      if (!hasShownDialog) { // Show the dialog only if it has not been shown before
         Future.delayed(Duration(seconds: 2), () {
-        //  _showWelcomeDialog(context);
+          //  _showWelcomeDialog(context);
           _showEmailPopup(context);
-          prefs.setBool('showUserForminfo', true); // Set flag to indicate the dialog has been shown
+          prefs.setBool('showUserForminfo',
+              true); // Set flag to indicate the dialog has been shown
         });
-
       }
     });
+    _updateUnreadMessageCount();
   }
+
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
     print("called loadmethod");
@@ -62,7 +65,8 @@ class _MyHomePageState extends State<preminum> {
     await prefs.setString('username', username);
     print("$username instoringfunction");
   }
-  Future<void>  _showEmailPopup(BuildContext context) async {
+
+  Future<void> _showEmailPopup(BuildContext context) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -70,7 +74,10 @@ class _MyHomePageState extends State<preminum> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontSize:17,fontWeight: FontWeight.w600)),
+              title: Text('Enter Your Confirm Email', style: TextStyle(
+                  color: Colors.purple,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600)),
               content: TextField(
                 controller: emailController,
               ),
@@ -86,10 +93,12 @@ class _MyHomePageState extends State<preminum> {
                           'Hello User!',
                           'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
-                        getcurrentweightgainuser(emailController.text.toString());
-                        CollectionReference collref= FirebaseFirestore.instance.collection('pkg_payment_users');
+                        getcurrentweightgainuser(emailController.text
+                            .toString());
+                        CollectionReference collref = FirebaseFirestore.instance
+                            .collection('pkg_payment_users');
                         collref.add({
-                          'email':emailController.text,
+                          'email': emailController.text,
                         }).then((value) {
                           print("User Added in firebase");
                         }).catchError((error) {
@@ -111,11 +120,13 @@ class _MyHomePageState extends State<preminum> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: Text('Error'),
-                                content: Text('Email not found in the database. Please try again.'),
+                                content: Text(
+                                    'Email not found in the database. Please try again.'),
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.of(context).pop(); // Close error dialog
+                                      Navigator.of(context)
+                                          .pop(); // Close error dialog
                                       emailController.clear();
                                     },
                                     child: Text('Try Again'),
@@ -132,13 +143,16 @@ class _MyHomePageState extends State<preminum> {
                           builder: (BuildContext context) {
                             return AlertDialog(
                               title: Text('Error'),
-                              content: Text('This email is not the same as the previously entered email. Please try again.'),
+                              content: Text(
+                                  'This email is not the same as the previously entered email. Please try again.'),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () {
-                                    Navigator.of(context).pop(); // Close error dialog
+                                    Navigator.of(context)
+                                        .pop(); // Close error dialog
                                     emailController.clear();
-                                    _showEmailPopup(context); // Reopen the original email entering dialog box
+                                    _showEmailPopup(
+                                        context); // Reopen the original email entering dialog box
                                   },
                                   child: Text('OK Fine'),
                                 ),
@@ -149,7 +163,8 @@ class _MyHomePageState extends State<preminum> {
                       }
                     }
                   },
-                  child: Text('Continue', style: TextStyle(color: Colors.purple)),
+                  child: Text(
+                      'Continue', style: TextStyle(color: Colors.purple)),
                 ),
               ],
             );
@@ -171,9 +186,11 @@ class _MyHomePageState extends State<preminum> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Welcome to the premium offer! We're glad to have you here."),
+                  Text(
+                      "Welcome to the premium offer! We're glad to have you here."),
                   SizedBox(height: 20),
-                  Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple)),
+                  Text('Enter Your Confirm Email',
+                      style: TextStyle(color: Colors.purple)),
                   TextField(
                     controller: emailController,
                   ),
@@ -181,7 +198,8 @@ class _MyHomePageState extends State<preminum> {
               ),
               actions: <Widget>[
                 TextButton(
-                  child: Text("Continue", style: TextStyle(color: Colors.purple)),
+                  child: Text(
+                      "Continue", style: TextStyle(color: Colors.purple)),
                   onPressed: () async {
                     String email = emailController.text.trim();
                     if (email.isNotEmpty) {
@@ -192,16 +210,19 @@ class _MyHomePageState extends State<preminum> {
                           'Hello User!',
                           'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
-                        getcurrentweightgainuser(emailController.text.toString());
+                        getcurrentweightgainuser(emailController.text
+                            .toString());
                         String email = emailController.text.toString();
                         String? name = await getNameFromEmail(email);
                         if (name != null) {
                           Navigator.of(context).pop();
                         } else {
-                          _showErrorDialog('Email not found in the database. Please try again.');
+                          _showErrorDialog(
+                              'Email not found in the database. Please try again.');
                         }
                       } else {
-                        _showErrorDialog('This email is not the same as the previously entered email. Please try again.');
+                        _showErrorDialog(
+                            'This email is not the same as the previously entered email. Please try again.');
                       }
                     }
                   },
@@ -235,21 +256,19 @@ class _MyHomePageState extends State<preminum> {
       },
     );
   }
+
   Future<bool> checkEmailExists(String email) async {
     // Implement your logic to check if the email exists in the database
     // Return true if the email exists, false otherwise
-    _database=await openDB();
-    UserRepo userRepo=new UserRepo();
-    if(await userRepo.isEmailExists(_database!,email)) {
-
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
+    if (await userRepo.isEmailExists(_database!, email)) {
       return true;
-
     }
-    else{
+    else {
       return false;
     }
     await _database?.close();
-
   }
 
 
@@ -257,97 +276,101 @@ class _MyHomePageState extends State<preminum> {
 
   @override
   Widget build(BuildContext context) {
-    String? usern=ModalRoute.of(context)?.settings.arguments as String?;
-    String displayUsername = usern ?? username; // Use route argument or stored username
+    String? usern = ModalRoute
+        .of(context)
+        ?.settings
+        .arguments as String?;
+    String displayUsername = usern ??
+        username; // Use route argument or stored username
     print("$username useranme variable");
     print("$displayUsername  display variable");
     // Retrieve email from the controller
     String email = emailController.text.toString();
     Future<String?> getName() async {
-      String error='Dear!!';
+      String error = 'Dear!!';
       String? name = null;
       if (name == null) {
-        String? nam= await getNameFromEmail(email);
+        String? nam = await getNameFromEmail(email);
         await Future.delayed(Duration(seconds: 1)); //process indicator
-        if(nam!=null){
+        if (nam != null) {
           return nam;
         }
       }
-      else{
+      else {
         return error;
       }
     }
 
     Future<int?> getAge() async {
-      var age=null;
+      var age = null;
       if (age == null) {
-        age= await getAgeFromEmail(email);
-        if(age!=null){
+        age = await getAgeFromEmail(email);
+        if (age != null) {
           return age;
         }
       }
-      else{
+      else {
         print('age cant fetched');
       }
     }
     Future<int?> getHeight() async {
       var height = null;
       if (height == null) {
-        height= await getHeightFromEmail(email);
-        if(height!=null){
+        height = await getHeightFromEmail(email);
+        if (height != null) {
           return height;
         }
       }
-      else{
+      else {
         print('height cant fetched');
       }
     }
     Future<int?> get_cweight() async {
       var cweight = null;
       if (cweight == null) {
-        cweight= await get_cweight_FromEmail(email);
-        if(cweight!=null){
+        cweight = await get_cweight_FromEmail(email);
+        if (cweight != null) {
           return cweight;
         }
       }
-      else{
+      else {
         print('cweight cant fetched');
       }
     }
     Future<int?> get_gweight() async {
       var gweight = null;
       if (gweight == null) {
-        gweight= await get_gweight_FromEmail(email);
-        if(gweight!=null){
+        gweight = await get_gweight_FromEmail(email);
+        if (gweight != null) {
           return gweight;
         }
       }
-      else{
+      else {
         print('gweight cant fetched');
       }
     }
     Future<String?> getGender() async {
       String? gender = null;
       if (gender == null) {
-        gender= await getGenderFromEmail(email);
-        if(gender!=null){
+        gender = await getGenderFromEmail(email);
+        if (gender != null) {
           return gender;
         }
       }
-      else{
+      else {
         print('gender cant fetched');
       }
     }
     Future<String?> getActivityLevel() async {
-      String error='error!!!!!!!!!!!!!!!!!!!!';
-      String? activity_level= null;
+      String error = 'error!!!!!!!!!!!!!!!!!!!!';
+      String? activity_level = null;
       if (activity_level == null) {
-        activity_level= await getActivityLevelFromEmail(email);
-        if(activity_level!=null){
+        activity_level = await getActivityLevelFromEmail(email);
+        if (activity_level != null) {
           return activity_level;
         }
       }
-      else{
+      else {
         return error;
       }
     }
@@ -382,7 +405,8 @@ class _MyHomePageState extends State<preminum> {
                           children: [
                             const SizedBox(height: 50),
                             ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20),
                               title: Text(
                                 //  name!=null? 'Hello': 'hello $name',
                                 'Hello $displayUsername',
@@ -430,7 +454,8 @@ class _MyHomePageState extends State<preminum> {
                                   () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (BuildContext context) => RecipePage(),
+                                    builder: (BuildContext context) =>
+                                        RecipePage(),
                                   ),
                                 );
                               },
@@ -463,12 +488,14 @@ class _MyHomePageState extends State<preminum> {
                               'StepCounter',
                               'assets/images/walk.jpg',
                                   () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (BuildContext context) => step(),
-                                        settings: RouteSettings(arguments: emailController.text.toString()),
-                                      ),
-                                    );
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (BuildContext context) => step(),
+                                    settings: RouteSettings(
+                                        arguments: emailController.text
+                                            .toString()),
+                                  ),
+                                );
                               },
                             ),
 
@@ -479,7 +506,9 @@ class _MyHomePageState extends State<preminum> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) => pmeal(),
-                                    settings: RouteSettings(arguments: emailController.text.toString()),
+                                    settings: RouteSettings(
+                                        arguments: emailController.text
+                                            .toString()),
                                   ),
                                 );
                               },
@@ -511,6 +540,19 @@ class _MyHomePageState extends State<preminum> {
               items: [
                 Icon(Icons.home, color: Colors.white),
                 Icon(Icons.message_outlined, color: Colors.white),
+                if (_unreadMessageCount > 0)
+                  Positioned(
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 10,
+                      backgroundColor: Colors.red,
+                      child: Text(
+                        _unreadMessageCount.toString(),
+                        style: TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ),
+                  ),
+
                 Icon(Icons.star, color: Colors.white),
               ],
               onTap: (index) {
@@ -530,12 +572,13 @@ class _MyHomePageState extends State<preminum> {
     );
   }
 
+
   void _showMessageOptions() {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 100,
+          height: 190,
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -548,6 +591,14 @@ class _MyHomePageState extends State<preminum> {
                 title: Text('Chat with Chatbot'),
                 leading: Icon(Icons.chat),
               ),
+              ListTile(
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _navigateToChatScreen(context, isChatbot: false);
+                },
+                title: Text('Chat with Dietitian'),
+                leading: Icon(Icons.person),
+              ),
             ],
           ),
         );
@@ -555,16 +606,62 @@ class _MyHomePageState extends State<preminum> {
     );
   }
 
+  void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) async {
+    if (isChatbot) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ChatBot(isChatBot: true)),
+      );
+    } else {
+      String? userId = await getUserId();
+      if (userId == null) {
+        // Generate and store a new user ID if not already stored
 
-
-  void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatBot(isChatBot: isChatbot),
-      ),
-    );
+        userId = DateTime.now().millisecondsSinceEpoch.toString();
+        await storeUserId(userId);
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => UserChatScreen(userId: userId!)),
+      );
+    }
   }
+
+  void _updateUnreadMessageCount() async {
+    String? userId = await getUserId();
+    if (userId != null) {
+      int count = await _getUnreadMessageCount(userId);
+      setState(() {
+        _unreadMessageCount = count;
+      });
+    }
+  }
+
+  Future<int> _getUnreadMessageCount(String userId) async {
+    QuerySnapshot unreadMessages = await FirebaseFirestore.instance
+        .collection('chats')
+        .doc(userId)
+        .collection('messages')
+        .where('isFromDietitian', isEqualTo: true)
+        .where('hasreplied', isEqualTo: false)
+        .get();
+
+    return unreadMessages.size;
+  }
+
+
+  Future<void> storeUserId(String userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('userId', userId);
+  }
+
+  Future<String?> getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString('userId');
+  }
+
+
+
   Widget itemDashboard(String title, String imagePath, VoidCallback onTap) =>
       GestureDetector(
         onTap: onTap,
@@ -575,7 +672,10 @@ class _MyHomePageState extends State<preminum> {
             boxShadow: [
               BoxShadow(
                 offset: const Offset(0, 5),
-                color: Theme.of(context).primaryColor.withOpacity(.2),
+                color: Theme
+                    .of(context)
+                    .primaryColor
+                    .withOpacity(.2),
                 spreadRadius: 2,
                 blurRadius: 5,
               ),

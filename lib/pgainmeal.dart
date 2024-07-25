@@ -965,7 +965,7 @@ class _MealState extends State<pmeal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 7 && now.hour <12;
+        isButtonEnabled = now.hour >= 7 && now.hour <9;
         timing = '6 AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
@@ -1458,7 +1458,7 @@ class _AddMealDialogState extends State<AddMealDialog> {
       int hour = now.hour;
       String currentMealType = '';
 
-      if (hour >= 7 && hour <12) {
+      if (hour >= 7 && hour <9) {
         currentMealType = 'Breakfast';
       } else if (hour >= 12 && hour < 15) {
         currentMealType = 'Lunch';
