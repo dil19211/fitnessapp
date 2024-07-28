@@ -48,8 +48,10 @@ class _MyHomePageState extends State<preminum> {
         });
       }
     });
-    _updateUnreadMessageCount();
+    _startListeningForUnreadMessages(); // Start listening for unread messages
   }
+
+
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -539,20 +541,23 @@ class _MyHomePageState extends State<preminum> {
               animationDuration: Duration(milliseconds: 300),
               items: [
                 Icon(Icons.home, color: Colors.white),
-                Icon(Icons.message_outlined, color: Colors.white),
-                if (_unreadMessageCount > 0)
-                  Positioned(
-                    right: 0,
-                    child: CircleAvatar(
-                      radius: 10,
-                      backgroundColor: Colors.red,
-                      child: Text(
-                        _unreadMessageCount.toString(),
-                        style: TextStyle(color: Colors.white, fontSize: 12),
+                Stack(
+                  children: [
+                    Icon(Icons.message_outlined, color: Colors.white),
+                    if (_unreadMessageCount > 0)
+                      Positioned(
+                        right: 0,
+                        child: CircleAvatar(
+                          radius: 10,
+                          backgroundColor: Colors.purple[200],
+                          child: Text(
+                            _unreadMessageCount.toString(),
+                            style: TextStyle(color: Colors.white, fontSize: 12),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-
+                  ],
+                ),
                 Icon(Icons.star, color: Colors.white),
               ],
               onTap: (index) {
@@ -627,28 +632,26 @@ class _MyHomePageState extends State<preminum> {
     }
   }
 
-  void _updateUnreadMessageCount() async {
+
+
+
+  void _startListeningForUnreadMessages() async {
     String? userId = await getUserId();
     if (userId != null) {
-      int count = await _getUnreadMessageCount(userId);
-      setState(() {
-        _unreadMessageCount = count;
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(userId)
+          .collection('messages')
+          .where('isFromDietitian', isEqualTo: true)
+          .where('hasreplied', isEqualTo: false)
+          .snapshots()
+          .listen((QuerySnapshot snapshot) {
+        setState(() {
+          _unreadMessageCount = snapshot.size;
+        });
       });
     }
   }
-
-  Future<int> _getUnreadMessageCount(String userId) async {
-    QuerySnapshot unreadMessages = await FirebaseFirestore.instance
-        .collection('chats')
-        .doc(userId)
-        .collection('messages')
-        .where('isFromDietitian', isEqualTo: true)
-        .where('hasreplied', isEqualTo: false)
-        .get();
-
-    return unreadMessages.size;
-  }
-
 
   Future<void> storeUserId(String userId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
