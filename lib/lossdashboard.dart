@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'chatboat.dart';
 import 'database_handler.dart';
 import 'gainPremiumDashboardPage.dart';
-import 'loddmeal.dart';
+import 'lossmeal.dart';
 import 'losspremimumdashboard.dart';
 import 'nextpage.dart';
 import 'package:flutter/foundation.dart';
@@ -37,6 +37,8 @@ class _MyHomePageState extends State<lossdashboaard> {
   TextEditingController emailController = TextEditingController();
   Database? _database;
   String username = '';
+  bool _isOverlayVisible = false;
+  OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
@@ -45,6 +47,11 @@ class _MyHomePageState extends State<lossdashboaard> {
     checkSubscriptionStatus();
     // Show email popup after a delay
     Future.delayed(Duration(seconds: 3), _showEmailPopup);
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    _overlayEntry?.remove(); // Clean up the overlay when the widget is disposed
   }
 
 
@@ -56,14 +63,168 @@ class _MyHomePageState extends State<lossdashboaard> {
       navigateToPremiumPage();
     }
   }
-  void dispose() {
-    super.dispose();
-  }
+
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       username = prefs.getString('username') ?? '';
     });
+  }
+ //overlay
+  OverlayEntry _createOverlayEntryhome(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 1.5 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'home',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  OverlayEntry _createOverlayEntrychat(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 2 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'chat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //overlay
+  OverlayEntry _createOverlayEntryoffer(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'premimum offer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayhome(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryhome(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //chat
+  void _showOverlaychat(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntrychat(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //offer
+  void _showOverlayoffer(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryoffer(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 3), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
   }
 
   Future<void> storeUsername(String username) async {
@@ -87,7 +248,7 @@ class _MyHomePageState extends State<lossdashboaard> {
           return StatefulBuilder(
             builder: (BuildContext context, setState) {
               return AlertDialog(
-                title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
+                title: Text('Enter Your Email account on \nwhich you want to receive \nemails from GritFit.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
                 content: TextField(
                   controller: emailController,
                 ),
@@ -587,17 +748,27 @@ class _MyHomePageState extends State<lossdashboaard> {
               animationDuration: Duration(milliseconds: 300),
               items: [
                 Icon(Icons.home, color: Colors.white),
-                Icon(Icons.message_outlined, color: Colors.white),
-                Icon(Icons.star, color: Colors.white),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlaychat(context);// Show overlay on long press
+                  },
+                  child: Icon(Icons.message_outlined, color: Colors.white),
+                ),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlayoffer(context); // Show overlay on long press
+                  },
+                  child: Icon(Icons.star, color: Colors.white),
+                ),
               ],
               onTap: (index) {
                 if (index == 1) {
                   _showMessageOptions(); // Show message options when message icon is tapped
                 } else if (index == 2) {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
-                } else {
-                  // Handle navigation for the home icon
-                  navigateToPage(lossdashboaard ());
+                } else if (index == 0) {
+                  _showOverlayhome(context);
+                  navigateToPage(lossdashboaard());
                 }
               },
             ),
@@ -1002,6 +1173,12 @@ class _MyHomePageState extends State<lossdashboaard> {
                         'Payment Successful!',
                         'Welcome! you are using the premium package of GritFit. Thanks...',
                       );
+                      String userEmail = emailController.text;
+                      sendAdminEmail(
+                        'agritfit@gmail.com',
+                        'Payment Received',
+                        'A new payment has been received from User $userEmail',
+                      );
                       handleSuccessfulPayment();
                     } else {
                       showDialog(
@@ -1067,7 +1244,20 @@ class _MyHomePageState extends State<lossdashboaard> {
 
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
-      paymentIntentData = await createPaymentIntent('20', 'USD');
+      String amount = '300';
+      String currency = 'USD';
+      String connectedAccountId = 'acct_1Pn8j5RwHbx9y5OW';
+
+      // Create the payment intent
+      paymentIntentData = await createPaymentIntent(amount, currency, connectedAccountId);
+
+      if (paymentIntentData == null) {
+        print('Payment intent creation failed.');
+        onPaymentResult(false);
+        return;
+      }
+
+      // Initialize the payment sheet
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentData!['client_secret'],
@@ -1075,6 +1265,8 @@ class _MyHomePageState extends State<lossdashboaard> {
           merchantDisplayName: 'Sif',
         ),
       );
+
+      // Display the payment sheet
       await displayPaymentSheet(onPaymentResult);
     } catch (e) {
       print('Error initializing payment sheet: $e');
@@ -1091,32 +1283,45 @@ class _MyHomePageState extends State<lossdashboaard> {
       if (e is stripe.StripeException) {
         print('Error presenting payment sheet: ${e.error.localizedMessage}');
       } else {
-        print('Error presenting payment sheet: $e');
+        print('Unexpected error: $e');
       }
       onPaymentResult(false);
     }
   }
 
-  createPaymentIntent(String amount, String currency) async {
+  Future<Map<String, dynamic>?> createPaymentIntent(
+      String amount, String currency, String connectedAccountId) async {
     try {
+      int amountInt = int.parse(amount) * 100; // Convert to cents
+      int applicationFeeAmount = (amountInt * 0.80).toInt(); // 20% of the amount
+
       Map<String, dynamic> body = {
-        'amount': calculateAmount('20'),
+        'amount': amountInt.toString(),
         'currency': currency,
-        'payment_method_types[]': 'card'
+        'payment_method_types[]': 'card',
+        'application_fee_amount': applicationFeeAmount.toString(), // Fee for your platform
+        'transfer_data[destination]': connectedAccountId, // Transfer 80% to the connected account
       };
 
       var response = await http.post(
-          Uri.parse('https://api.stripe.com/v1/payment_intents'),
-          body: body,
-          headers: {
-            'Authorization':
-            'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          });
-      return jsonDecode(response.body.toString());
-    }
-    catch (e) {
-      print("error $e");
+        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        body: body,
+        headers: {
+          'Authorization': 'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('PaymentIntent created: ${response.body}');
+        return jsonDecode(response.body.toString());
+      } else {
+        print('Error creating PaymentIntent: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      print('Error creating PaymentIntent: $e');
+      return null;
     }
   }
 
@@ -1124,6 +1329,8 @@ class _MyHomePageState extends State<lossdashboaard> {
     final a = (int.parse(amount)) * 100;
     return a.toString();
   }
+
+
   Future<void> sendEmail(String recipient, String subject, String message) async {
     // Replace with your email and password
     String username = 'agritfit@gmail.com';
@@ -1154,6 +1361,29 @@ class _MyHomePageState extends State<lossdashboaard> {
             content: Text('Something went wrong ,cant send email'),
           ),
         );
+      }
+    }
+  }
+  Future<void> sendAdminEmail(String recipient, String subject, String message) async {
+    // Replace with your email and password
+    String username = 'gritfitapp7@gmail.com';
+    String password = 'aksyxvonaufddkis';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'GritFit')
+      ..recipients.add(recipient)
+      ..subject = subject
+      ..text = message;
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
       }
     }
   }

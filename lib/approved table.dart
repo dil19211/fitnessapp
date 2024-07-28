@@ -3,12 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-class  wholepayment extends StatefulWidget {
+class wholepayment extends StatefulWidget {
   @override
   _WholePaymentState createState() => _WholePaymentState();
 }
 
-class _WholePaymentState extends State< wholepayment> {
+class _WholePaymentState extends State<wholepayment> {
   List<Map<String, dynamic>> userData = [];
 
   @override
@@ -59,24 +59,27 @@ class _WholePaymentState extends State< wholepayment> {
         padding: const EdgeInsets.only(top: 78.0),
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            child: DataTable(
-              border: TableBorder.all(color: Colors.black26, width: 2.0),
-              columnSpacing: 16.0,
-              dataRowHeight: 60.0,
-              columns: [
-                DataColumn(label: Text('ID')),
-                DataColumn(label: Text('Email')),
-              ],
-              rows: userData.map((users) {
-                return DataRow(
-                  cells: <DataCell>[
-                    DataCell(Text(users['id']?.toString() ?? '')),
-                    DataCell(Text(users['email'] ?? '')),
-                  ],
-                );
-              }).toList(),
+          child: SingleChildScrollView(
+            scrollDirection: Axis.vertical,
+            child: Container(
+              padding: EdgeInsets.all(8.0),
+              child: DataTable(
+                border: TableBorder.all(color: Colors.black26, width: 2.0),
+                columnSpacing: 16.0,
+                dataRowHeight: 60.0,
+                columns: [
+                  DataColumn(label: Text('ID')),
+                  DataColumn(label: Text('Email')),
+                ],
+                rows: userData.map((users) {
+                  return DataRow(
+                    cells: <DataCell>[
+                      DataCell(Text(users['id']?.toString() ?? '')),
+                      DataCell(Text(users['email'] ?? '')),
+                    ],
+                  );
+                }).toList(),
+              ),
             ),
           ),
         ),

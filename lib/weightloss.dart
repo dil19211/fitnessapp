@@ -9,6 +9,7 @@ import 'package:sqflite/sqflite.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'database_handler.dart';
+import 'idstorge.dart';
 import 'lossdashboard.dart';
 import 'package:http/http.dart' as http;
 
@@ -26,6 +27,7 @@ class _WeightGainState extends State<Weightloss> {
   TextEditingController goalWeightController = TextEditingController();
   TextEditingController genderController = TextEditingController();
   TextEditingController activityLevelController = TextEditingController();
+  TextEditingController idController = TextEditingController();
 
   String nameError = '';
   String emailError = '';
@@ -40,9 +42,11 @@ class _WeightGainState extends State<Weightloss> {
   String? selectedActivityLevel;
   String activityLevelError = '';
   String? selectedGender;
+  String idError='';
 
   @override
   void dispose() {
+    idController.dispose();
     heightFeetController.dispose();
     ageController.dispose();
     currentWeightController.dispose();
@@ -51,6 +55,11 @@ class _WeightGainState extends State<Weightloss> {
     super.dispose();
     genderController.dispose();
     activityLevelController.dispose();
+  }
+
+  String _generateUniqueId() {
+    // Ensure this method always returns a valid non-null string
+    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
   Future<bool> _isConnected() async {
@@ -88,6 +97,35 @@ class _WeightGainState extends State<Weightloss> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            TextField(
+              controller: idController,
+              decoration: InputDecoration(
+                labelText: 'Auto ID',
+                errorText: idError.isEmpty ? null : idError, // Display error text
+                border: OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.refresh),
+                  onPressed: () {
+                    setState(() {
+                      idController.text = _generateUniqueId(); // Generate new ID
+                      idError = _validateId(idController.text); // Validate after updating
+                      idstorage.storeUserId(idController.text); // Store the new ID
+                      checkErrors(); // Check for any errors
+                    });
+                  },
+                ),
+              ),
+              readOnly: true,
+              onTap: () {
+                setState(() {
+                  idController.text = _generateUniqueId(); // Generate new ID on tap
+                  idError = _validateId(idController.text); // Validate after updating
+                  idstorage.storeUserId(idController.text); // Store the new ID
+                  checkErrors(); // Check for any errors
+                });
+              },
+            ),
+            SizedBox(height: 25),
             buildTextField(
               'Enter Name',
               nameController,
@@ -121,7 +159,7 @@ class _WeightGainState extends State<Weightloss> {
             SizedBox(height: 25),
             buildAgeField(),
             SizedBox(height: 25),
-            buildTextFieldWithValidation(
+            buildTextFieldWithValidations(
               'Enter Height (Feet)',
               heightFeetController,
               heightFeetError,
@@ -183,7 +221,7 @@ class _WeightGainState extends State<Weightloss> {
             ],
             buildActivityLevelField(),
             SizedBox(height: 25),
-            buildTextFieldWithValidation(
+            buildTextFieldWithValidations(
               'Enter Current Weight (Kgs)',
               currentWeightController,
               currentWeightError,
@@ -205,7 +243,7 @@ class _WeightGainState extends State<Weightloss> {
               },
             ),
             SizedBox(height: 25),
-            buildTextFieldWithValidation(
+            buildTextFieldWithValidations(
               'Enter Goal Weight (Kgs)',
               goalWeightController,
               goalWeightError,
@@ -242,7 +280,7 @@ class _WeightGainState extends State<Weightloss> {
                 if (!isConnected) {
                   //   _showNoInternetDialog();
                   Fluttertoast.showToast(
-                    msg: "Connected to the Internet,No intenet Conection!!!",
+                    msg: "No intenet Conection!!!",
                     toastLength: Toast.LENGTH_LONG,
                     gravity: ToastGravity.TOP,
                     timeInSecForIosWeb: 2,
@@ -263,6 +301,7 @@ class _WeightGainState extends State<Weightloss> {
                   'activity_level':activityLevelController.text,
                   'cweight':currentWeightController.text,
                   'gweight':goalWeightController.text,
+                   'id':idController.text,
                 }).then((value) {
                   print("User Added in firebase");
                 }).catchError((error) {
@@ -377,10 +416,7 @@ class _WeightGainState extends State<Weightloss> {
         children: [
           TextField(
             controller: ageController,
-            readOnly: true,
-            onTap: () {
-              _selectDate(context);
-            },
+            keyboardType: TextInputType.number,
             decoration: InputDecoration(
               labelText: 'Enter Age',
               enabledBorder: OutlineInputBorder(
@@ -391,6 +427,12 @@ class _WeightGainState extends State<Weightloss> {
               ),
               contentPadding: EdgeInsets.symmetric(vertical: 14, horizontal: 18),
             ),
+            onChanged: (value) {
+              setState(() {
+                ageError = _validateAge(value); // Validate age as user types
+                checkErrors(); // Check for new errors
+              });
+            },
           ),
           if (ageError.isNotEmpty) ...[
             SizedBox(height: 4),
@@ -403,44 +445,58 @@ class _WeightGainState extends State<Weightloss> {
       ),
     );
   }
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(DateTime.now().year - 100),
-      lastDate: DateTime.now(),
-      // Customizing calendar appearance
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: Colors.purple, // Upper part color
-              onPrimary: Colors.white, // Upper part text color
+  Widget buildTextFieldWithValidations(
+      String labelText,
+      TextEditingController controller,
+      String errorText,
+      Function(String) onChanged,
+      String? Function(String)? validator,
+      ) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: controller,
+            onChanged: (value) {
+              onChanged(value);
+              // Call the validator function when the user types
+              setState(() {
+                errorText = validator!(controller.text) ?? '';
+              });
+            },
+            decoration: InputDecoration(
+              labelText: labelText,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.purple),
+              ),
+              contentPadding:
+              EdgeInsets.symmetric(vertical: 14, horizontal: 18),
             ),
-            dialogBackgroundColor: Colors.white, // Lower part color
+            keyboardType: TextInputType.number,
+            onSubmitted: (_) {
+              // Call the validator function when the user submits
+              setState(() {
+                errorText = validator!(controller.text) ?? '';
+              });
+            },
           ),
-          child: child!,
-        );
-      },
+          if (errorText.isNotEmpty) ...[
+            SizedBox(height: 4),
+            Text(
+              errorText,
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ],
+      ),
     );
-    if (picked != null) {
-      int age = calculateAge(picked);
-      setState(() {
-        ageController.text = age.toString();
-        ageError = _validateAge(age.toString()); // Clear any previous error related to age
-        checkErrors(); // Check for new errors
-      });
-    }
   }
-  int calculateAge(DateTime birthDate) {
-    final now = DateTime.now();
-    int age = now.year - birthDate.year;
-    if (now.month < birthDate.month ||
-        (now.month == birthDate.month && now.day < birthDate.day)) {
-      age--;
-    }
-    return age;
-  }
+
   void _checkGoalWeightSuitability() {
     // Cancel the previous Timer if it's active
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -595,7 +651,7 @@ class _WeightGainState extends State<Weightloss> {
             onChanged: (value) {
               onChanged(value);
             },
-            keyboardType: keyboardType,
+            keyboardType: TextInputType.name,
             decoration: InputDecoration(
               labelText: labelText,
               enabledBorder: OutlineInputBorder(
@@ -671,7 +727,12 @@ class _WeightGainState extends State<Weightloss> {
       ),
     );
   }
-
+  String _validateId(String id) {
+    if (id.isEmpty) {
+      return 'ID is required.';
+    }
+    return '';
+  }
   String _validateName(String name) {
     if (name.isEmpty) {
       return 'Name is required.';
@@ -754,6 +815,16 @@ class _WeightGainState extends State<Weightloss> {
     } else {
       setState(() {
         nameError = '';
+      });
+    }
+    if (idController.text.isEmpty) {
+      setState(() {
+        idError = 'ID is required.';
+        isValid = false;
+      });
+    } else {
+      setState(() {
+        idError = _validateId(idController.text);
       });
     }
 
@@ -867,11 +938,10 @@ class _WeightGainState extends State<Weightloss> {
           currentWeightError.isNotEmpty ||
           genderError.isNotEmpty||
           activityLevelError.isNotEmpty||
-          goalWeightError.isNotEmpty;
+          goalWeightError.isNotEmpty||
+          idError.isNotEmpty;
     });
   }
-
-
   Future<Database?> openDB() async{
     _database=await DatabaseHandler().openDB();
 

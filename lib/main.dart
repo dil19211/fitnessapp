@@ -1,9 +1,6 @@
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fitnessapp/getstarted%20page.dart';
-import 'package:fitnessapp/recipe%20page.dart';
 import 'package:fitnessapp/splashscreen.dart';
-import 'package:fitnessapp/workout.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
@@ -15,10 +12,9 @@ import 'package:flutter_background_service/flutter_background_service.dart';
 import 'package:flutter_background_service_android/flutter_background_service_android.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'adminpanel.dart';
 import 'consst.dart';
+
 import 'notification.dart';
 
 

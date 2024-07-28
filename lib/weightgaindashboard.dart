@@ -1,13 +1,10 @@
 import 'dart:convert';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/servicechecker.dart';
-import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/unpaidrecipe.dart';
 import 'package:fitnessapp/unpiadworkout.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:fitnessapp/workout.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +35,9 @@ class _MyHomePageState extends State<dashboaard> {
   TextEditingController emailController = TextEditingController();
   Database? _database;
   String username = '';
+  bool _isOverlayVisible = false;
+  OverlayEntry? _overlayEntry;
+
 
   @override
   void initState() {
@@ -47,6 +47,7 @@ class _MyHomePageState extends State<dashboaard> {
     // Show email popup after a delay
     Future.delayed(Duration(seconds: 3), _showEmailPopup);
   }
+
   Future<void> checkSubscriptionStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isSubscribed = prefs.getBool('isSubscribed') ?? false;
@@ -55,9 +56,169 @@ class _MyHomePageState extends State<dashboaard> {
       navigateToPremiumPage();
     }
   }
+  @override
   void dispose() {
     super.dispose();
+    _overlayEntry?.remove(); // Clean up the overlay when the widget is disposed
   }
+
+  //overlay
+  OverlayEntry _createOverlayEntryhome(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 1.5 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'home',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  OverlayEntry _createOverlayEntrychat(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 2 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'chat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //overlay
+  OverlayEntry _createOverlayEntryoffer(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'premimum offer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayhome(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryhome(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //chat
+  void _showOverlaychat(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntrychat(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //offer
+  void _showOverlayoffer(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryoffer(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 3), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -69,12 +230,14 @@ class _MyHomePageState extends State<dashboaard> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('username', username);
   }
+
   Future<void> navigateToPremiumPage() async {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => preminum()),
     );
   }
+
   void _showEmailPopup() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
@@ -86,7 +249,10 @@ class _MyHomePageState extends State<dashboaard> {
           return StatefulBuilder(
             builder: (BuildContext context, setState) {
               return AlertDialog(
-                title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontSize:17,fontWeight: FontWeight.w600)),
+                title: Text('Enter Your Email account on\n which you want to receive\n emails from GritFit. ', style: TextStyle(
+                    color: Colors.purple,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600)),
                 content: TextField(
                   controller: emailController,
                 ),
@@ -102,7 +268,8 @@ class _MyHomePageState extends State<dashboaard> {
                             'Hello User!',
                             'Welcome! you are using the un-paid version of GritFit.Enjoy some extra features after getting paid. Thanks...',
                           );
-                          getcurrentweightgainuser(emailController.text.toString());
+                          getcurrentweightgainuser(emailController.text
+                              .toString());
                           String Email = emailController.text.toString();
                           String? name = await getNameFromEmail(Email);
                           if (name != null) {
@@ -120,13 +287,14 @@ class _MyHomePageState extends State<dashboaard> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Text('Error'),
-                                  content: Text('Email not found in the database. Please try again.'),
+                                  content: Text(
+                                      'Email not found in the database. Please try again.'),
                                   actions: <Widget>[
                                     TextButton(
                                       onPressed: () {
-                                        Navigator.of(context).pop(); // Close error dialog
+                                        Navigator.of(context)
+                                            .pop(); // Close error dialog
                                         emailController.clear();
-
                                       },
                                       child: Text('Try Again'),
                                     ),
@@ -142,11 +310,13 @@ class _MyHomePageState extends State<dashboaard> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: Text('Error'),
-                                content: Text('This E-mail is not same as previous entered E-mail. Please try again.'),
+                                content: Text(
+                                    'This E-mail is not same as previous entered E-mail. Please try again.'),
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.of(context).pop(); // Close error dialog
+                                      Navigator.of(context)
+                                          .pop(); // Close error dialog
                                       emailController.clear();
                                       _showEmailPopup(); // Reopen the original email entering dialog box
                                     }, child: Text('OK Fine'),
@@ -158,7 +328,8 @@ class _MyHomePageState extends State<dashboaard> {
                         }
                       }
                     },
-                    child: Text('Continue', style: TextStyle(color: Colors.purple)),
+                    child: Text(
+                        'Continue', style: TextStyle(color: Colors.purple)),
                   ),
                 ],
               );
@@ -171,118 +342,120 @@ class _MyHomePageState extends State<dashboaard> {
 
   Future<bool> checkEmailExists(String email) async {
     // Return true if the email exists, false otherwise
-    _database=await openDB();
-    UserRepo userRepo=new UserRepo();
-    if(await userRepo.isEmailExists(_database!,email)) {
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
+    if (await userRepo.isEmailExists(_database!, email)) {
       return true;
-
     }
-    else{
+    else {
       return false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    String? usern=ModalRoute.of(context)?.settings.arguments as String?;
-    String displayUsername = usern ?? username; // Use route argument or stored username
+    String? usern = ModalRoute
+        .of(context)
+        ?.settings
+        .arguments as String?;
+    String displayUsername = usern ??
+        username; // Use route argument or stored username
     // Retrieve email from the controller
     String email = emailController.text.toString();
     // Get name asynchronously
     Future<String?> getName() async {
-      String error='Dear!!';
+      String error = 'Dear!!';
       String? name = null;
       if (name == null) {
-        String? nam= await getNameFromEmail(email);
+        String? nam = await getNameFromEmail(email);
         await Future.delayed(Duration(seconds: 1)); //process indicator
-        if(nam!=null){
+        if (nam != null) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('nam', nam);
         }
         return nam;
       }
-      else{
+      else {
         return error;
       }
     }
 
 
-
     Future<int?> getAge() async {
-      var age=null;
+      var age = null;
       if (age == null) {
-        age= await getAgeFromEmail(email);
-        if(age!=null){
+        age = await getAgeFromEmail(email);
+        if (age != null) {
           return age;
         }
       }
-      else{
+      else {
         print('age cant fetched');
       }
     }
     Future<int?> getHeight() async {
       var height = null;
       if (height == null) {
-        height= await getHeightFromEmail(email);
-        if(height!=null){
+        height = await getHeightFromEmail(email);
+        if (height != null) {
           return height;
         }
       }
-      else{
+      else {
         print('height cant fetched');
       }
     }
     Future<int?> get_cweight() async {
       var cweight = null;
       if (cweight == null) {
-        cweight= await get_cweight_FromEmail(email);
-        if(cweight!=null){
+        cweight = await get_cweight_FromEmail(email);
+        if (cweight != null) {
           return cweight;
         }
       }
-      else{
+      else {
         print('cweight cant fetched');
       }
     }
     Future<int?> get_gweight() async {
       var gweight = null;
       if (gweight == null) {
-        gweight= await get_gweight_FromEmail(email);
-        if(gweight!=null){
+        gweight = await get_gweight_FromEmail(email);
+        if (gweight != null) {
           return gweight;
         }
       }
-      else{
+      else {
         print('gweight cant fetched');
       }
     }
     Future<String?> getGender() async {
       String? gender = null;
       if (gender == null) {
-        gender= await getGenderFromEmail(email);
-        if(gender!=null){
+        gender = await getGenderFromEmail(email);
+        if (gender != null) {
           return gender;
         }
       }
-      else{
+      else {
         print('gender cant fetched');
       }
     }
     Future<String?> getActivityLevel() async {
-      String error='error!!!!!!!!!!!!!!!!!!!!';
-      String? activity_level= null;
+      String error = 'error!!!!!!!!!!!!!!!!!!!!';
+      String? activity_level = null;
       if (activity_level == null) {
-        activity_level= await getActivityLevelFromEmail(email);
-        if(activity_level!=null){
+        activity_level = await getActivityLevelFromEmail(email);
+        if (activity_level != null) {
           return activity_level;
         }
       }
-      else{
+      else {
         return error;
       }
     }
     return FutureBuilder<String?>(
-      future:getName(),
+      future: getName(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // While waiting for the name, show a loading indicator
@@ -312,7 +485,8 @@ class _MyHomePageState extends State<dashboaard> {
                           children: [
                             const SizedBox(height: 50),
                             ListTile(
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 20),
                               title: Text(
                                 //  name!=null? 'Hello': 'hello $name',
                                 'Hello $displayUsername',
@@ -360,7 +534,8 @@ class _MyHomePageState extends State<dashboaard> {
                                   () {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
-                                    builder: (BuildContext context) => uRecipePage(),
+                                    builder: (BuildContext context) =>
+                                        uRecipePage(),
                                   ),
                                 );
                               },
@@ -397,7 +572,9 @@ class _MyHomePageState extends State<dashboaard> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (BuildContext context) => meal(),
-                                    settings: RouteSettings(arguments: emailController.text.toString()),
+                                    settings: RouteSettings(
+                                        arguments: emailController.text
+                                            .toString()),
                                   ),
                                 );
                               },
@@ -445,7 +622,7 @@ class _MyHomePageState extends State<dashboaard> {
                           'text': 'Believe in yourself and\n all that you are\nYou have the power to change',
                           'animation': 'assets/images/gh.json',
                           'gradient': LinearGradient(
-                            colors: [ Colors.amber,Colors.yellowAccent[200]!],
+                            colors: [ Colors.amber, Colors.yellowAccent[200]!],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -464,7 +641,8 @@ class _MyHomePageState extends State<dashboaard> {
                           'animation': 'assets/images/kl.json',
                           'gradient': LinearGradient(
                             colors: [Colors.indigo[300]!,
-                              Colors.teal[500]!,],
+                              Colors.teal[500]!,
+                            ],
 
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -485,7 +663,8 @@ class _MyHomePageState extends State<dashboaard> {
                           'gradient': LinearGradient(
                             colors: [Colors.cyan[200]!,
 
-                              Colors.indigo,],
+                              Colors.indigo,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -503,8 +682,9 @@ class _MyHomePageState extends State<dashboaard> {
                           'text': '"Your only limit is you\nPush beyond!"',
                           'animation': 'assets/images/ty.json',
                           'gradient': LinearGradient(
-                            colors: [  Colors.green[300]!,
-                              Colors.red[200]!,],
+                            colors: [ Colors.green[300]!,
+                              Colors.red[200]!,
+                            ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -522,7 +702,10 @@ class _MyHomePageState extends State<dashboaard> {
                         return Builder(
                           builder: (BuildContext context) {
                             return Container(
-                              width: MediaQuery.of(context).size.width,
+                              width: MediaQuery
+                                  .of(context)
+                                  .size
+                                  .width,
                               margin: EdgeInsets.symmetric(horizontal: 5.0),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15.0),
@@ -534,7 +717,8 @@ class _MyHomePageState extends State<dashboaard> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Expanded(
-                                    flex: 3, // Adjust flex values as per your preference
+                                    flex: 3,
+                                    // Adjust flex values as per your preference
                                     child: Padding(
                                       padding: const EdgeInsets.all(16.0),
                                       child: Text(
@@ -550,10 +734,11 @@ class _MyHomePageState extends State<dashboaard> {
                                     ),
                                   ),
                                   Expanded(
-                                    flex: 2, // Adjust flex values as per your preference
+                                    flex: 2,
+                                    // Adjust flex values as per your preference
                                     child: Lottie.asset(
                                       //  height: 100,
-                                      width:100,
+                                      width: 100,
                                       slide['animation'] as String,
                                       //fit: BoxFit.cover,
                                     ),
@@ -583,23 +768,33 @@ class _MyHomePageState extends State<dashboaard> {
             bottomNavigationBar: CurvedNavigationBar(
               backgroundColor: Colors.white,
               color: Colors.purple,
-              animationDuration: Duration(milliseconds: 300),
+              animationDuration: Duration(milliseconds: 100),
               items: [
                 Icon(Icons.home, color: Colors.white),
-                Icon(Icons.message_outlined, color: Colors.white),
-                Icon(Icons.star, color: Colors.white),
+                GestureDetector(
+                  onLongPress: () {
+                      _showOverlaychat(context);// Show overlay on long press
+                  },
+                  child: Icon(Icons.message_outlined, color: Colors.white),
+                ),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlayoffer(context); // Show overlay on long press
+                  },
+                  child: Icon(Icons.star, color: Colors.white),
+                ),
               ],
               onTap: (index) {
                 if (index == 1) {
                   _showMessageOptions(); // Show message options when message icon is tapped
                 } else if (index == 2) {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
-                } else {
-                  // Handle navigation for the home icon
-                  navigateToPage( dashboaard());
+                } else if (index == 0) {
+                  _showOverlayhome(context);
+                  navigateToPage(dashboaard());
                 }
               },
-            ),
+            )
           );
         }
       },
@@ -632,7 +827,6 @@ class _MyHomePageState extends State<dashboaard> {
   }
 
 
-
   void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) {
     Navigator.push(
       context,
@@ -641,6 +835,7 @@ class _MyHomePageState extends State<dashboaard> {
       ),
     );
   }
+
   Widget itemDashboard(String title, String imagePath, VoidCallback onTap) =>
       GestureDetector(
         onTap: onTap,
@@ -651,7 +846,10 @@ class _MyHomePageState extends State<dashboaard> {
             boxShadow: [
               BoxShadow(
                 offset: const Offset(0, 5),
-                color: Theme.of(context).primaryColor.withOpacity(.2),
+                color: Theme
+                    .of(context)
+                    .primaryColor
+                    .withOpacity(.2),
                 spreadRadius: 2,
                 blurRadius: 5,
               ),
@@ -692,16 +890,19 @@ class _MyHomePageState extends State<dashboaard> {
       MaterialPageRoute(builder: (context) => page),
     );
   }
+
   void navigateToNextPage() {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => page()),
     );
   }
+
   void clearSharedPreferences() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
   void showLogoutDialog(BuildContext context) {
     TextEditingController emailController = TextEditingController();
     bool showError = false;
@@ -756,7 +957,8 @@ class _MyHomePageState extends State<dashboaard> {
                           showError = true;
                         });
                       } else {
-                        bool emailExists = await checkEmailExists(emailController.text);
+                        bool emailExists = await checkEmailExists(
+                            emailController.text);
                         if (emailExists) {
                           clearSharedPreferences();
                           await deleteUser(emailController.text);
@@ -773,11 +975,13 @@ class _MyHomePageState extends State<dashboaard> {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: Text('Error'),
-                                content: Text('Email not found in the database. Please try again.'),
+                                content: Text(
+                                    'Email not found in the database. Please try again.'),
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () {
-                                      Navigator.of(context).pop(); // Close error dialog
+                                      Navigator.of(context)
+                                          .pop(); // Close error dialog
                                       emailController.clear();
                                     },
                                     child: Text('Try Again'),
@@ -826,19 +1030,21 @@ class _MyHomePageState extends State<dashboaard> {
   }
 
 
-  Future<Database?> openDB() async{
-    _database=await DatabaseHandler().openDB();
+  Future<Database?> openDB() async {
+    _database = await DatabaseHandler().openDB();
 
     return _database;
   }
-  Future<void> getcurrentweightgainuser(String email)async{
-    _database=await openDB();
-    UserRepo userRepo=new UserRepo();
+
+  Future<void> getcurrentweightgainuser(String email) async {
+    _database = await openDB();
+    UserRepo userRepo = new UserRepo();
     await userRepo.getcurrentweightgainuser(_database!, email);
     //  await _database?.close();
   }
+
   Future<String?> getNameFromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['name'],
@@ -852,8 +1058,9 @@ class _MyHomePageState extends State<dashboaard> {
     // await _database!.close();
     return name;
   }
+
   Future<int> getAgeFromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['age'],
@@ -867,8 +1074,9 @@ class _MyHomePageState extends State<dashboaard> {
     //  await _database!.close();
     return age;
   }
+
   Future<int> getHeightFromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['height'],
@@ -882,8 +1090,9 @@ class _MyHomePageState extends State<dashboaard> {
     //   await _database!.close();
     return height;
   }
+
   Future<int> get_cweight_FromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['cweight'],
@@ -897,8 +1106,9 @@ class _MyHomePageState extends State<dashboaard> {
     // await _database!.close();
     return cweight;
   }
+
   Future<int> get_gweight_FromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['gweight'],
@@ -912,8 +1122,9 @@ class _MyHomePageState extends State<dashboaard> {
     //await _database!.close();
     return gweight;
   }
+
   Future<String?> getGenderFromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['gender'],
@@ -927,8 +1138,9 @@ class _MyHomePageState extends State<dashboaard> {
     //await _database!.close();
     return gender;
   }
+
   Future<String?> getActivityLevelFromEmail(String email) async {
-    _database=await openDB();
+    _database = await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
       'WEIGHTGAINUSER',
       columns: ['activity_level'],
@@ -981,7 +1193,8 @@ class _MyHomePageState extends State<dashboaard> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
-                showInternetConnectionDialog(context); // Show internet connection dialog
+                showInternetConnectionDialog(
+                    context); // Show internet connection dialog
               },
               child: Text('Yes'),
             ),
@@ -1017,6 +1230,12 @@ class _MyHomePageState extends State<dashboaard> {
                         emailController.text,
                         'Payment Successful!',
                         'Welcome! you are using the premium package of GritFit. Thanks...',
+                      );
+                      String userEmail = emailController.text;
+                      sendAdminEmail(
+                        'agritfit@gmail.com',
+                        'Payment Received',
+                        'A new payment has been received from User $userEmail',
                       );
                       handleSuccessfulPayment();
                     } else {
@@ -1084,7 +1303,15 @@ class _MyHomePageState extends State<dashboaard> {
 
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
-      paymentIntentData = await createPaymentIntent('300', 'USD');
+      // Calculate the amounts
+      int totalAmount = 300; // The total amount in cents
+      int platformFee = (totalAmount * 0.20).toInt(); // 20% fee
+
+      // Create the main payment intent for 80% of the amount
+      paymentIntentData =
+      await createPaymentIntent(totalAmount.toString(), 'USD');
+
+      // Initialize the payment sheet for the main payment
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentData!['client_secret'],
@@ -1092,13 +1319,19 @@ class _MyHomePageState extends State<dashboaard> {
           merchantDisplayName: 'Sif',
         ),
       );
+
+      // Display the payment sheet to the user
       await displayPaymentSheet(onPaymentResult);
+
+      // After a successful payment, transfer 20% to another account
+      if (onPaymentResult(true)) {
+        await transferFunds(platformFee.toString(), 'USD');
+      }
     } catch (e) {
-      print('Error initializing payment sheet: $e');
+      print('Error during payment process: $e');
       onPaymentResult(false);
     }
   }
-
   Future<void> displayPaymentSheet(Function(bool) onPaymentResult) async {
     try {
       await stripe.Stripe.instance.presentPaymentSheet();
@@ -1108,16 +1341,40 @@ class _MyHomePageState extends State<dashboaard> {
       if (e is stripe.StripeException) {
         print('Error presenting payment sheet: ${e.error.localizedMessage}');
       } else {
-        print('Error presenting payment sheet: $e');
+        print('Unexpected error: $e');
       }
       onPaymentResult(false);
+    }
+  }
+
+  Future<void> transferFunds(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': amount,
+        'currency': currency,
+        'destination': 'acct_1Pn8j5RwHbx9y5OW',
+        // Replace with the connected account ID
+      };
+
+      var response = await http.post(
+        Uri.parse('https://api.stripe.com/v1/transfers'),
+        body: body,
+        headers: {
+          'Authorization':
+          'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+      );
+      print("Transfer response: ${response.body}");
+    } catch (e) {
+      print("Error during transfer: $e");
     }
   }
 
   createPaymentIntent(String amount, String currency) async {
     try {
       Map<String, dynamic> body = {
-        'amount': calculateAmount('20'),
+        'amount': calculateAmount(amount),
         'currency': currency,
         'payment_method_types[]': 'card'
       };
@@ -1131,9 +1388,8 @@ class _MyHomePageState extends State<dashboaard> {
             'Content-Type': 'application/x-www-form-urlencoded'
           });
       return jsonDecode(response.body.toString());
-    }
-    catch (e) {
-      print("error $e");
+    } catch (e) {
+      print("Error creating payment intent: $e");
     }
   }
 
@@ -1141,23 +1397,27 @@ class _MyHomePageState extends State<dashboaard> {
     final a = (int.parse(amount)) * 100;
     return a.toString();
   }
-  Future<void> sendEmail(String recipient, String subject, String message) async {
-    // Replace with your email and password
-    String username = 'agritfit@gmail.com';
-    String password = 'dmehtpvtnacfuhpm';
 
-    final smtpServer = gmail(username, password);
 
-    final emailMessage = Message()
-      ..from = Address(username, 'GritFit')
-      ..recipients.add(recipient)
-      ..subject = subject
-      ..text = message;
 
-    try {
-      final sendReport = await send(emailMessage, smtpServer);
-      print('Message sent: ' + sendReport.toString());
-      ScaffoldMessenger.of(context).showSnackBar(
+  Future<void> sendEmail(String recipient, String subject,
+          String message) async {
+        // Replace with your email and password
+        String username = 'agritfit@gmail.com';
+        String password = 'dmehtpvtnacfuhpm';
+
+        final smtpServer = gmail(username, password);
+
+        final emailMessage = Message()
+          ..from = Address(username, 'GritFit')
+          ..recipients.add(recipient)
+          ..subject = subject
+          ..text = message;
+
+        try {
+          final sendReport = await send(emailMessage, smtpServer);
+          print('Message sent: ' + sendReport.toString());
+          ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('E-mail is sent on your account.'),
         ),
@@ -1171,6 +1431,29 @@ class _MyHomePageState extends State<dashboaard> {
             content: Text('Something went wrong ,cant send email'),
           ),
         );
+      }
+    }
+  }
+  Future<void> sendAdminEmail(String recipient, String subject, String message) async {
+    // Replace with your email and password
+    String username = 'gritfitapp7@gmail.com';
+    String password = 'aksyxvonaufddkis';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'GritFit')
+      ..recipients.add(recipient)
+      ..subject = subject
+      ..text = message;
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
       }
     }
   }

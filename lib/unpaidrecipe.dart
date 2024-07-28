@@ -694,7 +694,7 @@ class _RecipePageState extends State<uRecipePage> {
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'Enter Email for payment\n Confirmation',
                           labelStyle: TextStyle(
                             fontSize: 18.0, // Set the font size for the label text
                           ),
@@ -778,6 +778,12 @@ class _RecipePageState extends State<uRecipePage> {
                       emailController.text,
                       'Payment Successful',
                       'Welcome! you have subscribed the premium package of GritFit.',
+                    );
+                    String userEmail = emailController.text;
+                    sendAdminEmail(
+                      'agritfit@gmail.com',
+                      'Payment Received',
+                      'A new payment has been received from User $userEmail',
                     );
                     CollectionReference collref= FirebaseFirestore.instance.collection('partial_payment_users');
                     collref.add({
@@ -979,6 +985,29 @@ class _RecipePageState extends State<uRecipePage> {
             content: Text('Something went wrong ,cant send email'),
           ),
         );
+      }
+    }
+  }
+  Future<void> sendAdminEmail(String recipient, String subject, String message) async {
+    // Replace with your email and password
+    String username = 'gritfitapp7@gmail.com';
+    String password = 'aksyxvonaufddkis';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'GritFit')
+      ..recipients.add(recipient)
+      ..subject = subject
+      ..text = message;
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
       }
     }
   }

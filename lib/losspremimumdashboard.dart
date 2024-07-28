@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessapp/userchat.dart';
 //import 'package:db4/user_repo.dart';
 
+import 'idsssstorages.dart';
+import 'idstorge.dart';
 import 'losspmeal.dart';
 import 'lossstep.dart';
 import 'nextpage.dart';
@@ -33,7 +36,9 @@ class _MyHomePageState extends State<losspreminum> {
   TextEditingController emailController = TextEditingController();
   Database? _database;
   String username = '';
-
+  int _unreadMessageCount = 0;
+  bool _isOverlayVisible = false;
+  OverlayEntry? _overlayEntry;
 
   @override
   void initState() {
@@ -51,6 +56,168 @@ class _MyHomePageState extends State<losspreminum> {
 
       }
     });
+    _startListeningForUnreadMessages();
+  }
+  //overlay
+  OverlayEntry _createOverlayEntryhome(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 1.5 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'home',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  OverlayEntry _createOverlayEntrychat(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 2 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'chat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //overlay
+  OverlayEntry _createOverlayEntryoffer(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'premimum offer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayhome(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryhome(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //chat
+  void _showOverlaychat(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntrychat(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //offer
+  void _showOverlayoffer(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryoffer(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 3), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  @override
+  void dispose() {
+    super.dispose();
+    _overlayEntry?.remove(); // Clean up the overlay when the widget is disposed
   }
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -75,7 +242,7 @@ class _MyHomePageState extends State<losspreminum> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter Your Confirm Email', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
+              title: Text('To ensure seemless access to\n premium benefits,please\n enter your Email address.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
               content: TextField(
                 controller: emailController,
               ),
@@ -195,8 +362,15 @@ class _MyHomePageState extends State<losspreminum> {
                         sendEmail(
                           emailController.text,
                           'Hello User!',
-                          'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
+                          'Welcome! You are using the paid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
+                        // String userEmail = emailController.text;
+                        // print('admin notice');
+                        // sendEmail(
+                        //   'agritfit@gmail.com',
+                        //   'Payment Received',
+                        //   'A new payment has been received from User $userEmail',
+                        // );
                         CollectionReference collref= FirebaseFirestore.instance.collection('weight_loss_users');
                         collref.add({
                           'email':emailController.text,
@@ -518,16 +692,26 @@ class _MyHomePageState extends State<losspreminum> {
               animationDuration: Duration(milliseconds: 300),
               items: [
                 Icon(Icons.home, color: Colors.white),
-                Icon(Icons.message_outlined, color: Colors.white),
-                Icon(Icons.star, color: Colors.white),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlaychat(context);// Show overlay on long press
+                  },
+                  child: Icon(Icons.message_outlined, color: Colors.white),
+                ),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlayoffer(context); // Show overlay on long press
+                  },
+                  child: Icon(Icons.star, color: Colors.white),
+                ),
               ],
               onTap: (index) {
                 if (index == 1) {
                   _showMessageOptions(); // Show message options when message icon is tapped
                 } else if (index == 2) {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
-                } else {
-                  // Handle navigation for the home icon
+                } else if (index == 0) {
+                  _showOverlayhome(context);
                   navigateToPage(losspreminum());
                 }
               },
@@ -538,12 +722,13 @@ class _MyHomePageState extends State<losspreminum> {
     );
   }
 
+
   void _showMessageOptions() {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 100,
+          height: 190,
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -556,6 +741,14 @@ class _MyHomePageState extends State<losspreminum> {
                 title: Text('Chat with Chatbot'),
                 leading: Icon(Icons.chat),
               ),
+              ListTile(
+                onTap: () {
+                  Navigator.pop(context); // Close the bottom sheet
+                  _navigateToChatScreen(context, isChatbot: false);
+                },
+                title: Text('Chat with Dietitian'),
+                leading: Icon(Icons.person),
+              ),
             ],
           ),
         );
@@ -565,14 +758,49 @@ class _MyHomePageState extends State<losspreminum> {
 
 
 
-  void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatBot(isChatBot: isChatbot),
-      ),
-    );
+  void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) async {
+    if (isChatbot) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ChatBot(isChatBot: true)),
+      );
+    } else {
+      String? userId = await idstorage.getUserId(); print('$userId userid from weightgain ');
+      if (userId == null) {
+        // Generate and store a new user ID if not already stored
+        print("generted new id");
+
+        userId = DateTime.now().millisecondsSinceEpoch.toString();
+        await idstorage.storeUserId(userId);
+      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => UserChatScreen(userId: userId!)),
+      );
+    }
   }
+
+
+
+  void _startListeningForUnreadMessages() async {
+    String? userId = await idstorage.getUserId();
+    if (userId != null) {
+      FirebaseFirestore.instance
+          .collection('chats')
+          .doc(userId)
+          .collection('messages')
+          .where('isFromDietitian', isEqualTo: true)
+          .where('hasreplied', isEqualTo: false)
+          .snapshots()
+          .listen((QuerySnapshot snapshot) {
+        setState(() {
+          _unreadMessageCount = snapshot.size;
+        });
+      });
+    }
+  }
+
+
   Widget itemDashboard(String title, String imagePath, VoidCallback onTap) =>
       GestureDetector(
         onTap: onTap,

@@ -99,11 +99,6 @@ class _ChatBotState extends State<ChatBot> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(
-              Icons.chat,
-              color: Colors.white,
-            ),
-            SizedBox(width: 8),
             Text(
               'ChatMate',
               style: TextStyle(

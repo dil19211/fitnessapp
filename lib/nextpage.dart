@@ -1,11 +1,10 @@
-import 'package:lottie/lottie.dart';
+import 'package:fitnessapp/dietlogin.dart';
 import 'package:flutter/material.dart';
-import 'package:fitnessapp/getstarted%20page.dart';
+import 'package:lottie/lottie.dart';
 import 'package:fitnessapp/weightgain.dart';
 import 'package:fitnessapp/weightloss.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'adminpanel.dart';
 import 'login.dart';
+
 
 class page extends StatelessWidget {
   @override
@@ -24,16 +23,51 @@ class page extends StatelessWidget {
         ),
         centerTitle: false,
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.account_circle,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              // Navigate to user account page
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (BuildContext context) => LoginPage(),
-              ));
+          Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: Icon(Icons.account_circle_outlined, color: Colors.white),
+                onPressed: () {
+                  final RenderBox button = context.findRenderObject() as RenderBox;
+                  final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+                  final RelativeRect position = RelativeRect.fromRect(
+                    Rect.fromPoints(
+                      button.localToGlobal(Offset.zero, ancestor: overlay),
+                      button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+                    ),
+                    Offset.zero & overlay.size,
+                  );
+
+                  showMenu<String>(
+                    context: context,
+                    position: position,
+                    items: [
+                      PopupMenuItem<String>(
+                        value: 'Admin',
+                        child: Text('Admin'),
+                      ),
+                      PopupMenuItem<String>(
+                        value: 'Dietitian',
+                        child: Text('Dietitian'),
+                      ),
+                    ],
+                  ).then((String? result) {
+                    if (result != null) {
+                      switch (result) {
+                        case 'Admin':
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => LoginPage(),
+                          ));
+                          break;
+                        case 'Dietitian':
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (BuildContext context) => dietlogin(), // Replace with the appropriate page
+                          ));
+                      }
+                    }
+                  });
+                },
+              );
             },
           ),
         ],

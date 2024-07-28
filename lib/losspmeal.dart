@@ -44,7 +44,7 @@ class _MealState extends State<losspmeal> {
       if (!hasShownDialog) {
         // Show the dialog only if it has not been shown before
         Future.delayed(Duration(seconds: 2), () {
-          _showDiseaseDialog(context);
+          _showDiseaseAndAllergyDialog(context);
           prefs.setBool('hasShownDiseaseDialog',
               true); // Set flag to indicate the dialog has been shown
           print("called");
@@ -163,48 +163,96 @@ class _MealState extends State<losspmeal> {
 
   }
 
-  void _showDiseaseDialog(BuildContext context) {
+  void _showDiseaseAndAllergyDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         List<String> selectedDiseases = []; // To store selected diseases
+        List<String> selectedAllergies = []; // To store selected allergies
         final List<String> allDiseases = [
           'Diabetes',
           'Hypertension',
-          'Heart Disease'
+          'Heart Disease',
         ];
 
+        final List<String> allAllergies = [
+          'Egg',
+          'Peanuts',
+          'Shellfish',
+          'Milk',
+          'Wheat',
+          'Soy',
+          'Fish',
+          'Tree Nuts',
+          'Dairy',
+        ];
         return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return AlertDialog(
-              title: Text('Select Your Diseases if you have any',style: TextStyle(fontSize: 16,fontWeight: FontWeight.w500,color: Colors.purple),),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: allDiseases.map((disease) {
-                  return CheckboxListTile(
-                    title: Text(disease),
-                    value: selectedDiseases.contains(disease),
-                    activeColor: Colors.green, // Set active color to green
-                    onChanged: (bool? value) {
-                      setState(() {
-                        if (value == true) {
-                          selectedDiseases.add(disease);
-                        } else {
-                          selectedDiseases.remove(disease);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
+              title: Text(
+                'Health Information',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.purple,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Select Your Diseases if you have any:',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...allDiseases.map((disease) {
+                      return CheckboxListTile(
+                        title: Text(disease),
+                        value: selectedDiseases.contains(disease),
+                        activeColor: Colors.green,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value == true) {
+                              selectedDiseases.add(disease);
+                            } else {
+                              selectedDiseases.remove(disease);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                    SizedBox(height: 20),
+                    Text(
+                      'Do you have any food allergies?',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    ...allAllergies.map((allergy) {
+                      return CheckboxListTile(
+                        title: Text(allergy),
+                        value: selectedAllergies.contains(allergy),
+                        activeColor: Colors.green,
+                        onChanged: (bool? value) {
+                          setState(() {
+                            if (value == true) {
+                              selectedAllergies.add(allergy);
+                            } else {
+                              selectedAllergies.remove(allergy);
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
                   onPressed: () async {
-                    // Save selected diseases to SharedPreferences
-                    SharedPreferences prefs = await SharedPreferences
-                        .getInstance();
+                    // Save selected diseases and allergies to SharedPreferences
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
                     prefs.setStringList('diseases', selectedDiseases);
+                    prefs.setStringList('allergies', selectedAllergies);
                     Navigator.of(context).pop(); // Close the dialog
                   },
                   child: Text('Save'),
@@ -945,22 +993,22 @@ class _MealState extends State<losspmeal> {
 
     switch (mealType) {
       case 'Breakfast':
-        isButtonEnabled = now.hour >= 7 && now.hour <9;
+        isButtonEnabled = now.hour >= 6 && now.hour <12;
         timing = '6 AM - 9 AM';
         calorieRange = _breakfastCalories;
         break;
       case 'Lunch':
-        isButtonEnabled = now.hour >= 12 && now.hour < 15;
+        isButtonEnabled = now.hour >= 12 && now.hour < 16;
         timing = '12 PM - 3 PM';
         calorieRange = _lunchCalories;
         break;
       case 'Snack':
-        isButtonEnabled = now.hour >= 15 && now.hour < 18;
+        isButtonEnabled = now.hour >= 16 && now.hour < 18;
         timing = '3 PM - 6 PM';
         calorieRange = _snackCalories;
         break;
       case 'Dinner':
-        isButtonEnabled = now.hour >= 18 && now.hour < 21;
+        isButtonEnabled = now.hour >= 18  && now.hour < 21;
         timing = '6 PM - 9 PM';
         calorieRange = _dinnerCalories;
         break;
@@ -1438,11 +1486,11 @@ class _AddMealDialogState extends State<AddMealDialog> {
       int hour = now.hour;
       String currentMealType = '';
 
-      if (hour >= 7 && hour <9) {
+      if (hour >= 6 && hour <12) {
         currentMealType = 'Breakfast';
-      } else if (hour >= 12 && hour < 15) {
+      } else if (hour >= 12 && hour < 16) {
         currentMealType = 'Lunch';
-      } else if (hour >= 15 && hour < 18) {
+      } else if (hour >= 16 && hour < 18) {
         currentMealType = 'Snack';
       } else if (hour >= 18 && hour < 21) {
         currentMealType = 'Dinner';

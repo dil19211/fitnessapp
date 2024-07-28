@@ -1,6 +1,8 @@
 
 
-import 'package:fitnessapp/dietionchat.dart';
+import 'dart:async';
+
+import 'package:fitnessapp/dietionchatpanel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,8 @@ import 'package:mailer/smtp_server/gmail.dart';
 import 'adminpanel.dart';
 import 'const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:http/http.dart' as http;
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -33,6 +37,8 @@ class _LoginPageState extends State<LoginPage> {
   bool _showPasswordError = false;
   bool _buttonEnabled = true; // Initialize to true
   final ValueNotifier<bool> _obscureText = ValueNotifier(true);
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+  bool _hasFullInternetAccess = false;
 
 
   @override
@@ -40,6 +46,10 @@ class _LoginPageState extends State<LoginPage> {
     super.initState();
     _emailController.addListener(_validateEmail);
     _passwordController.addListener(_validatePassword);
+    _checkInternetConnection();
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+      _updateConnectionStatus(results.first); // Taking the first result for simplicity
+    });
   }
 
   @override
@@ -49,7 +59,57 @@ class _LoginPageState extends State<LoginPage> {
     _emailFocus.dispose();
     _passwordFocus.dispose();
     _obscureText.dispose();
+    _connectivitySubscription.cancel();
     super.dispose();
+  }
+  void _checkInternetConnection() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.none) {
+      _showToast("No internet connection");
+    } else {
+      _checkFullInternetAccess();
+    }
+  }
+
+  void _updateConnectionStatus(ConnectivityResult result) {
+    if (result == ConnectivityResult.none) {
+      _showToast("No internet connection");
+    } else {
+      _checkFullInternetAccess();
+    }
+  }
+
+  void _checkFullInternetAccess() async {
+    try {
+      final response = await http.get(Uri.parse('https://www.google.com'));
+      if (response.statusCode == 200) {
+        setState(() {
+          _hasFullInternetAccess = true;
+        });
+      } else {
+        _showToast("Limited internet connection");
+        setState(() {
+          _hasFullInternetAccess = false;
+        });
+      }
+    } catch (e) {
+      _showToast("Limited internet connection");
+      setState(() {
+        _hasFullInternetAccess = false;
+      });
+    }
+  }
+
+  void _showToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.TOP,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.redAccent,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 
   void _validateEmail() {
@@ -107,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(height: 25),
                     Image.asset(image1),
                     Text(
-                      "Welcome Back!",
+                      "Welcome Back Admin!",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -214,16 +274,16 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       onPressed: () async {
-                        sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
+                       // sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
 
-                        SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                        await prefs.setString('selectedPage', 'login');
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) => DietitianChatScreen(),
-                          ),
-                        );
+                        // SharedPreferences prefs =
+                        // await SharedPreferences.getInstance();
+                        // await prefs.setString('selectedPage', 'login');
+                        // Navigator.of(context).pushReplacement(
+                        //   MaterialPageRoute(
+                        //     builder: (BuildContext context) => admin(),
+                        //   ),
+                        // );
 
                         // Validate fields
                         _validateFieldsAndSubmit();
@@ -234,11 +294,21 @@ class _LoginPageState extends State<LoginPage> {
                                 required BuildContext context}) async {
                             FirebaseAuth auth = FirebaseAuth.instance;
                             User? user;
+                            if (_hasFullInternetAccess) {
                             try {
+                              //internet
                               UserCredential userCredential = await auth.signInWithEmailAndPassword(
                                   email: email, password: password);
                               user = userCredential.user;
-                              // sendMail(recipientEmail: _emailController.text.toString(),mailMessage: 'u are using gritfit!!!');
+                               sendMail(recipientEmail: _emailController.text.toString(),mailMessage: 'Admin is sucessfuly logged in!!!');
+                              SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                              await prefs.setString('selectedPage', 'login');
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (BuildContext context) => admin(),
+                                ),
+                              );
 
                             } on FirebaseAuthException catch (e) {
 
@@ -265,11 +335,15 @@ class _LoginPageState extends State<LoginPage> {
                                     LoginPage(), ));
                               return user;
                             }
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  admin(),
-                            ));
-                            return user;
+                            // Navigator.of(context).push(MaterialPageRoute(
+                            //   builder: (BuildContext context) =>
+                            //       admin(),
+                            // ));
+                            // return user;
+                            }
+                            else {
+                              _showToast("Stable internet connection required to log in");
+                            }
                           }
                           User? user=await loginUsingEmailPassword(
                               email: _emailController.text, password: _passwordController.text, context: context);
@@ -293,6 +367,7 @@ class _LoginPageState extends State<LoginPage> {
                         } else {
                           // Handle forgot password action
                           print("Forgot Password button pressed");
+                          //internet
                           sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Your  psssword is [ agritfit123 ]');
                         }
                       },

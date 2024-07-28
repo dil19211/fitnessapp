@@ -38,7 +38,7 @@ class Welcome extends StatelessWidget {
                     text: TextSpan(
                       children: [
                         TextSpan(
-                          text: ' Get ready to transform your fitness journey with our tailored workouts, nutrition plans, and progress tracking.',
+                          text: 'Get ready to transform your fitness journey with our tailored workouts, customizable meal plans based on your preferences,and progress tracking.',
                           style: TextStyle(fontSize: 16, color: Colors.black54),
                         ),
                       ],

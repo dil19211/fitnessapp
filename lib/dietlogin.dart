@@ -2,7 +2,7 @@
 import 'dart:async';
 
 import 'package:lottie/lottie.dart';
-import 'package:fitnessapp/dietionchat.dart';
+import 'package:fitnessapp/dietionchatpanel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +110,7 @@ class _LoginPageState extends State<dietlogin> {
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.TOP,
       timeInSecForIosWeb: 1,
-      backgroundColor: Colors.black87,
+      backgroundColor: Colors.redAccent,
       textColor: Colors.white,
       fontSize: 16.0,
     );
@@ -170,7 +170,7 @@ class _LoginPageState extends State<dietlogin> {
                     SizedBox(height: 25),
                     Lottie.asset(image2),
                     Text(
-                      "Welcome Back!",
+                      "Welcome Back Dietition!",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
@@ -423,7 +423,7 @@ class _LoginPageState extends State<dietlogin> {
     // change your email here
     String username = _emailController.text.toString();
     // change your password here
-    String password = 'pzkzsdlrwxuisqye';
+    String password = 'xubosgtslgljnxmz';
     final smtpServer = gmail(username, password);
     final message = Message()
       ..from = Address(username, 'Mail Service')

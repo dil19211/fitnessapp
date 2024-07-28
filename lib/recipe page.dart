@@ -5,9 +5,7 @@ import 'package:fitnessapp/payUserModel.dart';
 import 'package:fitnessapp/user_repo.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_stripe/flutter_stripe.dart';
-import 'dart:convert';
+
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 class RecipePage extends StatefulWidget {
@@ -159,7 +157,8 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/curry.jpg',
       'ingredients': 'Chicken, Onions, Tomatoes, Garlic, Ginger, Spices, Yogurt',
       'recipe': 'Cook onions until golden. Add garlic, ginger, and spices. Add chicken and cook until browned. Add tomatoes and yogurt. Simmer until chicken is cooked through.',
-      'category': 'Meal', 'videoUrl': 'https://youtu.be/WRYOVVexMhU?si=DGavK7F8ghlLuAva',
+      'category': 'Meal',
+      'videoUrl': 'https://youtu.be/WRYOVVexMhU?si=DGavK7F8ghlLuAva',
       'calories': '300 per serving',
     },
     {
@@ -231,7 +230,7 @@ class _RecipePageState extends State<RecipePage> {
       'image': 'assets/images/apple pie.jpg',
       'recipe': 'Blend apple, rolled oats, yogurt, cinnamon, honey, and almond milk until smooth.',
       'category': 'Blends',
-       'videoUrl': 'https://youtu.be/6dtnxgZCK5M?si=Gw3J5Gk8pyJJBrHn',
+      'videoUrl': 'https://youtu.be/6dtnxgZCK5M?si=Gw3J5Gk8pyJJBrHn',
       'calories': '1 serving 150',
     },
     {
@@ -368,28 +367,37 @@ class _RecipePageState extends State<RecipePage> {
       'ingredients': 'Flour, Sugar, Butter, Eggs, Vanilla Extract, Baking Powder, Salt, Milk, Frosting',
       'image': 'assets/images/vanilla.jpg',
       'recipe': 'Cream together butter and sugar. Beat in eggs and vanilla extract. Mix in flour, baking powder, and salt. Gradually add milk. Pour batter into cupcake liners. Bake at 350°F for 18-20 minutes. Frost once cooled.',
-      'category': 'Snacks', 'videoUrl': 'https://youtu.be/uU7eOlSL6Hk?si=bJ8BTXeMQcbylTpY','calories': '1 slice 150',},
+      'category': 'Snacks',
+      'videoUrl': 'https://youtu.be/uU7eOlSL6Hk?si=bJ8BTXeMQcbylTpY',
+      'calories': '1 slice 150',
+    },
     {
       'name': 'Chocolate Cake',
       'ingredients': 'Flour, Sugar, Cocoa Powder, Baking Powder, Baking Soda, Salt, Eggs, Milk, Vegetable Oil, Vanilla Extract, Hot Water, Frosting',
       'image': 'assets/images/cake.jpg',
       'recipe': 'Mix dry ingredients. Add eggs, milk, oil, and vanilla extract. Beat until smooth. Stir in hot water. Pour into greased pans. Bake at 350°F for 30-35 minutes. Frost once cooled.',
-      'category': 'Snacks', 'videoUrl': 'https://youtu.be/RfhNAs597nM?si=3T0uKwx9yfSbLCUz','calories': '1 slice 200',},
+      'category': 'Snacks',
+      'videoUrl': 'https://youtu.be/RfhNAs597nM?si=3T0uKwx9yfSbLCUz',
+      'calories': '1 slice 200',
+    },
 
     {
       'name': 'Chocolate Truffles',
       'ingredients': 'Chocolate Chips, Heavy Cream, Butter, Cocoa Powder, Nuts or Sprinkles (optional)',
       'image': 'assets/images/trffles.jpg',
       'recipe': 'Heat cream and pour over chocolate chips and butter. Stir until smooth. Chill until firm. Roll into balls and coat in cocoa powder or chopped nuts. Chill until set.',
-      'category': 'Snacks', 'videoUrl': 'https://youtu.be/ckmDgIYsb8Q?si=VUaj7gKhvHXLuBGC','calories': '1 serving 50',},
+      'category': 'Snacks',
+      'videoUrl': 'https://youtu.be/ckmDgIYsb8Q?si=VUaj7gKhvHXLuBGC',
+      'calories': '1 serving 50',
+    },
 
 
   ];
 
   List<Map<String, String>> filteredRecipes = [];
   List<String> containerTitles = ['All', 'Salad', 'Meal', 'Blends', 'Snacks'];
-
-
+  List<String> searchSuggestions = [];
+  GlobalKey listKey = GlobalKey();
 
   @override
   void initState() {
@@ -400,7 +408,6 @@ class _RecipePageState extends State<RecipePage> {
   void selectContainer(int index) {
     setState(() {
       selectedIndex = index;
-      // Reset search
       searchController.clear();
       if (index == 0) {
         filteredRecipes = allRecipes;
@@ -418,40 +425,45 @@ class _RecipePageState extends State<RecipePage> {
   void searchRecipes(String query) {
     setState(() {
       if (query.isEmpty) {
-        // If the search query is empty, reset the filtered recipes based on the selected category
         if (selectedIndex == 0) {
-          filteredRecipes = allRecipes; // Show all recipes in "All" category
+          filteredRecipes = allRecipes;
         } else {
-          filteredRecipes = filterRecipesByCategory(
-              containerTitles[selectedIndex]); // Show recipes in the selected category
-        }
-      } else {
-        // If the search query is not empty, filter recipes based on name and category
-        if (selectedIndex == 0) {
-          // If in "All" category, filter all recipes by name and category
-          filteredRecipes = allRecipes.where((recipe) =>
-          recipe['name']!.toLowerCase().contains(query.toLowerCase()) ||
-              recipe['category']!.toLowerCase().contains(query.toLowerCase())
-          ).toList();
-        } else {
-          // If in a specific category, filter recipes in that category by name only
           filteredRecipes =
-              filterRecipesByCategory(containerTitles[selectedIndex]).where((
-                  recipe) =>
-                  recipe['name']!.toLowerCase().contains(query.toLowerCase())
-              ).toList();
+              filterRecipesByCategory(containerTitles[selectedIndex]);
+        }
+        searchSuggestions = [];
+      } else {
+        searchSuggestions = allRecipes
+            .where((recipe) =>
+            recipe['name']!.toLowerCase().contains(query.toLowerCase()))
+            .map((recipe) => recipe['name']!)
+            .toList();
+
+        if (selectedIndex == 0) {
+          filteredRecipes = allRecipes
+              .where((recipe) =>
+          recipe['name']!.toLowerCase().contains(query.toLowerCase()) ||
+              recipe['category']!.toLowerCase().contains(query.toLowerCase()))
+              .toList();
+        } else {
+          filteredRecipes =
+              filterRecipesByCategory(containerTitles[selectedIndex])
+                  .where((recipe) =>
+                  recipe['name']!.toLowerCase().contains(query.toLowerCase()))
+                  .toList();
         }
       }
     });
   }
 
 
+
   void showRecipeDialog(BuildContext context, Map<String, String> recipe) {
     showDialog(
       context: context,
       builder: (context) {
-        return SingleChildScrollView( // Wrap with SingleChildScrollView
-          clipBehavior: Clip.none, // Set clipBehavior to Clip.none
+        return SingleChildScrollView(
+          clipBehavior: Clip.none,
           child: AlertDialog(
             contentPadding: EdgeInsets.zero,
             content: Column(
@@ -479,10 +491,12 @@ class _RecipePageState extends State<RecipePage> {
                     children: [
                       Image.asset(recipe['image'] ?? ''),
                       SizedBox(height: 10),
-                      Text('Ingredients:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Ingredients:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['ingredients'] ?? ''),
                       SizedBox(height: 10),
-                      Text('Recipe:', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Recipe:',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       Text(recipe['recipe'] ?? ''),
                       SizedBox(height: 10),
                       Text(
@@ -496,7 +510,6 @@ class _RecipePageState extends State<RecipePage> {
                       SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () async {
-                          //showUserForm(context, recipe);
                           showInternetConnectionDialog(context, recipe);
                         },
                         style: ElevatedButton.styleFrom(
@@ -504,10 +517,9 @@ class _RecipePageState extends State<RecipePage> {
                             borderRadius: BorderRadius.circular(10.0),
                           ),
                           backgroundColor: Colors.purple[300],
-                          // Text color of the button
                           foregroundColor: Colors.white,
                         ),
-                        child: Text('See Video'),
+                        child: Text('Paid Video'),
                       ),
                     ],
                   ),
@@ -519,8 +531,6 @@ class _RecipePageState extends State<RecipePage> {
       },
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -581,7 +591,7 @@ class _RecipePageState extends State<RecipePage> {
                                     ? Colors.white
                                     : Colors.black,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 14, // Adjust font size for better fitting
+                                fontSize: 14,
                               ),
                             ),
                           ),
@@ -606,6 +616,7 @@ class _RecipePageState extends State<RecipePage> {
           ),
           Expanded(
             child: ListView(
+              key: listKey,
               padding: EdgeInsets.all(20.0),
               children: filteredRecipes.isNotEmpty
                   ? filteredRecipes.map((recipe) {
@@ -648,15 +659,38 @@ class _RecipePageState extends State<RecipePage> {
                                 ),
                               ),
                               SizedBox(height: 5),
-                              ElevatedButton(
-                                onPressed: () =>
-                                    showRecipeDialog(context, recipe),
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0),
+                              Row(
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () =>
+                                        showRecipeDialog(context, recipe),
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10.0),
+                                      ),
+                                    ),
+                                    child: Text('Free Recipe'),
                                   ),
-                                ),
-                                child: Text('See Recipe'),
+                                  SizedBox(width: 10),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text(
+                                            'Calories: ${recipe['calories']} kcal')),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10.0),
+                                      ),
+                                      minimumSize: Size(60, 40),
+                                    ),
+                                    child: Text('See\nkcal'),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -761,8 +795,10 @@ class _RecipePageState extends State<RecipePage> {
       },
     );
   }
+
 //paid user dalog
-  void showInternetConnectionDialog(BuildContext context,   Map<String, String> recipe) {
+  void showInternetConnectionDialog(BuildContext context,
+      Map<String, String> recipe) {
     showDialog(
       context: context,
       builder: (context) {
@@ -786,6 +822,7 @@ class _RecipePageState extends State<RecipePage> {
       },
     );
   }
+
   void launchVideo(String url) async {
     try {
       if (await canLaunch(url)) {
@@ -800,7 +837,6 @@ class _RecipePageState extends State<RecipePage> {
       ));
     }
   }
-
 
 
   Future<Database?> openDB() async {
@@ -829,6 +865,5 @@ class _RecipePageState extends State<RecipePage> {
 
     await _database?.close();
   }
-
 
 }

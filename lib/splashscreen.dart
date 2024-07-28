@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'package:fitnessapp/lossdashboard.dart';
-import 'package:fitnessapp/stepcounter.dart';
 import 'package:fitnessapp/weightgaindashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'adminpanel.dart';
+import 'dietionchatpanel.dart';
 import 'getstarted page.dart';
-import 'login.dart';
+
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -45,6 +45,9 @@ class _SplashScreenState extends State<SplashScreen> {
         case 'login':
           dashboard = admin();
           break;
+        case 'dietlogin':
+          dashboard = DietitianChatScreen();
+          break;
         default:
         // Handle any other cases here
           dashboard = Welcome(); // Replace with your default page
@@ -64,12 +67,13 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     // Your splash screen UI here
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
 
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset('assets/images/pics.json',height: 300,width: 300,repeat:true,reverse:true,), // Replace with your animation file path
+            Lottie.asset('assets/images/pics.json',height: 300,width: 300,reverse: true,repeat: true,), // Replace with your animation file path
             // Adjust spacing as needed
             Text(
               '',

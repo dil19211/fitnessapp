@@ -5,7 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class Workout extends StatefulWidget {
   @override
@@ -782,61 +782,65 @@ class _WorkoutState extends State<Workout> {
             padding: EdgeInsets.all(16.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Exercises',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                Center(
+                  child: Text(
+                    'Exercises',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 SizedBox(height: 10),
-                Column(
-                  children: exercises.map((exercise) {
-                    // Determine if the exercise is enabled based on whether it's included in the selected plan
-                    bool isEnabled = includedExercises.contains(exercise);
+                Center(
+                  child: Column(
+                    children: exercises.map((exercise) {
+                      // Determine if the exercise is enabled based on whether it's included in the selected plan
+                      bool isEnabled = includedExercises.contains(exercise);
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                      child: GestureDetector(
-                        onTap: () {
-                          // Only navigate if the exercise is enabled
-                          if (isEnabled) {
-                            Navigator.pop(context); // Close the bottom sheet
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ExerciseDetailPage(
-                                  exerciseName: exercise,
-                                  exerciseImage: exerciseImages[exercise] ?? '',
-                                  videoUrl: exerciseVideos[exercise] ?? '',
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Only navigate if the exercise is enabled
+                            if (isEnabled) {
+                              Navigator.pop(context); // Close the bottom sheet
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ExerciseDetailPage(
+                                    exerciseName: exercise,
+                                    exerciseImage: exerciseImages[exercise] ?? '',
+                                    videoUrl: exerciseVideos[exercise] ?? '',
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
-                          else {
-                            // Show snackbar if the exercise is not enabled
-                            Fluttertoast.showToast(msg: "Beacuse of your diability plan you are not allowed to perform gis excersie",
+                              );
+                            } else {
+                              // Show snackbar if the exercise is not enabled
+                              Fluttertoast.showToast(
+                                msg: "Because of your disability plan you are not allowed to perform this exercise",
                                 toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.TOP,
                                 timeInSecForIosWeb: 2,
                                 backgroundColor: Colors.purple[100],
                                 textColor: Colors.black,
-                                fontSize: 15
-                            );
-                          }
-                        },
-                        child: Text(
-                          exercise,
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: isEnabled ? Colors.black : Colors.grey, // Disable text color if not enabled
+                                fontSize: 15,
+                              );
+                            }
+                          },
+                          child: Text(
+                            exercise,
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: isEnabled ? Colors.black : Colors.grey, // Disable text color if not enabled
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
               ],
             ),

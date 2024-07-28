@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/userchat.dart';
+import 'idstorge.dart';
 import 'nextpage.dart';
 import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/recipe%20page.dart';
@@ -31,6 +32,9 @@ class _MyHomePageState extends State<preminum> {
   Database? _database;
   String username = '';
   int _unreadMessageCount = 0;
+  bool _isOverlayVisible = false;
+  OverlayEntry? _overlayEntry;
+
 
   @override
   void initState() {
@@ -51,6 +55,167 @@ class _MyHomePageState extends State<preminum> {
     _startListeningForUnreadMessages(); // Start listening for unread messages
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _overlayEntry?.remove(); // Clean up the overlay when the widget is disposed
+  }
+  //overlay
+  OverlayEntry _createOverlayEntryhome(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 1.5 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'home',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  OverlayEntry _createOverlayEntrychat(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 2 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'chat',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //overlay
+  OverlayEntry _createOverlayEntryoffer(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 100.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'premimum offer',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayhome(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryhome(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //chat
+  void _showOverlaychat(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntrychat(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //offer
+  void _showOverlayoffer(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryoffer(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 3), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
 
 
   Future<void> loadUsername() async {
@@ -76,9 +241,9 @@ class _MyHomePageState extends State<preminum> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Enter Your Confirm Email', style: TextStyle(
+              title: Text('To ensure seemless access to\n premium benefits,please \nenter your Email address.', style: TextStyle(
                   color: Colors.purple,
-                  fontSize: 17,
+                  fontSize: 15,
                   fontWeight: FontWeight.w600)),
               content: TextField(
                 controller: emailController,
@@ -210,8 +375,14 @@ class _MyHomePageState extends State<preminum> {
                         sendEmail(
                           emailController.text,
                           'Hello User!',
-                          'Welcome! You are using the unpaid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
+                          'Welcome! You are using the paid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
+                        // String userEmail = emailController.text;
+                        // sendEmail(
+                        //   'agritfit@gmail.com',
+                        //   'Payment Received',
+                        //   'A new payment has been received from User $userEmail',
+                        // );
                         getcurrentweightgainuser(emailController.text
                             .toString());
                         String email = emailController.text.toString();
@@ -541,32 +712,26 @@ class _MyHomePageState extends State<preminum> {
               animationDuration: Duration(milliseconds: 300),
               items: [
                 Icon(Icons.home, color: Colors.white),
-                Stack(
-                  children: [
-                    Icon(Icons.message_outlined, color: Colors.white),
-                    if (_unreadMessageCount > 0)
-                      Positioned(
-                        right: 0,
-                        child: CircleAvatar(
-                          radius: 10,
-                          backgroundColor: Colors.purple[200],
-                          child: Text(
-                            _unreadMessageCount.toString(),
-                            style: TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                      ),
-                  ],
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlaychat(context);// Show overlay on long press
+                  },
+                  child: Icon(Icons.message_outlined, color: Colors.white),
                 ),
-                Icon(Icons.star, color: Colors.white),
+                GestureDetector(
+                  onLongPress: () {
+                    _showOverlayoffer(context); // Show overlay on long press
+                  },
+                  child: Icon(Icons.star, color: Colors.white),
+                ),
               ],
               onTap: (index) {
                 if (index == 1) {
                   _showMessageOptions(); // Show message options when message icon is tapped
                 } else if (index == 2) {
                   _showPremiumDialog(); // Show premium dialog when star icon is tapped
-                } else {
-                  // Handle navigation for the home icon
+                } else if (index == 0) {
+                  _showOverlayhome(context);
                   navigateToPage(preminum());
                 }
               },
@@ -618,12 +783,13 @@ class _MyHomePageState extends State<preminum> {
         MaterialPageRoute(builder: (context) => ChatBot(isChatBot: true)),
       );
     } else {
-      String? userId = await getUserId();
+      String? userId = await idstorage.getUserId(); print('$userId userid from weightgain ');
       if (userId == null) {
         // Generate and store a new user ID if not already stored
+        print("generted new id");
 
         userId = DateTime.now().millisecondsSinceEpoch.toString();
-        await storeUserId(userId);
+        await idstorage.storeUserId(userId);
       }
       Navigator.push(
         context,
@@ -635,8 +801,10 @@ class _MyHomePageState extends State<preminum> {
 
 
 
+
+
   void _startListeningForUnreadMessages() async {
-    String? userId = await getUserId();
+    String? userId = await idstorage .getUserId();
     if (userId != null) {
       FirebaseFirestore.instance
           .collection('chats')
@@ -653,15 +821,7 @@ class _MyHomePageState extends State<preminum> {
     }
   }
 
-  Future<void> storeUserId(String userId) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('userId', userId);
-  }
 
-  Future<String?> getUserId() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('userId');
-  }
 
 
 

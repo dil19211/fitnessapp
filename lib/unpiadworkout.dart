@@ -102,41 +102,48 @@ class _WorkoutState extends State<uWorkout> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          width: 500,
           padding: EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Exercises',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Center(
+                child: Text(
+                  'Exercises',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               SizedBox(height: 10),
-              Column(
-                children: exercises.map((exercise) {
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context); // Close the bottom sheet
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ExerciseDetailPage(exerciseName: exercise,  exerciseImage: exerciseImages[exercise] ?? '',videoUrl: exerciseVideos[exercise] ?? '',),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        exercise,
-                        style: TextStyle(fontSize: 18),
+              Center(
+                child: Column(
+                  children: exercises.map((exercise) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context); // Close the bottom sheet
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExerciseDetailPage(
+                                exerciseName: exercise,
+                                exerciseImage: exerciseImages[exercise] ?? '',
+                                videoUrl: exerciseVideos[exercise] ?? '',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          exercise,
+                          style: TextStyle(fontSize: 18),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
             ],
           ),
@@ -144,6 +151,7 @@ class _WorkoutState extends State<uWorkout> {
       },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -497,62 +505,74 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
   void _setTimer() {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true, // Enable scroll control for smaller screens
       builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Set Timer (in minutes)',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 10),
-              TextField(
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Minutes',
-                ),
-                onChanged: (value) {
-                  _timeInMinutes = int.tryParse(value) ?? 0;
-                },
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  List<int>? timeRange = exerciseTimeRange[widget.exerciseName];
-                  if (timeRange != null &&
-                      (_timeInMinutes < timeRange[0] || _timeInMinutes > timeRange[1])) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Invalid Time'),
-                          content: Text(
-                              'Please enter a time between ${timeRange[0]} and ${timeRange[1]} minutes for ${widget.exerciseName}.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
+        return GestureDetector( // GestureDetector to handle taps outside the keyboard area
+          onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode()); // Dismiss keyboard on tap outside
+          },
+          child: SingleChildScrollView(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom, // Adjust for keyboard
+            ),
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Set Timer (in minutes)',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Minutes',
+                    ),
+                    onChanged: (value) {
+                      _timeInMinutes = int.tryParse(value) ?? 0;
+                    },
+                  ),
+                  SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      List<int>? timeRange = exerciseTimeRange[widget.exerciseName];
+                      if (timeRange != null &&
+                          (_timeInMinutes < timeRange[0] ||
+                              _timeInMinutes > timeRange[1])) {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Invalid Time'),
+                              content: Text(
+                                  'Please enter a time between ${timeRange[0]} and ${timeRange[1]} minutes for ${widget.exerciseName}.'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            );
+                          },
                         );
-                      },
-                    );
-                  } else {
-                    setState(() {
-                      _timerSet = true;
-                      _timeInSeconds = _timeInMinutes * 60;
-                    });
-                  }
-                },
-                child: Text('Set'),
+                      } else {
+                        setState(() {
+                          _timerSet = true;
+                          _timeInSeconds = _timeInMinutes * 60;
+                        });
+                      }
+                    },
+                    child: Text('Set'),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       },
@@ -748,7 +768,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          labelText: 'Email',
+                          labelText: 'Enter Email for payment\n Confirmation',
                           labelStyle: TextStyle(
                             fontSize: 18.0, // Set the font size for the label text
                           ),
@@ -832,6 +852,12 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                       emailController.text,
                       'Payment Successful',
                       'Welcome! you have subscribed the premium package of GritFit.',
+                    );
+                     String userEmail = emailController.text;
+                     sendAdminEmail(
+                       'agritfit@gmail.com',
+                      'Payment Received',
+                      'A new payment has been received from User $userEmail',
                     );
                     CollectionReference collref= FirebaseFirestore.instance.collection('partial_payment_users');
                     collref.add({
@@ -1003,6 +1029,30 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
             content: Text('Something went wrong ,cant send email'),
           ),
         );
+      }
+    }
+  }
+
+  Future<void> sendAdminEmail(String recipient, String subject, String message) async {
+    // Replace with your email and password
+    String username = 'gritfitapp7@gmail.com';
+    String password = 'aksyxvonaufddkis';
+
+    final smtpServer = gmail(username, password);
+
+    final emailMessage = Message()
+      ..from = Address(username, 'GritFit')
+      ..recipients.add(recipient)
+      ..subject = subject
+      ..text = message;
+
+    try {
+      final sendReport = await send(emailMessage, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
       }
     }
   }
