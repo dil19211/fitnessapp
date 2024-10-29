@@ -7,9 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
-import 'dietitiontoadmin.dart';
-import 'dietlogin.dart';
-import 'idsssstorages.dart';
+
 
 class adminChatScreen extends StatefulWidget {
   @override
@@ -209,7 +207,7 @@ class _adminChatScreenState extends State<adminChatScreen> {
               return ListTile(
                 leading: Icon(Icons.person), // Add the person icon here
                 title: Text(
-                  "User: $userId",
+                  "Dietitian: $userId",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                 ),
                 subtitle: Text(

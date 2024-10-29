@@ -1,14 +1,10 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessapp/userchat.dart';
-//import 'package:db4/user_repo.dart';
-
-import 'idsssstorages.dart';
 import 'idstorge.dart';
 import 'losspmeal.dart';
 import 'lossstep.dart';
 import 'nextpage.dart';
-import 'package:fitnessapp/pgainmeal.dart';
 import 'package:fitnessapp/recipe%20page.dart';
 import 'package:fitnessapp/servicechecker.dart';
 import 'package:fitnessapp/stepcounter.dart';
@@ -214,6 +210,59 @@ class _MyHomePageState extends State<losspreminum> {
       });
     }
   }
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 600.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 70,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+
+
   @override
   void dispose() {
     super.dispose();
@@ -242,7 +291,7 @@ class _MyHomePageState extends State<losspreminum> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('To ensure seemless access to\n premium benefits,please\n enter your Email address.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
+              title: Text('To ensure seemless access to\n premium benefits,please\n enter your Email address.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w500,fontSize: 13,),),
               content: TextField(
                 controller: emailController,
               ),
@@ -676,12 +725,22 @@ class _MyHomePageState extends State<losspreminum> {
                 Positioned(
                   top: 27,
                   right: 4,
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: Icon(Icons.exit_to_app_sharp),
-                    onPressed: () {
-                      showLogoutDialog(context);
+                  child: GestureDetector(
+                    onLongPress: () {
+                      _showOverlayexit(context);
+                      // Show overlay on long press
                     },
+                    onTap: () {
+                      showLogoutDialog(context); // Show logout dialog on regular tap
+                    },
+                    child: IconButton(
+                      color: Colors.white,
+                      icon: Icon(Icons.exit_to_app_sharp),
+                      onPressed: () {
+                        showLogoutDialog(context);
+                        // You can remove this onPressed since tap and long press are now handled by GestureDetector
+                      },
+                    ),
                   ),
                 ),
               ],

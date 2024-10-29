@@ -26,7 +26,7 @@ class page extends StatelessWidget {
           Builder(
             builder: (BuildContext context) {
               return IconButton(
-                icon: Icon(Icons.account_circle_outlined, color: Colors.white),
+                icon: Icon(Icons.perm_identity_sharp, color: Colors.white),
                 onPressed: () {
                   final RenderBox button = context.findRenderObject() as RenderBox;
                   final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;

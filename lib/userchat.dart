@@ -173,7 +173,7 @@ class _UserChatScreenState extends State<UserChatScreen> {
             padding: EdgeInsets.all(8.0),
             color: Colors.purpleAccent,
             child: Text(
-              "Do not use abusive words During Chat",
+              "Do not use abusive words during Chat",
               style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),

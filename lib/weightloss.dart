@@ -1,17 +1,20 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessapp/idstorge.dart';
+import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:fitnessapp/user_model.dart';
 import 'package:fitnessapp/user_repo.dart';
+import 'package:fitnessapp/weightgaindashboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
+import 'package:fluttertoast/fluttertoast.dart';
+
 import 'database_handler.dart';
-import 'idstorge.dart';
-import 'lossdashboard.dart';
-import 'package:http/http.dart' as http;
 
 class Weightloss extends StatefulWidget {
   @override
@@ -57,10 +60,6 @@ class _WeightGainState extends State<Weightloss> {
     activityLevelController.dispose();
   }
 
-  String _generateUniqueId() {
-    // Ensure this method always returns a valid non-null string
-    return DateTime.now().millisecondsSinceEpoch.toString();
-  }
 
   Future<bool> _isConnected() async {
     bool hasConnection = await InternetConnectionChecker().hasConnection;
@@ -69,8 +68,7 @@ class _WeightGainState extends State<Weightloss> {
     }
 
     try {
-      final response = await http.get(Uri.parse('https://www.google.com'))
-          .timeout(Duration(seconds: 4));
+      final response = await http.get(Uri.parse('https://www.google.com')).timeout(Duration(seconds: 4));
       if (response.statusCode == 200) {
         return true;
       }
@@ -78,6 +76,11 @@ class _WeightGainState extends State<Weightloss> {
       print('Error checking internet connection: $e');
     }
     return false;
+  }
+
+  String _generateUniqueId() {
+    // Ensure this method always returns a valid non-null string
+    return DateTime.now().millisecondsSinceEpoch.toString();
   }
 
 
@@ -125,6 +128,7 @@ class _WeightGainState extends State<Weightloss> {
                 });
               },
             ),
+
             SizedBox(height: 25),
             buildTextField(
               'Enter Name',
@@ -262,9 +266,9 @@ class _WeightGainState extends State<Weightloss> {
                     !RegExp(r'^\d*\.?\d*$').hasMatch(value)) {
                   return 'Please enter a valid weight in kgs.';
                 } else if (value.isNotEmpty &&
-                    double.parse(value) >
+                    double.parse(value) <
                         double.parse(currentWeightController.text)) {
-                  return 'Goal weight should be less than current weight.';
+                  return 'Goal weight should be greater than current weight.';
                 }
                 return null;
               },
@@ -274,7 +278,6 @@ class _WeightGainState extends State<Weightloss> {
               onPressed: hasError
                   ? null
                   : () async {
-                insertDB();
                 bool isConnected = await  _isConnected();
                 print("not entered");
                 if (!isConnected) {
@@ -290,8 +293,9 @@ class _WeightGainState extends State<Weightloss> {
                   );
                   return;
                 }
-                getFromweightlossusers();
-                CollectionReference collref= FirebaseFirestore.instance.collection('weight_loss_users');
+                insertDB();
+                getFromweightgainusers();
+                CollectionReference collref= FirebaseFirestore.instance.collection('weight_gain_users');
                 collref.add({
                   'name': nameController.text,
                   'email':emailController.text,
@@ -301,7 +305,8 @@ class _WeightGainState extends State<Weightloss> {
                   'activity_level':activityLevelController.text,
                   'cweight':currentWeightController.text,
                   'gweight':goalWeightController.text,
-                   'id':idController.text,
+                  'id':idController.text,
+
                 }).then((value) {
                   print("User Added in firebase");
                 }).catchError((error) {
@@ -310,19 +315,19 @@ class _WeightGainState extends State<Weightloss> {
                 String? nameUser=await getNameFromEmail(emailController.text.toString());
 
                 if (_validateFields()) {
-
                   SharedPreferences prefs =
                   await SharedPreferences.getInstance();
-                  await prefs.setString('selectedPage', 'weightloss');
+                  await prefs.setString('selectedPage', 'weightgain');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Your goal is set Sucessfully.'),
-                      duration: Duration(seconds: 3),
-                    ),
+                      SnackBar(
+                        content: Text('Your goal is set Sucessfully.'),
+                        duration: Duration(seconds: 3),
+                      )
                   );
+
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                        builder: (BuildContext context) => lossdashboaard(),
+                        builder: (BuildContext context) => dashboaard(),
                         settings: RouteSettings(arguments: nameUser)
                     ),
                   );
@@ -445,58 +450,6 @@ class _WeightGainState extends State<Weightloss> {
       ),
     );
   }
-  Widget buildTextFieldWithValidations(
-      String labelText,
-      TextEditingController controller,
-      String errorText,
-      Function(String) onChanged,
-      String? Function(String)? validator,
-      ) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 9),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          TextField(
-            controller: controller,
-            onChanged: (value) {
-              onChanged(value);
-              // Call the validator function when the user types
-              setState(() {
-                errorText = validator!(controller.text) ?? '';
-              });
-            },
-            decoration: InputDecoration(
-              labelText: labelText,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.grey),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.purple),
-              ),
-              contentPadding:
-              EdgeInsets.symmetric(vertical: 14, horizontal: 18),
-            ),
-            keyboardType: TextInputType.number,
-            onSubmitted: (_) {
-              // Call the validator function when the user submits
-              setState(() {
-                errorText = validator!(controller.text) ?? '';
-              });
-            },
-          ),
-          if (errorText.isNotEmpty) ...[
-            SizedBox(height: 4),
-            Text(
-              errorText,
-              style: TextStyle(color: Colors.red),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
   void _checkGoalWeightSuitability() {
     // Cancel the previous Timer if it's active
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -727,6 +680,58 @@ class _WeightGainState extends State<Weightloss> {
       ),
     );
   }
+  Widget buildTextFieldWithValidations(
+      String labelText,
+      TextEditingController controller,
+      String errorText,
+      Function(String) onChanged,
+      String? Function(String)? validator,
+      ) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 9),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextField(
+            controller: controller,
+            onChanged: (value) {
+              onChanged(value);
+              // Call the validator function when the user types
+              setState(() {
+                errorText = validator!(controller.text) ?? '';
+              });
+            },
+            decoration: InputDecoration(
+              labelText: labelText,
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.grey),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.purple),
+              ),
+              contentPadding:
+              EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+            ),
+            keyboardType: TextInputType.number,
+            onSubmitted: (_) {
+              // Call the validator function when the user submits
+              setState(() {
+                errorText = validator!(controller.text) ?? '';
+              });
+            },
+          ),
+          if (errorText.isNotEmpty) ...[
+            SizedBox(height: 4),
+            Text(
+              errorText,
+              style: TextStyle(color: Colors.red),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   String _validateId(String id) {
     if (id.isEmpty) {
       return 'ID is required.';
@@ -768,7 +773,6 @@ class _WeightGainState extends State<Weightloss> {
     return '';
   }
 
-
   String _validateHeightFeet(String feet) {
     if (feet.isEmpty) {
       return 'Height is required.';
@@ -780,6 +784,7 @@ class _WeightGainState extends State<Weightloss> {
     }
     return '';
   }
+
 
   String _validateCurrentWeight(String weight) {
     if (weight.isEmpty) {
@@ -803,6 +808,7 @@ class _WeightGainState extends State<Weightloss> {
     }
     return '';
   }
+
 
   bool _validateFields() {
     bool isValid = true;
@@ -925,7 +931,6 @@ class _WeightGainState extends State<Weightloss> {
       });
     }
 
-
     return isValid;
   }
 
@@ -942,6 +947,8 @@ class _WeightGainState extends State<Weightloss> {
           idError.isNotEmpty;
     });
   }
+
+
   Future<Database?> openDB() async{
     _database=await DatabaseHandler().openDB();
 
@@ -950,7 +957,7 @@ class _WeightGainState extends State<Weightloss> {
   Future<void> insertDB()async {
     _database = await openDB();
     UserRepo userRepo = new UserRepo();
-    userRepo.createlTable(_database!);
+    userRepo.createTable(_database!);
 
     UserModel userModel = new UserModel(nameController.text.toString(),
         emailController.text.toString(),
@@ -960,7 +967,7 @@ class _WeightGainState extends State<Weightloss> {
         activityLevelController.text.toString(),
         int.tryParse(currentWeightController.text.toString())!,
         int.tryParse(goalWeightController.text.toString())!);
-    await _database?.insert('WEIGHTLOSSUSER', userModel.toMap());
+    await _database?.insert('WEIGHTGAINUSER', userModel.toMap());
 
     //
 
@@ -974,17 +981,17 @@ class _WeightGainState extends State<Weightloss> {
     }
     // await _database?.close();
   }
-  Future<void> getFromweightlossusers()async{
+  Future<void> getFromweightgainusers()async{
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    await userRepo.getweightlossusers(_database!);
+    await userRepo.getweightgainusers(_database!);
 
     //   await _database?.close();
   }
   Future<String?> getNameFromEmail(String email) async {
     _database=await openDB();
     List<Map<String, dynamic>> result = await _database!.query(
-      'WEIGHTLOSSUSER',
+      'WEIGHTGAINUSER',
       columns: ['name'],
       where: 'email = ?',
       whereArgs: [email],
@@ -999,7 +1006,7 @@ class _WeightGainState extends State<Weightloss> {
   Future<bool> EmailExists(String email) async {
     _database=await openDB();
     UserRepo userRepo=new UserRepo();
-    if(await userRepo.EmailExists(_database!,email)) {
+    if(await userRepo.isEmailExists(_database!,email)) {
       return true;
     }
     else{

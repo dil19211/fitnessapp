@@ -1641,7 +1641,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                           backgroundColor: Colors.purple[500],
                           foregroundColor: Colors.white,
                         ),
-                        child: Text('Submit'),
+                        child: Text('Proceed'),
                       ),
                     ],
                   ),

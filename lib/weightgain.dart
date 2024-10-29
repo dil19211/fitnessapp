@@ -11,11 +11,9 @@ import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import 'database_handler.dart';
-import 'main.dart';
+
 
 class WeightGain extends StatefulWidget {
   @override
@@ -282,7 +280,6 @@ class _WeightGainState extends State<WeightGain> {
                 bool isConnected = await  _isConnected();
                 print("not entered");
                 if (!isConnected) {
-    //   _showNoInternetDialog();
                   Fluttertoast.showToast(
                     msg: "No intenet Conection!!!",
                     toastLength: Toast.LENGTH_LONG,
@@ -696,6 +693,20 @@ class _WeightGainState extends State<WeightGain> {
           TextField(
             controller: controller,
             onChanged: (value) {
+              // Update the displayed value without changing the controller's text directly
+              double? floatValue = double.tryParse(value);
+              if (floatValue != null) {
+                // Store the integer part in the controller
+                controller.text = floatValue.toInt().toString();
+                // Move the cursor to the end
+                controller.selection = TextSelection.fromPosition(
+                  TextPosition(offset: controller.text.length),
+                );
+              } else {
+                // If the input is invalid, clear the controller or handle as needed
+                controller.clear();
+              }
+              // Call the onChanged function
               onChanged(value);
               // Call the validator function when the user types
               setState(() {
@@ -713,7 +724,7 @@ class _WeightGainState extends State<WeightGain> {
               contentPadding:
               EdgeInsets.symmetric(vertical: 14, horizontal: 18),
             ),
-            keyboardType: TextInputType.number,
+            keyboardType: TextInputType.numberWithOptions(decimal: true), // Allow decimal input
             onSubmitted: (_) {
               // Call the validator function when the user submits
               setState(() {
@@ -774,18 +785,22 @@ class _WeightGainState extends State<WeightGain> {
     return '';
   }
 
-
   String _validateHeightFeet(String feet) {
     if (feet.isEmpty) {
       return 'Height is required.';
     } else {
-      int feetValue = int.tryParse(feet) ?? 0;
-      if (feetValue < 4 || feetValue > 6) {
-        return 'Feet should be between 4 and 6.';
+      // Try to parse the input as a double instead of an int
+      double feetValue = double.tryParse(feet) ?? 0.0;
+
+      // Validate the range (4 to 6 feet)
+      if (feetValue < 4.0 || feetValue > 6.0) {
+        return 'Feet should be between 4.0 and 6.0.';
       }
     }
     return '';
   }
+
+
 
 
   String _validateCurrentWeight(String weight) {

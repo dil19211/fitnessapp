@@ -687,7 +687,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                     foregroundColor: Colors.white,
                     minimumSize: Size(70, 40),
                   ),
-                  child: Text('Watch Video'),
+                  child: Text('Paid Video'),
                 ),
               ],
             ),
@@ -765,21 +765,37 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                           ),
                         ],
                       ),
+                      // Custom label above the TextFormField
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0), // Adjust distance
+                          child: Text(
+                            'Enter Email for payment Confirmation',
+                            style: TextStyle(
+                              fontSize: 15.0,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // TextFormField without label text (because we added it manually)
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          labelText: 'Enter Email for payment\n Confirmation',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0, // Set the font size for the label text
-                          ),
                           hintText: 'example@gmail.com',
                           hintStyle: TextStyle(
-                            fontSize: 16.0, // Set the font size for the hint text
+                            fontSize: 15.0, // Set the font size for the hint text
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 10.0), // Control padding around input
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
                         style: TextStyle(
-                          color:Colors.purple,
-                          fontSize: 16.0, // Set the font size for the input text
+                          color: Colors.purple,
+                          fontSize: 15.0, // Set the font size for the input text
                         ),
                         keyboardType: TextInputType.emailAddress,
                         validator: (value) {
@@ -812,7 +828,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
                           backgroundColor: Colors.purple[500],
                           foregroundColor: Colors.white,
                         ),
-                        child: Text('Submit'),
+                        child: Text('Proceed'),
                       ),
                     ],
                   ),
@@ -824,6 +840,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
       },
     );
   }
+
 
 
 
@@ -970,7 +987,7 @@ class _ExerciseDetailPageState extends State<ExerciseDetailPage> {
           body: body,
           headers: {
             'Authorization':
-            'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+            'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
             'Content-Type': 'application/x-www-form-urlencoded'
           });
       return jsonDecode(response.body.toString());

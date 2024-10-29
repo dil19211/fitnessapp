@@ -85,7 +85,7 @@ class _DietitianChatScreenState extends State<DietitianChatScreen> {
             ),
             child: Center(
               child: Text(
-                'Chat With Dietition',
+                'Chat With Admin',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -101,6 +101,58 @@ class _DietitianChatScreenState extends State<DietitianChatScreen> {
   void _showOverlay(BuildContext context) {
     if (!_isOverlayVisible) {
       _overlayEntry = _createOverlayEntry(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  //overlay
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 600.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 70,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
       Overlay.of(context)?.insert(_overlayEntry!);
       _isOverlayVisible = true;
 
@@ -283,9 +335,19 @@ class _DietitianChatScreenState extends State<DietitianChatScreen> {
             },
           ),
           // Logout icon in the second position
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
-            onPressed: _showLogoutDialog,
+          // IconButton(
+          //   icon: Icon(Icons.logout, color: Colors.white),
+          //   onPressed: _showLogoutDialog,
+          //
+          // ),
+          GestureDetector(
+            onLongPress: () {
+              _showOverlayexit(context);
+            },
+            child: IconButton(
+              icon: Icon(Icons.logout, color: Colors.white),
+              onPressed:  _showLogoutDialog,// Normal press action
+            ),
           ),
         ],
       ),

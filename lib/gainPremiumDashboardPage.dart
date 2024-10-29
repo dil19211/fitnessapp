@@ -216,6 +216,58 @@ class _MyHomePageState extends State<preminum> {
       });
     }
   }
+  //overlay
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 600.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 70,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
 
 
   Future<void> loadUsername() async {
@@ -243,8 +295,8 @@ class _MyHomePageState extends State<preminum> {
             return AlertDialog(
               title: Text('To ensure seemless access to\n premium benefits,please \nenter your Email address.', style: TextStyle(
                   color: Colors.purple,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600)),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500)),
               content: TextField(
                 controller: emailController,
               ),
@@ -377,12 +429,6 @@ class _MyHomePageState extends State<preminum> {
                           'Hello User!',
                           'Welcome! You are using the paid version of GritFit. Enjoy some extra features after getting paid. Thanks...',
                         );
-                        // String userEmail = emailController.text;
-                        // sendEmail(
-                        //   'agritfit@gmail.com',
-                        //   'Payment Received',
-                        //   'A new payment has been received from User $userEmail',
-                        // );
                         getcurrentweightgainuser(emailController.text
                             .toString());
                         String email = emailController.text.toString();
@@ -441,7 +487,7 @@ class _MyHomePageState extends State<preminum> {
     else {
       return false;
     }
-    await _database?.close();
+
   }
 
 
@@ -693,17 +739,27 @@ class _MyHomePageState extends State<preminum> {
                   ],
                 ),
 
-                Positioned(
-                  top: 27,
-                  right: 4,
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: Icon(Icons.exit_to_app_sharp),
-                    onPressed: () {
-                      showLogoutDialog(context);
-                    },
-                  ),
+            Positioned(
+              top: 27,
+              right: 4,
+              child: GestureDetector(
+                onLongPress: () {
+                  _showOverlayexit(context);
+                // Show overlay on long press
+                },
+                onTap: () {
+                  showLogoutDialog(context); // Show logout dialog on regular tap
+                },
+                child: IconButton(
+                  color: Colors.white,
+                  icon: Icon(Icons.exit_to_app_sharp),
+                  onPressed: () {
+                    showLogoutDialog(context);
+                    // You can remove this onPressed since tap and long press are now handled by GestureDetector
+                  },
                 ),
+              ),
+            ),
               ],
             ),
             bottomNavigationBar: CurvedNavigationBar(
@@ -748,7 +804,7 @@ class _MyHomePageState extends State<preminum> {
       context: context,
       builder: (BuildContext context) {
         return Container(
-          height: 190,
+          height: 220, // Increased height for the extra text
           padding: EdgeInsets.symmetric(vertical: 20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -763,10 +819,48 @@ class _MyHomePageState extends State<preminum> {
               ),
               ListTile(
                 onTap: () {
-                  Navigator.pop(context); // Close the bottom sheet
-                  _navigateToChatScreen(context, isChatbot: false);
+                  DateTime now = DateTime.now();
+                  int currentHour = now.hour;
+
+                  // Check if current time is between 9 AM and 5 PM
+                  if (currentHour >= 9 && currentHour < 17) {
+                    Navigator.pop(context); // Close the bottom sheet
+                    _navigateToChatScreen(context, isChatbot: false);
+                  } else {
+                    // Show a message or a dialog indicating that it's outside working hours
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Dietitian Unavailable'),
+                          content: Text('You can chat with the dietitian between 9 AM and 5 PM.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
                 },
-                title: Text('Chat with Dietitian'),
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Chat with Dietitian'),
+                    SizedBox(height: 5),
+                    Text(
+                      'Available from 9 AM to 5 PM',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
+                ),
                 leading: Icon(Icons.person),
               ),
             ],
@@ -775,6 +869,7 @@ class _MyHomePageState extends State<preminum> {
       },
     );
   }
+
 
   void _navigateToChatScreen(BuildContext context, {required bool isChatbot}) async {
     if (isChatbot) {
@@ -797,11 +892,6 @@ class _MyHomePageState extends State<preminum> {
       );
     }
   }
-
-
-
-
-
 
   void _startListeningForUnreadMessages() async {
     String? userId = await idstorage .getUserId();

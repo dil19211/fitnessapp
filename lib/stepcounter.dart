@@ -191,7 +191,7 @@ class _StepCounterState extends State<step> {
       setState(() {
         double currentTimestamp = DateTime.now().millisecondsSinceEpoch / 1000;
         double timeDifference = currentTimestamp - _lastStepTimestamp;
-        if (timeDifference > 2) {
+        if (timeDifference > 1) {
           _stepCount++;
           _dailySteps++;
           _todaysSteps++; // Accumulate today's steps

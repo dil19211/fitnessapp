@@ -218,6 +218,60 @@ class _MyHomePageState extends State<dashboaard> {
       });
     }
   }
+  //exit
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 600.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 70,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+
+
 
   Future<void> loadUsername() async {
     final prefs = await SharedPreferences.getInstance();
@@ -251,8 +305,8 @@ class _MyHomePageState extends State<dashboaard> {
               return AlertDialog(
                 title: Text('Enter Your Email account on\n which you want to receive\n emails from GritFit. ', style: TextStyle(
                     color: Colors.purple,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600)),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500)),
                 content: TextField(
                   controller: emailController,
                 ),
@@ -498,9 +552,9 @@ class _MyHomePageState extends State<dashboaard> {
                                 ),
                               ),
                               trailing: Lottie.asset(
-                                'assets/images/alien.json',
-                                width: 90,
-                                height: 150,
+                                'assets/images/dumbles.json',
+                                width: 130,
+                                height: 300,
                                 repeat: true,
                                 reverse: true,
                               ),
@@ -755,12 +809,22 @@ class _MyHomePageState extends State<dashboaard> {
                 Positioned(
                   top: 27,
                   right: 4,
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: Icon(Icons.exit_to_app_sharp),
-                    onPressed: () {
-                      showLogoutDialog(context);
+                  child: GestureDetector(
+                    onLongPress: () {
+                      _showOverlayexit(context);
+                      // Show overlay on long press
                     },
+                    onTap: () {
+                      showLogoutDialog(context); // Show logout dialog on regular tap
+                    },
+                    child: IconButton(
+                      color: Colors.white,
+                      icon: Icon(Icons.exit_to_app_sharp),
+                      onPressed: () {
+                        showLogoutDialog(context);
+                        // You can remove this onPressed since tap and long press are now handled by GestureDetector
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -1361,7 +1425,7 @@ class _MyHomePageState extends State<dashboaard> {
         body: body,
         headers: {
           'Authorization':
-          'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+          'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
           'Content-Type': 'application/x-www-form-urlencoded'
         },
       );
@@ -1384,7 +1448,7 @@ class _MyHomePageState extends State<dashboaard> {
           body: body,
           headers: {
             'Authorization':
-            'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+            'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
             'Content-Type': 'application/x-www-form-urlencoded'
           });
       return jsonDecode(response.body.toString());

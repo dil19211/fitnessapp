@@ -63,7 +63,7 @@ class _GainTableState extends State<losstable> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Weight Gain User Records',
+          'Weight Gain Users',
           style: TextStyle(
             color: Colors.white,
             shadows: [

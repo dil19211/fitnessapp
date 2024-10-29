@@ -334,11 +334,6 @@ class _LoginPageState extends State<dietlogin> {
                                       dietlogin(),));
                                 return user;
                               }
-                              // Navigator.of(context).push(MaterialPageRoute(
-                              //   builder: (BuildContext context) =>
-                              //       dietlogin(),
-                              // ));
-                              // return user;
                             }
                             else {
                               _showToast("Stable internet connection required to log in");
@@ -368,7 +363,7 @@ class _LoginPageState extends State<dietlogin> {
                           // Handle forgot password action
                           print("Forgot Password button pressed");
                           //internet
-                          sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Your  psssword is [ agritfit123 ]');
+                          sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Your  psssword is [ dgritfit123 ]');
                         }
                       },
                       style: ElevatedButton.styleFrom(
@@ -398,11 +393,6 @@ class _LoginPageState extends State<dietlogin> {
     );
   }
 
-
-
-
-  // All validations pass, perform login or submit data
-  // Access email and password using _emailController.text and _passwordController.text
   void _validateFieldsAndSubmit() {
     // Validate email and password
     _validateEmail();

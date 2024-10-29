@@ -496,7 +496,7 @@ class _RecipePageState extends State<uRecipePage> {
                           // Text color of the button
                           foregroundColor: Colors.white,
                         ),
-                        child: Text('See Video'),
+                        child: Text('Paid Video'),
                       ),
                     ],
                   ),
@@ -643,7 +643,7 @@ class _RecipePageState extends State<uRecipePage> {
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),
                                 ),
-                                child: Text('See Recipe'),
+                                child: Text('Free Recipe'),
                               ),
                             ],
                           ),
@@ -691,20 +691,36 @@ class _RecipePageState extends State<uRecipePage> {
                           ),
                         ],
                       ),
+                      // Custom label above the TextFormField
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5.0), // Adjust distance
+                          child: Text(
+                            'Enter Email for payment Confirmation',
+                            style: TextStyle(
+                              fontSize: 18.0, // Adjust the font size
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // TextFormField for email input without label text (handled manually)
                       TextFormField(
                         controller: emailController,
                         decoration: InputDecoration(
-                          labelText: 'Enter Email for payment\n Confirmation',
-                          labelStyle: TextStyle(
-                            fontSize: 18.0, // Set the font size for the label text
-                          ),
                           hintText: 'example@gmail.com',
                           hintStyle: TextStyle(
-                            fontSize: 16.0, // Set the font size for the hint text
+                            fontSize: 16.0, // Adjust the font size for the hint text
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 15.0, horizontal: 10.0), // Control padding
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
                           ),
                         ),
                         style: TextStyle(
-                          color:Colors.purple,
+                          color: Colors.purple,
                           fontSize: 16.0, // Set the font size for the input text
                         ),
                         keyboardType: TextInputType.emailAddress,
@@ -720,6 +736,7 @@ class _RecipePageState extends State<uRecipePage> {
                         },
                       ),
                       SizedBox(height: 20),
+                      // Submit Button
                       ElevatedButton(
                         onPressed: () async {
                           // Set autovalidate mode to always when submitting the form
@@ -728,7 +745,9 @@ class _RecipePageState extends State<uRecipePage> {
                           });
 
                           if (_formKey.currentState!.validate()) {
+                            // Close the dialog after submission
                             Navigator.of(context).pop();
+                            // Pass the 'recipe' map to the dialog
                             showInternetConnectionDialog(context, recipe);
                           }
                         },
@@ -739,7 +758,7 @@ class _RecipePageState extends State<uRecipePage> {
                           backgroundColor: Colors.purple[500],
                           foregroundColor: Colors.white,
                         ),
-                        child: Text('Submit'),
+                        child: Text('Proceed'),
                       ),
                     ],
                   ),
@@ -751,6 +770,7 @@ class _RecipePageState extends State<uRecipePage> {
       },
     );
   }
+
   void showInternetConnectionDialog(BuildContext context,
       Map<String, String> recipe) {
     showDialog(
@@ -926,7 +946,7 @@ class _RecipePageState extends State<uRecipePage> {
           body: body,
           headers: {
             'Authorization':
-            'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
+            'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
             'Content-Type': 'application/x-www-form-urlencoded'
           });
       return jsonDecode(response.body.toString());

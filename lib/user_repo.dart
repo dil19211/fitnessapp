@@ -74,7 +74,7 @@ class UserRepo{
     final List<Map<String,dynamic>> mapmeal= await db.query('WEIGHTGAINMEAL');
     if(mapmeal.isNotEmpty) {
       print(mapmeal);
-      print('map of meal is fetched in user repo');
+       print('map of meal is fetched in user repo');
       return mapmeal;
     }
     else{

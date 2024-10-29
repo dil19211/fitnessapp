@@ -14,7 +14,6 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:workmanager/workmanager.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'consst.dart';
-
 import 'notification.dart';
 
 
@@ -25,7 +24,7 @@ void main() async {
     apiKey: GEMINI_API_KEY,
   );
   Stripe.publishableKey =
-  'pk_test_51PJ8UO2Llx6JzMA097s9w7TMcx9twOXtugzhcsIPlfagU8Y5D1GvavzMJ72322b4oRhvjNc38Z0cnd0TQ1lqgoLW00e5vXNMgg';
+  'pk_test_51QCFMZGzHm25KgpHhB4lgsTwZuR7vIQFztkfFVeANHiQ1YunbrCTA5XctI5E9K8NbvLqhFTFj6jILmsarL8mOg8G004pUMIk0r';
   Platform.isAndroid ?
   await Firebase.initializeApp(options: const FirebaseOptions(
     apiKey: "AIzaSyCkJnZAee2hzxEy7mvdZPj9ZHe9ZxV-XAI",

@@ -12,7 +12,6 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'chatboat.dart';
 import 'database_handler.dart';
-import 'gainPremiumDashboardPage.dart';
 import 'lossmeal.dart';
 import 'losspremimumdashboard.dart';
 import 'nextpage.dart';
@@ -226,6 +225,59 @@ class _MyHomePageState extends State<lossdashboaard> {
       });
     }
   }
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 600.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 4- 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 70,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+//home
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+
+
 
   Future<void> storeUsername(String username) async {
     final prefs = await SharedPreferences.getInstance();
@@ -248,7 +300,7 @@ class _MyHomePageState extends State<lossdashboaard> {
           return StatefulBuilder(
             builder: (BuildContext context, setState) {
               return AlertDialog(
-                title: Text('Enter Your Email account on \nwhich you want to receive \nemails from GritFit.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w600,fontSize: 16,),),
+                title: Text('Enter Your Email account on \nwhich you want to receive \nemails from GritFit.', style: TextStyle(color: Colors.purple,fontWeight: FontWeight.w500,fontSize: 13,),),
                 content: TextField(
                   controller: emailController,
                 ),
@@ -732,12 +784,22 @@ class _MyHomePageState extends State<lossdashboaard> {
                 Positioned(
                   top: 27,
                   right: 4,
-                  child: IconButton(
-                    color: Colors.white,
-                    icon: Icon(Icons.exit_to_app_sharp),
-                    onPressed: () {
-                      showLogoutDialog(context);
+                  child: GestureDetector(
+                    onLongPress: () {
+                      _showOverlayexit(context);
+                      // Show overlay on long press
                     },
+                    onTap: () {
+                      showLogoutDialog(context); // Show logout dialog on regular tap
+                    },
+                    child: IconButton(
+                      color: Colors.white,
+                      icon: Icon(Icons.exit_to_app_sharp),
+                      onPressed: () {
+                        showLogoutDialog(context);
+                        // You can remove this onPressed since tap and long press are now handled by GestureDetector
+                      },
+                    ),
                   ),
                 ),
               ],
@@ -1244,20 +1306,15 @@ class _MyHomePageState extends State<lossdashboaard> {
 
   Future<void> makePayment(Function(bool) onPaymentResult) async {
     try {
-      String amount = '300';
-      String currency = 'USD';
-      String connectedAccountId = 'acct_1Pn8j5RwHbx9y5OW';
+      // Calculate the amounts
+      int totalAmount = 300; // The total amount in cents
+      int platformFee = (totalAmount * 0.20).toInt(); // 20% fee
 
-      // Create the payment intent
-      paymentIntentData = await createPaymentIntent(amount, currency, connectedAccountId);
+      // Create the main payment intent for 80% of the amount
+      paymentIntentData =
+      await createPaymentIntent(totalAmount.toString(), 'USD');
 
-      if (paymentIntentData == null) {
-        print('Payment intent creation failed.');
-        onPaymentResult(false);
-        return;
-      }
-
-      // Initialize the payment sheet
+      // Initialize the payment sheet for the main payment
       await stripe.Stripe.instance.initPaymentSheet(
         paymentSheetParameters: stripe.SetupPaymentSheetParameters(
           paymentIntentClientSecret: paymentIntentData!['client_secret'],
@@ -1266,14 +1323,18 @@ class _MyHomePageState extends State<lossdashboaard> {
         ),
       );
 
-      // Display the payment sheet
+      // Display the payment sheet to the user
       await displayPaymentSheet(onPaymentResult);
+
+      // After a successful payment, transfer 20% to another account
+      if (onPaymentResult(true)) {
+        await transferFunds(platformFee.toString(), 'USD');
+      }
     } catch (e) {
-      print('Error initializing payment sheet: $e');
+      print('Error during payment process: $e');
       onPaymentResult(false);
     }
   }
-
   Future<void> displayPaymentSheet(Function(bool) onPaymentResult) async {
     try {
       await stripe.Stripe.instance.presentPaymentSheet();
@@ -1289,39 +1350,49 @@ class _MyHomePageState extends State<lossdashboaard> {
     }
   }
 
-  Future<Map<String, dynamic>?> createPaymentIntent(
-      String amount, String currency, String connectedAccountId) async {
+  Future<void> transferFunds(String amount, String currency) async {
     try {
-      int amountInt = int.parse(amount) * 100; // Convert to cents
-      int applicationFeeAmount = (amountInt * 0.80).toInt(); // 20% of the amount
-
       Map<String, dynamic> body = {
-        'amount': amountInt.toString(),
+        'amount': amount,
         'currency': currency,
-        'payment_method_types[]': 'card',
-        'application_fee_amount': applicationFeeAmount.toString(), // Fee for your platform
-        'transfer_data[destination]': connectedAccountId, // Transfer 80% to the connected account
+        'destination': 'acct_1Pn8j5RwHbx9y5OW',
+        // Replace with the connected account ID
       };
 
       var response = await http.post(
-        Uri.parse('https://api.stripe.com/v1/payment_intents'),
+        Uri.parse('https://api.stripe.com/v1/transfers'),
         body: body,
         headers: {
-          'Authorization': 'Bearer sk_test_51PJ8UO2Llx6JzMA0EMn75x40L6Zkw0cmMxXJlwfLUER3knmNbfz7vq33eEkN0NulpE5WjQ2WwwWyHou6ltiezaFz00is1lBIBe',
-          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization':
+          'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
       );
-
-      if (response.statusCode == 200) {
-        print('PaymentIntent created: ${response.body}');
-        return jsonDecode(response.body.toString());
-      } else {
-        print('Error creating PaymentIntent: ${response.body}');
-        return null;
-      }
+      print("Transfer response: ${response.body}");
     } catch (e) {
-      print('Error creating PaymentIntent: $e');
-      return null;
+      print("Error during transfer: $e");
+    }
+  }
+
+  createPaymentIntent(String amount, String currency) async {
+    try {
+      Map<String, dynamic> body = {
+        'amount': calculateAmount(amount),
+        'currency': currency,
+        'payment_method_types[]': 'card'
+      };
+
+      var response = await http.post(
+          Uri.parse('https://api.stripe.com/v1/payment_intents'),
+          body: body,
+          headers: {
+            'Authorization':
+            'Bearer sk_test_51QCFMZGzHm25KgpHi1WHRRacbj2BBQb75zWYhShEn5xtcRyiKpZC7dJhdwS76tX4JEPOqCdofVihwwTD8bqYkbgp00D0D1p3zJ',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          });
+      return jsonDecode(response.body.toString());
+    } catch (e) {
+      print("Error creating payment intent: $e");
     }
   }
 

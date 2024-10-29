@@ -9,7 +9,6 @@ import 'package:lottie/lottie.dart';
 import 'package:flutter/material.dart';
 import 'approved table.dart';
 import 'chatpanelofadmin.dart';
-import 'idsssstorages.dart';
 import 'login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'losstable.dart';
@@ -90,6 +89,160 @@ class _AdminState extends State<admin> {
       });
     }
   }
+  OverlayEntry _createOverlayEntryexit(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 640.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 5 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 100,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Exit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOverlayexit(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryexit(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  OverlayEntry _createOverlayEntryemail(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 640.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 3 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'send Email',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOverlayemail(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryemail(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+  OverlayEntry _createOverlayEntryblock(BuildContext context) {
+    return OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 640.0, // Position above the FloatingActionButton
+        right: MediaQuery.of(context).size.width / 2 - 50, // Center horizontally
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: 120,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                'Blocked users',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showOverlayblock(BuildContext context) {
+    if (!_isOverlayVisible) {
+      _overlayEntry = _createOverlayEntryblock(context);
+      Overlay.of(context)?.insert(_overlayEntry!);
+      _isOverlayVisible = true;
+
+      // Automatically remove the overlay after 2 seconds
+      Future.delayed(Duration(seconds: 2), () {
+        if (_isOverlayVisible) {
+          _overlayEntry?.remove();
+          _isOverlayVisible = false;
+        }
+      });
+    }
+  }
+
 
 
 
@@ -116,22 +269,38 @@ class _AdminState extends State<admin> {
         ),
         centerTitle: false,
         actions: [
-          IconButton(
-            icon: Icon(Icons.block, color: Colors.white),
-            onPressed: () {
-              navigateToBlockList(context);
+          GestureDetector(
+            onLongPress: () {
+              _showOverlayblock(context);
             },
+            child: IconButton(
+              icon: Icon(Icons.block, color: Colors.white),
+              onPressed: () {
+                navigateToBlockList(context); // Normal press action
+              },
+            ),
           ),
-          IconButton(
-            icon: Icon(Icons.email, color: Colors.white),
-            onPressed: _showEmailFormDialog,
-          ),
-          IconButton(
-            icon: Icon(Icons.exit_to_app, color: Colors.white),
-            onPressed: () {
-              showLogoutDialog(context);
+          GestureDetector(
+            onLongPress: () {
+             _showOverlayemail(context);
             },
+            child: IconButton(
+              icon: Icon(Icons.email, color: Colors.white),
+              onPressed: _showEmailFormDialog, // Normal press action
+            ),
           ),
+          GestureDetector(
+            onLongPress: () {
+              _showOverlayexit(context); // Trigger the overlay on long press
+            },
+            child: IconButton(
+              icon: Icon(Icons.exit_to_app, color: Colors.white),
+              onPressed: () {
+                showLogoutDialog(context); // Normal press shows logout dialog
+              },
+            ),
+          ),
+
         ],
       ),
       body: SingleChildScrollView(

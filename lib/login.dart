@@ -23,10 +23,7 @@ class LoginPage extends StatefulWidget {
   @override
   _LoginPageState createState() => _LoginPageState();
 }
-
 class _LoginPageState extends State<LoginPage> {
-
-
 
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
@@ -274,18 +271,6 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       onPressed: () async {
-                       // sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Admin is sucessfuly logged in');
-
-                        // SharedPreferences prefs =
-                        // await SharedPreferences.getInstance();
-                        // await prefs.setString('selectedPage', 'login');
-                        // Navigator.of(context).pushReplacement(
-                        //   MaterialPageRoute(
-                        //     builder: (BuildContext context) => admin(),
-                        //   ),
-                        // );
-
-                        // Validate fields
                         _validateFieldsAndSubmit();
                         if (!_showEmailError && !_showPasswordError) {
                           Future<User?> loginUsingEmailPassword(
@@ -296,7 +281,6 @@ class _LoginPageState extends State<LoginPage> {
                             User? user;
                             if (_hasFullInternetAccess) {
                             try {
-                              //internet
                               UserCredential userCredential = await auth.signInWithEmailAndPassword(
                                   email: email, password: password);
                               user = userCredential.user;
@@ -335,11 +319,6 @@ class _LoginPageState extends State<LoginPage> {
                                     LoginPage(), ));
                               return user;
                             }
-                            // Navigator.of(context).push(MaterialPageRoute(
-                            //   builder: (BuildContext context) =>
-                            //       admin(),
-                            // ));
-                            // return user;
                             }
                             else {
                               _showToast("Stable internet connection required to log in");
@@ -348,7 +327,6 @@ class _LoginPageState extends State<LoginPage> {
                           User? user=await loginUsingEmailPassword(
                               email: _emailController.text, password: _passwordController.text, context: context);
                           print(user);
-                          // Access email and password using _emailController.text and _passwordController.text
                         }
                       },
                     ), SizedBox(height: 15),
@@ -365,9 +343,9 @@ class _LoginPageState extends State<LoginPage> {
                             fontSize: 16.0,
                           );
                         } else {
-                          // Handle forgot password action
+
                           print("Forgot Password button pressed");
-                          //internet
+
                           sendMail(recipientEmail: _emailController.text.toString(), mailMessage: 'Your  psssword is [ agritfit123 ]');
                         }
                       },
@@ -397,11 +375,7 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
-
-
-
-
-  // All validations pass, perform login or submit data
+    // All validations pass, perform login or submit data
   // Access email and password using _emailController.text and _passwordController.text
   void _validateFieldsAndSubmit() {
     // Validate email and password
